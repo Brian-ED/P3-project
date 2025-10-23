@@ -1,4 +1,4 @@
-package com.example.app_name_here.views;
+package com.example.application.views;
 
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -9,10 +9,11 @@ import com.vaadin.flow.router.Route;
 public class HomeView extends VerticalLayout {
 
     public HomeView() {
-        add(new H1("Søvndagbog"));
+
+        add(new H1("Welcome to your new application"));
         add(new Paragraph("This is the home view"));
 
-        add(new Paragraph("You can edit this view in src/main/java/com/example/app_name_here/views/HomeView.java"));
+        add(new Paragraph("You can edit this view in src/main/java/com/example/application/views/HomeView.java"));
 
     }
 }

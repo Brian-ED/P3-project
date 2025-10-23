@@ -1,30 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
-
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- This parent POM provides all Spring Boot managed versions -->
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.6</version> <!-- use latest -->
-        <relativePath/>
-    </parent>
-
-    <groupId>com.example.app_name_here</groupId>
-    <artifactId>vaadin-app</artifactId>
+    <groupId>com.example.application</groupId>
+    <artifactId>my-app</artifactId>
+    <name>my-app</name>
     <version>1.0-SNAPSHOT</version>
-    <name>Vaadin Application</name>
+    <packaging>jar</packaging>
 
     <properties>
-        <java.version>25</java.version>
+        <java.version>21</java.version>
         <vaadin.version>24.9.3</vaadin.version>
     </properties>
 
-    <!-- TODO: Optional, but apparently helps performance -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.6</version>
+    </parent>
+
+    <repositories>
+        <repository>
+            <id>Vaadin Directory</id>
+            <url>https://maven.vaadin.com/vaadin-addons</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -37,16 +43,16 @@
         </dependencies>
     </dependencyManagement>
 
-
     <dependencies>
-
-        <!-- TODO start, Not sure what each of these does -->
-
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-core</artifactId> <!-- Using only free components -->
+            <!-- Replace artifactId with vaadin-core to use only free components -->
+            <artifactId>vaadin-core</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-spring-boot-starter</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.parttio</groupId>
             <artifactId>line-awesome</artifactId>
@@ -73,24 +79,6 @@
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
         </dependency>
-
-        <!-- TODO end -->
-
-        <!-- Vaadin with Spring Boot -->
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-spring-boot-starter</artifactId>
-            <version>${vaadin.version}</version>
-        </dependency>
-
-        <!-- Optional: Lombok -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- Optional: for tests -->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-junit5</artifactId>
@@ -124,11 +112,8 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
-
-
 
     <profiles>
         <profile>
@@ -213,6 +198,4 @@
         </profile>
 
     </profiles>
-
-
 </project>

@@ -1,6 +1,5 @@
-package com.example.app_name_here.views;
+package com.example.application.views;
 
-// New imports
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.html.Footer;
@@ -20,23 +19,12 @@ import com.vaadin.flow.server.menu.MenuEntry;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import java.util.List;
 
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.Route;
-/*
- * @Route("") // root URL public class MainView extends VerticalLayout
- * { public MainView() { Button button = new Button("Click me", event
- * -> Notification.show("Hello from Vaadin22!")); add(button); } }
- */
-
 /**
  * The main view is a top-level placeholder for other views.
  */
 @Layout
 @AnonymousAllowed
-public class MainLayout extends AppLayout
-        implements AfterNavigationObserver {
+public class MainLayout extends AppLayout implements AfterNavigationObserver {
 
     private H1 viewTitle;
 
@@ -51,16 +39,14 @@ public class MainLayout extends AppLayout
         toggle.setAriaLabel("Menu toggle");
 
         viewTitle = new H1();
-        viewTitle.addClassNames(LumoUtility.FontSize.LARGE,
-                LumoUtility.Margin.NONE);
+        viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
 
         addToNavbar(true, toggle, viewTitle);
     }
 
     private void addDrawerContent() {
         Span appName = new Span("My App");
-        appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD,
-                LumoUtility.FontSize.LARGE);
+        appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
         Header header = new Header(appName);
 
         Scroller scroller = new Scroller(createNavigation());
@@ -71,15 +57,12 @@ public class MainLayout extends AppLayout
     private SideNav createNavigation() {
         SideNav nav = new SideNav();
 
-        List<MenuEntry> menuEntries = MenuConfiguration
-                .getMenuEntries();
+        List<MenuEntry> menuEntries = MenuConfiguration.getMenuEntries();
         menuEntries.forEach(entry -> {
             if (entry.icon() != null) {
-                nav.addItem(new SideNavItem(entry.title(),
-                        entry.path(), new SvgIcon(entry.icon())));
+                nav.addItem(new SideNavItem(entry.title(), entry.path(), new SvgIcon(entry.icon())));
             } else {
-                nav.addItem(
-                        new SideNavItem(entry.title(), entry.path()));
+                nav.addItem(new SideNavItem(entry.title(), entry.path()));
             }
         });
 
@@ -98,7 +81,6 @@ public class MainLayout extends AppLayout
     }
 
     private String getCurrentPageTitle() {
-        return MenuConfiguration.getPageHeader(getContent())
-                .orElse("");
+        return MenuConfiguration.getPageHeader(getContent()).orElse("");
     }
 }
