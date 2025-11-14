@@ -45,13 +45,14 @@ public class QMorning extends VerticalLayout {
 //    });
 
     setAlignItems(FlexComponent.Alignment.CENTER);
-    setPadding(true);
 
     // Put buttons in a horizontal layout
     HorizontalLayout buttons = new HorizontalLayout(prev, next);
-    buttons.setWidthFull(); 
-    buttons.setJustifyContentMode(JustifyContentMode.BETWEEN); 
+    buttons.setWidthFull();
+    buttons.setJustifyContentMode(JustifyContentMode.BETWEEN);
 
+    setHeightFull();
+    setJustifyContentMode(JustifyContentMode.BETWEEN);
 
     setHeightFull();
     setJustifyContentMode(JustifyContentMode.BETWEEN);
