@@ -91,3 +91,7 @@ mvnw
 tsconfig.json
 types.d.ts
 index.html
+
+# Easier setup with nix
+/flake.nix
+/flake.lock
