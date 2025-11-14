@@ -30,7 +30,6 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
 
     public MainLayout() {
         setPrimarySection(Section.DRAWER);
-        addDrawerContent();
         addHeaderContent();
     }
 
@@ -42,16 +41,6 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
         viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
 
         addToNavbar(true, toggle, viewTitle);
-    }
-
-    private void addDrawerContent() {
-        Span appName = new Span("My App");
-        appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
-        Header header = new Header(appName);
-
-        Scroller scroller = new Scroller(createNavigation());
-
-        addToDrawer(header, scroller, createFooter());
     }
 
     private SideNav createNavigation() {
