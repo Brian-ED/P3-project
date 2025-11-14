@@ -2,6 +2,7 @@ package com.example.application.views;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -13,7 +14,6 @@ import com.vaadin.flow.router.Route;
 public class QMorning extends VerticalLayout {
   Button next = new Button("Næste >");
   Button prev = new Button("< Tilbage");
-  Button prev2 = new Button("< Tilbage");
 
   RadioButtonGroup<String> TakesMeds = new RadioButtonGroup<>();
   FormLayout formLayout = new FormLayout();
@@ -43,13 +43,29 @@ public class QMorning extends VerticalLayout {
 //        selected.setText("No selection yet");
 //      }
 //    });
-    setAlignItems(FlexComponent.Alignment.CENTER);
-    HorizontalLayout buttons = new HorizontalLayout();
-    buttons.addToStart(prev);
-    buttons.addToEnd(next);
-    buttons.addToEnd(prev2);
-    add(h3,buttons);
+    
 
+
+    VerticalLayout layout = new VerticalLayout();
+layout.setAlignItems(FlexComponent.Alignment.CENTER);
+
+Div h3 = new Div("h3");
+h3.setClassName("id-h3"); 
+layout.add(h3);
+
+layout.setPadding(true);
+
+Button prev = new Button("Før");
+Button next = new Button("Næste");
+
+// Put buttons in a horizontal layout
+HorizontalLayout buttonRow = new HorizontalLayout(prev, next);
+buttonRow.setWidthFull(); 
+buttonRow.setJustifyContentMode(JustifyContentMode.BETWEEN); // Align left + right
+
+layout.add(buttonRow);
+
+add(layout);
 
 
 //    formLayout.addFormRow(layout);
