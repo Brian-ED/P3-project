@@ -43,29 +43,12 @@ public class QMorning extends VerticalLayout {
 //        selected.setText("No selection yet");
 //      }
 //    });
-    
+    setAlignItems(FlexComponent.Alignment.CENTER);
+    HorizontalLayout buttons = new HorizontalLayout();
+    buttons.addToStart(prev);
+    buttons.addToEnd(next);
+    add(h3,buttons);
 
-
-    VerticalLayout layout = new VerticalLayout();
-layout.setAlignItems(FlexComponent.Alignment.CENTER);
-
-Div h3 = new Div("h3");
-h3.setClassName("id-h3"); 
-layout.add(h3);
-
-layout.setPadding(true);
-
-Button prev = new Button("Før");
-Button next = new Button("Næste");
-
-// Put buttons in a horizontal layout
-HorizontalLayout buttonRow = new HorizontalLayout(prev, next);
-buttonRow.setWidthFull(); 
-buttonRow.setJustifyContentMode(JustifyContentMode.BETWEEN); // Align left + right
-
-layout.add(buttonRow);
-
-add(layout);
 
 
 //    formLayout.addFormRow(layout);
