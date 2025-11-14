@@ -50,12 +50,23 @@ public class QMorning extends VerticalLayout {
     // Put buttons in a horizontal layout
     HorizontalLayout buttons = new HorizontalLayout(prev, next);
     buttons.setWidthFull(); 
-    buttons.setJustifyContentMode(JustifyContentMode.BETWEEN); // Align left + right
+    buttons.setJustifyContentMode(JustifyContentMode.BETWEEN); 
 
+
+    setHeightFull();
+    setJustifyContentMode(JustifyContentMode.BETWEEN);
+     // Align left + right
     add(h3,buttons);
 
 
-
+    next.setWidth("220px");
+    next.setHeight("110px");
+    prev.setWidth("220px");
+    prev.setHeight("110px");
+    prev.getStyle().set("background-color", "#262ecaff").set("color", "white");
+    next.getStyle().set("background-color", "#262ecaff").set("color", "white");
+    prev.getStyle().set("font-size", "30px");
+    next.getStyle().set("font-size", "30px");
 //    formLayout.addFormRow(layout);
 //    formLayout.addFormRow(TakesMeds);
 //    formLayout.addFormRow(selected);
