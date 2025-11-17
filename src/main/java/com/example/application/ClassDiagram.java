@@ -32,22 +32,14 @@ class SleepAdvisor extends User {
 class DynamicSurvey {
     DynamicQuestion[] questions;
     Integer currentQuestion;
-    SurveyType surveyType;
+    Question[] surveyQuestions;
 
-    DynamicSurvey(SurveyType surveyType) {
-        Question[] morningQuestions = {};
-        Question[] eveningQuestions = {};
-        this.surveyType = surveyType;
+    DynamicSurvey() {
         this.currentQuestion = 0;
 
-        Question[] questionsList = switch (surveyType) {
-            case morning -> morningQuestions;
-            case evening -> eveningQuestions;
-        };
-
-        this.questions = new DynamicQuestion[questionsList.length];
+        this.questions = new DynamicQuestion[surveyQuestions.length];
         for (int i=0; i<questions.length; i++){
-            this.questions[i] = new DynamicQuestion(questionsList[i]);
+            this.questions[i] = new DynamicQuestion(surveyQuestions[i]);
         };
     }
     public void nextQuestion() {
@@ -66,15 +58,17 @@ class DynamicSurvey {
         // Fill in answers array from dynamic questions
         for (int i=0; i<questions.length; i++) {
             DynamicQuestion q = questions[i];
-            if (q.question.answer == null) {
+            if (q.question.answerToQuestion.isEmpty()) {
                 return Optional.empty();
+            } else {
+                answers[i] = q.question.answerToQuestion.orElseThrow();
             }
-            answers[i] = q.question.answer;
         }
 
-        return Optional.of(new AnsweredSurvey(answers, surveyType));
+        return Optional.of(new AnsweredSurvey(answers, SurveyType.morning));
     }
 }
+
 class DynamicQuestion {
     Question question;
 
@@ -97,15 +91,4 @@ class AnsweredSurvey {
 enum SurveyType {
     morning,
     evening,
-}
-
-abstract class Answer2 {
-    public abstract void drawUI();
-}
-
-class Question {
-    Answer answer;
-    void answerQuestion(Answer answer) {
-        this.answer = answer;
-    };
 }

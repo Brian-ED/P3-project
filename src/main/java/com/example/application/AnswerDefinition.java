@@ -1,27 +1,37 @@
 package com.example.application;
 
+import java.util.Optional;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.timepicker.TimePicker;
 
-abstract class Answer {
-     protected final String questionTitle;
+class Answer {
+}
 
-    protected Answer(String questionTitle) {
+abstract class Question {
+    Optional<Answer> answerToQuestion;
+    protected final String questionTitle;
+
+    protected Question(String questionTitle) {
+        this.answerToQuestion = Optional.empty();
         this.questionTitle = questionTitle;
+    }
+    void answerQuestion(Answer answer) {
+        this.answerToQuestion = Optional.of(answer);
     }
     abstract Component drawUI();
 }
 
-class ComboBoxAnswer extends Answer {
+class ComboBoxAnswer extends Question {
 
     private final String[] options;
 
-    ComboBoxAnswer(String questionTitle, Answer[]... pafu) {
+    ComboBoxAnswer(String questionTitle, String... options) {
         super(questionTitle);     // store questionTitle in the base class
-        this.options = pafu;   // store dropdown options
+        this.options = options;   // store dropdown options
     }
 
     @Override
@@ -32,7 +42,7 @@ class ComboBoxAnswer extends Answer {
     };
 }
 
-class RollAnswer extends Answer {
+class RollAnswer extends Question {
 
     RollAnswer(String questionTitle) {
         super(questionTitle);
@@ -45,11 +55,11 @@ class RollAnswer extends Answer {
     }
 }
 
-class AskMoreIfYes extends Answer {
+class AskMoreIfYes extends Question {
 
-    private final Answer[] extraQuestionsInYes;
+    private final Question[] extraQuestionsInYes;
 
-    AskMoreIfYes(String questionTitle, Answer[] extraQuestionsInYes) {
+    AskMoreIfYes(String questionTitle, Question[] extraQuestionsInYes) {
         super(questionTitle);
         this.extraQuestionsInYes = extraQuestionsInYes;
     }
@@ -74,7 +84,7 @@ class AskMoreIfYes extends Answer {
 
             // If they answered "Ja", add the extra questions underneath
             if ("Ja".equals(e.getValue())) {
-                for (Answer extra : extraQuestionsInYes) {
+                for (Question extra : extraQuestionsInYes) {
                     container.add(extra.drawUI());
                 }
             }
@@ -86,10 +96,10 @@ class AskMoreIfYes extends Answer {
 
 class MainProgram {
   static void main(String[] args) {
-    Answer[] amiy = {
+    Question[] amiy = {
       new ComboBoxAnswer("Did you drink vodka?"),
     };
-    Answer[] allQ = {
+    Question[] allQ = {
       new ComboBoxAnswer( "Et par timer efter jeg stod op følte jeg mig 1: Udmattet/Uoplagt - 5: Frisk/Oplagt"),
       new ComboBoxAnswer("what is up"),
       new RollAnswer("when is up"),
