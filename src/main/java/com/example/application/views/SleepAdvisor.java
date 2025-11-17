@@ -10,8 +10,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
-class CSS {}
-
 class StatisticBox extends VerticalLayout {
   H3 title;
   H3 valueField;
