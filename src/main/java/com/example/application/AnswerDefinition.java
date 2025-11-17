@@ -19,9 +19,9 @@ class ComboBoxAnswer extends Answer {
 
     private final String[] options;
 
-    ComboBoxAnswer(String questionTitle, String... options) {
+    ComboBoxAnswer(String questionTitle, Answer[]... pafu) {
         super(questionTitle);     // store questionTitle in the base class
-        this.options = options;   // store dropdown options
+        this.options = pafu;   // store dropdown options
     }
 
     @Override

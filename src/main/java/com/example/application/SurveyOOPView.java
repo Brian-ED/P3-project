@@ -2,6 +2,7 @@ package com.example.application;
 
 
 import com.example.application.AllQ;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -42,15 +43,26 @@ public class SurveyOOPView extends VerticalLayout {
         content.setWidth("60%");
         content.setPadding(true);
 
-        // Follow-up questions if user answers "Ja"
-        Answer[] amiy = {
-            new ComboBoxAnswer("Did you drink vodka?", "Ja", "Nej")
+        Answer[] pafu = {
+            new RollAnswer("Hvor mange minutter?"),
+            new RollAnswer("Hvornår på dagen?")
         };
+
+        // Follow-up questions if user answers "Ja"
+        AskMoreIfYes [] amiy = {new AskMoreIfYes(
+         "Har du været fysisk aktiv i dag?",
+            new Answer[] {
+            new RollAnswer("Hvor mange minutter?"),
+            new RollAnswer("Hvornår på dagen?")
+            }
+        )};
 
         // All questions in the survey
         allQ = new Answer [] {
-            new ComboBoxAnswer("How's your daddy", "Good", "Bad"),
-            new ComboBoxAnswer("What is up", "Not much", "A lot"),
+            new AskMoreIfYes("Har du været fysisk aktiv i dag?", amiy),
+
+           /*  new ComboBoxAnswer("How's your daddy", "Good", "Bad"),
+            new ComboBoxAnswer("What is up", "Not much", "A lot"),*/
             new RollAnswer("When is up"),
             new AskMoreIfYes("Do you drink?", amiy)
         };
@@ -64,9 +76,12 @@ public class SurveyOOPView extends VerticalLayout {
         buttons.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         
         
-        layout.add(allQ[1].drawUI());
+
+        Component qNum = allQ[currentIndex].drawUI();
+
+        layout.add(qNum);
         layout.setAlignSelf(Alignment.START, h3);
-        layout.setAlignSelf(Alignment.START, allQ[1].drawUI());
+        layout.setAlignSelf(Alignment.START, qNum);
         add(layout, buttons);
 
         next.setWidth("220px");
