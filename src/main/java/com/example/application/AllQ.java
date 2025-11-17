@@ -62,13 +62,4 @@ public class AllQ {
     }
 }
 
-/*
-YesNoElab(x) = Yes/No with elaboration on yes
-RollMenuTime = _
-Enum = _
-ComboBox = _
 
-Q1Even: YesNoElab(RollMenuTime, ComboBox)
-Q2Even: YesNoElab(RollMenuTime)
-Q3Even: YesNoElab(Checkboxes, RollMenuTime) 
- */

@@ -99,7 +99,9 @@ enum SurveyType {
     evening,
 }
 
-class Answer {}
+abstract class Answer2 {
+    public abstract void drawUI();
+}
 
 class Question {
     Answer answer;

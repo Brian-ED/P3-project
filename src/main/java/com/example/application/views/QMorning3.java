@@ -29,8 +29,12 @@ public class QMorning3 extends VerticalLayout {
 
     // Set question
     layout.add(new H3(AllQ.QUESTIONS[3]));
-//    setAlignItems(FlexComponent.Alignment.CENTER);
+    layout.add(new H3());
+    //setAlignItems(FlexComponent.Alignment.CENTER);
 
+
+
+    
     // Put buttons in a horizontal layout
     HorizontalLayout buttons = new HorizontalLayout(prev, next);
     buttons.setWidthFull();
