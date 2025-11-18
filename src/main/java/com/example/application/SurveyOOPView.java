@@ -55,7 +55,7 @@ public class SurveyOOPView extends VerticalLayout {
             new RollAnswer("Hvor mange minutter?"),
             new RollAnswer("Hvornår på dagen?")
             }
-        )};
+        );
 
         // All questions in the survey
         allQ = new Answer [] {

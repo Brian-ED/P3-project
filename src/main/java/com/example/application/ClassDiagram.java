@@ -61,7 +61,7 @@ class DynamicSurvey {
         }
     }
     public Optional<AnsweredSurvey> submitAnswers() {
-        Answer[] answers = new Answer[questions.length];
+        ok[] answers = new ok[questions.length];
 
         // Fill in answers array from dynamic questions
         for (int i=0; i<questions.length; i++) {
@@ -81,15 +81,15 @@ class DynamicQuestion {
     DynamicQuestion(Question question) {
         this.question = question;
     }
-    public void answerQuestion(Answer answer) {
+    public void answerQuestion(ok answer) {
         this.question.answerQuestion(answer);
     }
 }
 class AnsweredSurvey {
     SurveyType surveyType;
-    Answer[] answers;
+    ok[] answers;
 
-    AnsweredSurvey(Answer[] answers, SurveyType surveyType) {
+    AnsweredSurvey(ok[] answers, SurveyType surveyType) {
         this.surveyType = surveyType;
         this.answers = answers;
     }
@@ -104,8 +104,8 @@ abstract class Answer2 {
 }
 
 class Question {
-    Answer answer;
-    void answerQuestion(Answer answer) {
+    ok answer;
+    void answerQuestion(ok answer) {
         this.answer = answer;
     };
 }

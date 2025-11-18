@@ -6,20 +6,20 @@ import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 
-abstract class Answer {
+abstract class ok {
      protected final String questionTitle;
 
-    protected Answer(String questionTitle) {
+    protected ok(String questionTitle) {
         this.questionTitle = questionTitle;
     }
     abstract Component drawUI();
 }
 
-class ComboBoxAnswer extends Answer {
+class ComboBoxAnswer extends ok {
 
     private final String[] options;
 
-    ComboBoxAnswer(String questionTitle, Answer[]... pafu) {
+    ComboBoxAnswer(String questionTitle, ok[]... pafu) {
         super(questionTitle);     // store questionTitle in the base class
         this.options = pafu;   // store dropdown options
     }
@@ -32,7 +32,7 @@ class ComboBoxAnswer extends Answer {
     };
 }
 
-class RollAnswer extends Answer {
+class RollAnswer extends ok {
 
     RollAnswer(String questionTitle) {
         super(questionTitle);
@@ -45,11 +45,11 @@ class RollAnswer extends Answer {
     }
 }
 
-class AskMoreIfYes extends Answer {
+class AskMoreIfYes extends ok {
 
-    private final Answer[] extraQuestionsInYes;
+    private final ok[] extraQuestionsInYes;
 
-    AskMoreIfYes(String questionTitle, Answer[] extraQuestionsInYes) {
+    AskMoreIfYes(String questionTitle, ok[] extraQuestionsInYes) {
         super(questionTitle);
         this.extraQuestionsInYes = extraQuestionsInYes;
     }
@@ -74,7 +74,7 @@ class AskMoreIfYes extends Answer {
 
             // If they answered "Ja", add the extra questions underneath
             if ("Ja".equals(e.getValue())) {
-                for (Answer extra : extraQuestionsInYes) {
+                for (ok extra : extraQuestionsInYes) {
                     container.add(extra.drawUI());
                 }
             }
@@ -86,10 +86,10 @@ class AskMoreIfYes extends Answer {
 
 class MainProgram {
   static void main(String[] args) {
-    Answer[] amiy = {
+    ok[] amiy = {
       new ComboBoxAnswer("Did you drink vodka?"),
     };
-    Answer[] allQ = {
+    ok[] allQ = {
       new ComboBoxAnswer( "Et par timer efter jeg stod op følte jeg mig 1: Udmattet/Uoplagt - 5: Frisk/Oplagt"),
       new ComboBoxAnswer("what is up"),
       new RollAnswer("when is up"),
