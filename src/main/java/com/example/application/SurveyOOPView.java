@@ -1,22 +1,42 @@
 package com.example.application;
 
 
-import com.example.application.AllQ;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
-import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.router.Route;
+
+class DynamicMorningSurvey extends DynamicSurvey {
+    Question[] surveyQuestions = new Question [] {
+        new AskMoreIfYes(
+            "Har du været fysisk aktiv i dag?",
+            new Question[] {
+                new AskMoreIfYes(
+                "Har du været fysisk aktiv i dag?",
+                new Question[] {
+                    new RollAnswer("Hvor mange minutter?"),
+                    new RollAnswer("Hvornår på dagen?")
+                }
+                )
+            }
+        ),
+
+        /*  new ComboBoxAnswer("How's your daddy", "Good", "Bad"),
+        new ComboBoxAnswer("What is up", "Not much", "A lot"),*/
+        new RollAnswer("When is up"),
+        new AskMoreIfYes("Do you drink?", new Question[] {})
+    };
+
+}
+class DynamicEveningSurvey extends DynamicSurvey {
+    Question[] surveyQuestions = {};
+}
 
 @Route("survey-oop")
 public class SurveyOOPView extends VerticalLayout {
-
-    private final Answer[] allQ;
-
 
     private int currentIndex = 0;
 
@@ -43,39 +63,13 @@ public class SurveyOOPView extends VerticalLayout {
         content.setWidth("60%");
         content.setPadding(true);
 
-        Answer[] pafu = {
-            new RollAnswer("Hvor mange minutter?"),
-            new RollAnswer("Hvornår på dagen?")
-        };
-
-        // Follow-up questions if user answers "Ja"
-        AskMoreIfYes [] amiy = {new AskMoreIfYes(
-         "Har du været fysisk aktiv i dag?",
-            new Answer[] {
-            new RollAnswer("Hvor mange minutter?"),
-            new RollAnswer("Hvornår på dagen?")
-            }
-        );
-
         // All questions in the survey
-        allQ = new Answer [] {
-            new AskMoreIfYes("Har du været fysisk aktiv i dag?", amiy),
+        Question[] allQ = (new DynamicSurvey()).surveyQuestions;
 
-           /*  new ComboBoxAnswer("How's your daddy", "Good", "Bad"),
-            new ComboBoxAnswer("What is up", "Not much", "A lot"),*/
-            new RollAnswer("When is up"),
-            new AskMoreIfYes("Do you drink?", amiy)
-        };
-
-        
-        
-        
         VerticalLayout layout = new VerticalLayout();
         HorizontalLayout buttons = new HorizontalLayout(prev, next);
         buttons.setWidthFull();
         buttons.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        
-        
 
         Component qNum = allQ[currentIndex].drawUI();
 
@@ -104,11 +98,9 @@ public class SurveyOOPView extends VerticalLayout {
         
         
         // Add each question's UI to the page
-        /*for (Answer a : allQ) {
+        /*for (Question a : allQ) {
             add(a.drawUI());
         }*/
     }
 
 }
-
-
