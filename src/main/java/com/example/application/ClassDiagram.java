@@ -4,10 +4,6 @@ import java.util.Optional;
 
 abstract class User {
     String fullName;
-    public abstract void loadMainPage();
-
-    /* TODO */ public void login() {}
-    /* TODO */ public void logout() {}
     /* TODO */ public void seeAnsweredSurvey() {}
 }
 class Citizen extends User {
@@ -17,29 +13,32 @@ class Citizen extends User {
 
     /* TODO */ public void answerMorningSurvey() {}
     /* TODO */ public void answerEveningSurvey() {}
-    /* TODO */ public void loadMainPage() {}
+    public void changeAssignedAdvisor(SleepAdvisor newSleepAdvisor) {
+        this.assignedAdvisor = newSleepAdvisor;
+    }
 }
 class SleepAdvisor extends User {
     /* TODO */ public void searchCitizensList() {}
     /* TODO */ public void showOnlyYourCitizens() {}
     /* TODO */ public void sortCitizensByAdvisor() {}
     /* TODO */ public void sortCitizensByName() {}
-    /* TODO */ public void changeAssignedAdvisor() {}
+    public void changeAssignedAdvisor(Citizen citizen) {
+        citizen.changeAssignedAdvisor(this);
+    }
     /* TODO */ public void seeCitizenData() {}
-    /* TODO */ public void loadMainPage() {}
 }
 
 class DynamicSurvey {
     DynamicQuestion[] questions;
     Integer currentQuestion;
-    Question[] surveyQuestions;
+    SurveyType surveyType;
 
-    DynamicSurvey() {
+    DynamicSurvey(Object[] questionsList) {
         this.currentQuestion = 0;
 
-        this.questions = new DynamicQuestion[surveyQuestions.length];
+        this.questions = new DynamicQuestion[questionsList.length];
         for (int i=0; i<questions.length; i++){
-            this.questions[i] = new DynamicQuestion(surveyQuestions[i]);
+            this.questions[i] = new DynamicQuestion(questionsList[i]);
         };
     }
     public void nextQuestion() {
@@ -53,37 +52,36 @@ class DynamicSurvey {
         }
     }
     public Optional<AnsweredSurvey> submitAnswers() {
-        ok[] answers = new ok[questions.length];
+        Answer[] answers = new Answer[questions.length];
 
         // Fill in answers array from dynamic questions
         for (int i=0; i<questions.length; i++) {
             DynamicQuestion q = questions[i];
-            if (q.question.answerToQuestion.isEmpty()) {
+            if (q.answer.isEmpty()) {
                 return Optional.empty();
-            } else {
-                answers[i] = q.question.answerToQuestion.orElseThrow();
             }
+            answers[i] = q.answer.orElseThrow();
         }
 
-        return Optional.of(new AnsweredSurvey(answers, SurveyType.morning));
+        return Optional.of(new AnsweredSurvey(answers, surveyType));
     }
 }
-
 class DynamicQuestion {
-    Question question;
+    Optional<Answer> answer;
+    Object question;
 
-    DynamicQuestion(Question question) {
+    DynamicQuestion(Object question) {
         this.question = question;
     }
-    public void answerQuestion(ok answer) {
-        this.question.answerQuestion(answer);
+    public void answerQuestion(Answer answer) {
+        this.answer = Optional.of(answer);
     }
 }
 class AnsweredSurvey {
     SurveyType surveyType;
-    ok[] answers;
+    Answer[] answers;
 
-    AnsweredSurvey(ok[] answers, SurveyType surveyType) {
+    AnsweredSurvey(Answer[] answers, SurveyType surveyType) {
         this.surveyType = surveyType;
         this.answers = answers;
     }
@@ -92,14 +90,16 @@ enum SurveyType {
     morning,
     evening,
 }
-
-abstract class Answer2 {
-    public abstract void drawUI();
-}
+abstract class Answer {}
 
 class Question {
-    Answer answer;
+    protected final String questionTitle;
+    Optional<Answer> answerToQuestion;
+
+    protected Question(String questionTitle) {
+        this.questionTitle = questionTitle;
+    }
     void answerQuestion(Answer answer) {
-        this.answer = answer;
-    };
+        this.answerToQuestion = Optional.of(answer);
+    }
 }
