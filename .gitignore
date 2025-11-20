@@ -92,6 +92,8 @@ tsconfig.json
 types.d.ts
 index.html
 
-# Easier setup with nix
-/flake.nix
-/flake.lock
+# postgresql database
+.s.PGSQL.5432.lock
+.s.PGSQL.5432
+logfile
+.tmp
