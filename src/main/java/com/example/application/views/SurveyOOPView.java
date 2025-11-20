@@ -1,6 +1,9 @@
-package com.example.application;
+package com.example.application.views;
 
 
+import com.example.application.Questions.AskMoreIfYesQuestion;
+import com.example.application.Questions.QuestionUI;
+import com.example.application.Questions.RollQuestion;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H3;
@@ -9,34 +12,29 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
-class DynamicMorningSurvey extends DynamicSurvey {
-    Question[] surveyQuestions = new Question [] {
-        new AskMoreIfYes(
+@Route("survey-oop")
+public class SurveyOOPView extends VerticalLayout {
+
+    QuestionUI[] morningSurveyQuestions = new QuestionUI[] {
+        new AskMoreIfYesQuestion(
             "Har du været fysisk aktiv i dag?",
-            new Question[] {
-                new AskMoreIfYes(
+            new QuestionUI[] {
+                new AskMoreIfYesQuestion(
                 "Har du været fysisk aktiv i dag?",
-                new Question[] {
-                    new RollAnswer("Hvor mange minutter?"),
-                    new RollAnswer("Hvornår på dagen?")
-                }
+                    new QuestionUI[] {
+                        new RollQuestion("Hvor mange minutter?"),
+                        new RollQuestion("Hvornår på dagen?")
+                    }
                 )
+
             }
         ),
 
         /*  new ComboBoxAnswer("How's your daddy", "Good", "Bad"),
         new ComboBoxAnswer("What is up", "Not much", "A lot"),*/
-        new RollAnswer("When is up"),
-        new AskMoreIfYes("Do you drink?", new Question[] {})
+        new RollQuestion("When is up"),
+        new AskMoreIfYesQuestion("Do you drink?", new QuestionUI[] {})
     };
-
-}
-class DynamicEveningSurvey extends DynamicSurvey {
-    Question[] surveyQuestions = {};
-}
-
-@Route("survey-oop")
-public class SurveyOOPView extends VerticalLayout {
 
     private int currentIndex = 0;
 
@@ -44,9 +42,6 @@ public class SurveyOOPView extends VerticalLayout {
     public VerticalLayout content;
 
     public SurveyOOPView() {
-
-
-        final Object[] QUESTIONS = null;
         Button next = new Button("Næste >");
         Button prev = new Button("< Tilbage");
         H3 h3 = new H3();
@@ -64,7 +59,7 @@ public class SurveyOOPView extends VerticalLayout {
         content.setPadding(true);
 
         // All questions in the survey
-        Question[] allQ = (new DynamicSurvey()).surveyQuestions;
+        QuestionUI[] allQ = morningSurveyQuestions;
 
         VerticalLayout layout = new VerticalLayout();
         HorizontalLayout buttons = new HorizontalLayout(prev, next);
