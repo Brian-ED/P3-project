@@ -29,9 +29,6 @@ public class SurveyOOPView extends VerticalLayout {
 
             }
         ),
-
-        /*  new ComboBoxAnswer("How's your daddy", "Good", "Bad"),
-        new ComboBoxAnswer("What is up", "Not much", "A lot"),*/
         new RollQuestion("When is up"),
         new AskMoreIfYesQuestion("Do you drink?", new QuestionUI[] {})
     };
