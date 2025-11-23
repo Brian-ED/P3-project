@@ -47,3 +47,38 @@ java -jar target/my-app-1.0-SNAPSHOT.jar
 - Find add-ons at [vaadin.com/directory](https://vaadin.com/directory).
 - Ask questions on [Stack Overflow](https://stackoverflow.com/questions/tagged/vaadin) or join our [Forum](https://vaadin.com/forum).
 - Report issues, create pull requests in [GitHub](https://github.com/vaadin).
+
+# New additions
+flyway for managing database, so migrations are handled properly.
+
+## TODO stuff to do before production
+Use `spring.jpa.hibernate.ddl-auto=validate` to verify the schemas at `resources/db/migrations`, and to enable versioned data migrations.
+
+# DB workaholic routine
+First tried implementing one table each answer type, then reconsidered.
+Considered one table each answer, disregarded.
+Considered one table for all answers, disregarded.
+Realized one table for surveyAnswers was amazing, and that I am overthinking the Questions table.
+
+## Composition over inheritence
+```
+@MappedSuperclass
+class Answer {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @Column(nullable = false)
+    private Long id;
+
+    @Column(nullable = false)
+    private Citizen answerer;
+
+    protected Answer(Citizen answerer) {
+        this.answerer = answerer;
+    }
+}
+```
+Into:
+```
+```
+## Info
+users can't be id because they aren't unique
