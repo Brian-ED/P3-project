@@ -3,9 +3,6 @@ package com;
 import java.io.File;
 
 public class postgresqlSwitcher {
-    public postgresqlSwitcher() {
-		super();
-	}
 
     public static void main(String[] args) {
         System.out.println("Switcher started");
