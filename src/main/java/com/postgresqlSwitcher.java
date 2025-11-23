@@ -15,11 +15,11 @@ public class postgresqlSwitcher {
         File nonPostgres = new File("./src/main/resources/application-not-postgres.properties");
 
         if (!current.exists()) {
-            System.out.println("ERROR: Current settings are missing, expected at ./src/main/resources/application.properties");
+            System.out.println("ERROR: Current settings are missing, expected at "+current.getPath());
         } else if (!(postgres.exists() || nonPostgres.exists())) {
-            System.out.println("ERROR: The settings to replace with are missing, this is either a file at ./src/main/resources/application-postgres.properties or at ./src/main/resources/application-not-postgres.properties.");
+            System.out.println("ERROR: The settings to replace with are missing, this should be at either "+postgres.getPath()+" or at "+nonPostgres.getPath()+".");
         } else if (postgres.exists() && nonPostgres.exists()) {
-            System.out.println("ERROR: Both settings files exist, delete either ./src/main/resources/application-postgres.properties or ./src/main/resources/application-not-postgres.properties.");
+            System.out.println("ERROR: Both settings files exist, delete either "+postgres.getPath()+" or "+nonPostgres.getPath()+".");
         } else if (postgres.exists()) {
             current.renameTo(nonPostgres);
             postgres.renameTo(current);
