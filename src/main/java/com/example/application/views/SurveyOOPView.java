@@ -1,6 +1,9 @@
-package com.example.application;
+package com.example.application.views;
 
 
+import com.example.application.Questions.AskMoreIfYesQuestion;
+import com.example.application.Questions.QuestionUI;
+import com.example.application.Questions.RollQuestion;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H3;
@@ -94,9 +97,6 @@ public class SurveyOOPView extends VerticalLayout {
     public VerticalLayout content;
 
     public SurveyOOPView() {
-
-
-        final Object[] QUESTIONS = null;
         Button next = new Button("Næste >");
         Button prev = new Button("< Tilbage");
         H3 h3 = new H3();
