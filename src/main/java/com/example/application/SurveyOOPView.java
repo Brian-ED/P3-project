@@ -10,29 +10,79 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
 class DynamicMorningSurvey extends DynamicSurvey {
-    Question[] surveyQuestions = new Question [] {
-        new AskMoreIfYes(
-            "Har du været fysisk aktiv i dag?",
-            new Question[] {
-                new AskMoreIfYes(
-                "Har du været fysisk aktiv i dag?",
-                new Question[] {
-                    new RollAnswer("Hvor mange minutter?"),
-                    new RollAnswer("Hvornår på dagen?")
+    DynamicMorningSurvey() {
+        super(new QuestionUI[] {
+            new AskMoreIfYesQuestion( 
+                "Tager du nogen gange sovemedicin eller melatonin piller", 
+                new QuestionUI[] {
+                    new ComboBoxQuestion("Hvad tager du?", "Sovemedicin", "Melatonin")
                 }
-                )
-            }
-        ),
+            ),
+            new ComboBoxQuestion(
+                "Hvad foretog du dig de sidste par timer inden du gik i seng?", "Ting", "Sager"),
+            new RollQuestion(
+                "I går gik jeg i seng klokken:"),
+            new RollQuestion(
+                "Jeg slukkede lyset klokken:"),
+            new RollQuestion(
+                "Efter jeg slukkede lyset, sov jeg ca. efter:"),
+            new ComboBoxQuestion(
+                "Jeg vågnede cirka x gange i løbet af natten:", "1", "2", "3"),
+            new RollQuestion(
+                "Jeg var sammenlagt vågen i cirka x minutter i løbet af natten"),
+            new RollQuestion(
+                "I morges vågnede jeg klokken:"),
+            new RollQuestion(
+                "Og jeg stod op klokken:")
+            
 
-        /*  new ComboBoxAnswer("How's your daddy", "Good", "Bad"),
-        new ComboBoxAnswer("What is up", "Not much", "A lot"),*/
-        new RollAnswer("When is up"),
-        new AskMoreIfYes("Do you drink?", new Question[] {})
-    };
 
+        });
+    }
+    /*Question[] surveyQuestions = {};*/
 }
+
 class DynamicEveningSurvey extends DynamicSurvey {
-    Question[] surveyQuestions = {};
+
+    DynamicEveningSurvey() {
+        super(new QuestionUI[] {
+            new AskMoreIfYesQuestion(
+                "Har du været fysisk aktiv i dag?",
+                new QuestionUI[] {
+                    new RollQuestion("Hvor mange minutter?"),
+                    new RollQuestion("Hvornår på dagen?")
+                }
+            ),
+            new AskMoreIfYesQuestion(
+                "Har du været ude i dagslys?",
+                new QuestionUI[] {
+                    new RollQuestion("Hvornår på dagen?")
+                }
+            ),
+            new AskMoreIfYesQuestion(
+                 "Har du drukket koffeinholdige drikke i dag?", 
+                new QuestionUI[] {
+                    new ComboBoxQuestion ("Hvilke drikke (flere kan vælges)", "Monster", "Kaffe", "Sodavand"),
+                    new RollQuestion("Hvornår på dagen indtager du den sidste drik?")
+                }
+            ),
+            new AskMoreIfYesQuestion("Har du drukket alkohol?",
+                new QuestionUI[] {
+                    new RollQuestion ("Hvornår på dagen drak du den sidste genstand?"),
+                    new ComboBoxQuestion("Hvor mange genstande har du ca. drukket i løbet af dagen?", "1", "2", "3")
+                }
+            ),
+            new AskMoreIfYesQuestion("Har du sovet i løbet af dagen?",
+                new QuestionUI[]{
+                    new RollQuestion("Hvornår på dagen")
+                }
+            )
+
+            
+
+        
+        });
+    }
 }
 
 @Route("survey-oop")
@@ -64,8 +114,10 @@ public class SurveyOOPView extends VerticalLayout {
         content.setPadding(true);
 
         // All questions in the survey
-        Question[] allQ = (new DynamicSurvey()).surveyQuestions;
+        DynamicSurvey survey = new DynamicMorningSurvey();
 
+        QuestionUI[] allQ = survey.surveyQuestions;
+        
         VerticalLayout layout = new VerticalLayout();
         HorizontalLayout buttons = new HorizontalLayout(prev, next);
         buttons.setWidthFull();

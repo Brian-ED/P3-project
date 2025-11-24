@@ -28,34 +28,43 @@ class SleepAdvisor extends User {
     /* TODO */ public void seeCitizenData() {}
 }
 
+
+
 class DynamicSurvey {
+
     DynamicQuestion[] questions;
     Integer currentQuestion;
-    SurveyType surveyType;
+    SurveyType surveyType;          // you can set this from subclasses if you need it
+    public final QuestionUI[] surveyQuestions;
 
-    DynamicSurvey(Object[] questionsList) {
+    // Use QuestionUI[] instead of Object[]
+    DynamicSurvey(QuestionUI[] questionsList) {
         this.currentQuestion = 0;
+        this.surveyQuestions = questionsList;
 
         this.questions = new DynamicQuestion[questionsList.length];
-        for (int i=0; i<questions.length; i++){
+        for (int i = 0; i < questions.length; i++) {
             this.questions[i] = new DynamicQuestion(questionsList[i]);
-        };
+        }
     }
+
     public void nextQuestion() {
         if (currentQuestion + 1 < questions.length) {
             currentQuestion += 1;
         }
     }
+
     public void previousQuestion() {
         if (currentQuestion > 0) {
             currentQuestion -= 1;
         }
     }
+
     public Optional<AnsweredSurvey> submitAnswers() {
         Answer[] answers = new Answer[questions.length];
 
         // Fill in answers array from dynamic questions
-        for (int i=0; i<questions.length; i++) {
+        for (int i = 0; i < questions.length; i++) {
             DynamicQuestion q = questions[i];
             if (q.answer.isEmpty()) {
                 return Optional.empty();
@@ -66,6 +75,7 @@ class DynamicSurvey {
         return Optional.of(new AnsweredSurvey(answers, surveyType));
     }
 }
+
 class DynamicQuestion {
     Optional<Answer> answer;
     Object question;
