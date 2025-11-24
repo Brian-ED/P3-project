@@ -45,7 +45,7 @@ class DynamicSurvey {
         this.questions = new DynamicQuestion[questionsList.length];
         for (int i = 0; i < questions.length; i++) {
             this.questions[i] = new DynamicQuestion(questionsList[i]);
-        }
+        };
     }
 
     public void nextQuestion() {
