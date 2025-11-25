@@ -9,7 +9,10 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.router.Route;
 
+import jakarta.annotation.security.PermitAll;
+
 @Route("morning")
+@PermitAll
 public class QMorning extends VerticalLayout {
   Button next = new Button("Næste >");
   Button prev = new Button("< Tilbage");

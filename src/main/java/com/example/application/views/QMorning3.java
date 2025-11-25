@@ -1,7 +1,6 @@
 package com.example.application.views;
 
 import com.example.application.AllQ;
-
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -11,7 +10,10 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.router.Route;
 
+import jakarta.annotation.security.PermitAll;
+
 @Route("morning3")
+@PermitAll
 public class QMorning3 extends VerticalLayout {
   private static final Object[] QUESTIONS = null;
   Button next = new Button("Næste >");
@@ -76,4 +78,3 @@ public class QMorning3 extends VerticalLayout {
     next.getStyle().set("font-size", "30px");
   }
 }
-
