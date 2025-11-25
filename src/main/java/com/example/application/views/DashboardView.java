@@ -58,12 +58,12 @@ public class DashboardView extends VerticalLayout {
         statsRow.setFlexGrow(1, card3);
 
         Div mainCard = new Div();
-        mainCard.getStyle().set("background", "white")
-        .set("border-radius", "12px")
-        .set("padding", "20px")
-        .set("box-shadow", "0 2px 12px rgba(0, 0, 0, 0)")
-        .set("margin-top", "18px")
-        .set("width", "calc(100% - 40px)");
+        mainCard.getStyle().set("background", "white");
+        mainCard.getStyle().set("border-radius", "12px");
+        mainCard.getStyle().set("padding", "20px");
+        mainCard.getStyle().set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)");
+        mainCard.getStyle().set("margin-top", "18px");
+        mainCard.getStyle().set("width", "100%");
 
         // Title row with icon + search and toggle
         HorizontalLayout mainHeaderRow = new HorizontalLayout();
@@ -272,7 +272,7 @@ public class DashboardView extends VerticalLayout {
         // Left: small app title
         Span appTitle = new Span("Velkommen, John Doe");
         appTitle.getStyle().set("font-weight", "700");
-        appTitle.getStyle().set("font-size", "30px");
+        appTitle.getStyle().set("font-size", "16px");
         appTitle.getStyle().set("color", "#072d85ff");
 
         // Right: logout button
