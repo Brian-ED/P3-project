@@ -10,10 +10,10 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.router.Route;
 
-import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 
 @Route("morning3")
-@PermitAll
+@RolesAllowed({"CITIZEN", "ADMIN"})
 public class QMorning3 extends VerticalLayout {
   private static final Object[] QUESTIONS = null;
   Button next = new Button("Næste >");
