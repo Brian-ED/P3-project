@@ -6,6 +6,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
+import jakarta.annotation.security.RolesAllowed;
+
 class StatisticBox extends VerticalLayout {
   H3 title;
   H3 valueField;
@@ -27,6 +29,7 @@ class StatisticBox extends VerticalLayout {
 }
 
 @Route("sleepadvisor")
+@RolesAllowed({"ADVISOR", "ADMIN"})
 public class SleepAdvisor extends VerticalLayout {
   public SleepAdvisor() {
     setHeightFull();
