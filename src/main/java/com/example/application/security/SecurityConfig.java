@@ -1,7 +1,6 @@
 package com.example.application.security;
 
 
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -24,26 +23,19 @@ class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // Configure Vaadin's security using VaadinSecurityConfigurer
-        http.with(VaadinSecurityConfigurer.vaadin(), configurer -> {
-            configurer.loginView(LoginView.class);
-        });
+        http.with(
+            VaadinSecurityConfigurer.vaadin(),
+            configurer -> configurer.loginView(LoginView.class)
+        );
 
         return http.build();
     }
 
     @Bean
     public UserDetailsManager userDetailsManager() {
-        LoggerFactory.getLogger(SecurityConfig.class)
-            .warn("Using in-memory user details manager!");
-        UserDetails user = User.withUsername("user")
-                .password("{noop}user")
-                .roles("USER")
-                .build();
-        UserDetails admin = User.withUsername("admin")
-                .password("{noop}admin")
-                .roles("ADMIN")
-                .build();
-        return new InMemoryUserDetailsManager(user, admin);
+        UserDetails citizen      = User.withUsername("citizen").password("{noop}citizen").roles("CITIZEN").build();
+        UserDetails sleepAdvisor = User.withUsername("advisor").password("{noop}advisor").roles("ADVISOR").build();
+        UserDetails admin        = User.withUsername("admin"  ).password("{noop}admin"  ).roles("ADMIN"  ).build();
+        return new InMemoryUserDetailsManager(citizen, sleepAdvisor, admin);
     }
 }
