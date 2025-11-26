@@ -1,9 +1,11 @@
 package com.example.application.views;
 
-
+import com.example.application.DynamicSurvey;
 import com.example.application.Questions.AskMoreIfYesQuestion;
 import com.example.application.Questions.QuestionUI;
 import com.example.application.Questions.RollQuestion;
+import com.example.application.Questions.ComboBoxQuestion;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H3;
@@ -96,40 +98,36 @@ public class SurveyOOPView extends VerticalLayout {
     // Layout that will contain the current question UI
     public VerticalLayout content;
 
+    private DynamicMorningSurvey survey;
+    private QuestionUI[] allQ;
+
     public SurveyOOPView() {
+
+        // 1) Choose which survey to show
+        this.survey = new DynamicMorningSurvey();   // or new DynamicEveningSurvey()
+        this.allQ   = survey.surveyQuestions;
+
         Button next = new Button("Næste >");
         Button prev = new Button("< Tilbage");
-        H3 h3 = new H3();
+        H3 h3 = new H3("Spørgeskema");
 
-
-        // Overall layout setup for the page
+        // 2) Overall layout setup for the page
         setSizeFull();
-        setAlignItems(FlexComponent.Alignment.CENTER);
+        setAlignItems(FlexComponent.Alignment.START);
         setJustifyContentMode(JustifyContentMode.BETWEEN);
 
-        // This layout will hold the current question's UI
+        // 3) Layout that holds the *current* question
         content = new VerticalLayout();
-        content.setAlignItems(FlexComponent.Alignment.START);
+        content.setAlignItems(FlexComponent.Alignment.END);
         content.setWidth("60%");
         content.setPadding(true);
 
-        // All questions in the survey
-        DynamicSurvey survey = new DynamicMorningSurvey();
-
-        QuestionUI[] allQ = survey.surveyQuestions;
-        
-        VerticalLayout layout = new VerticalLayout();
+        // 4) Button bar
         HorizontalLayout buttons = new HorizontalLayout(prev, next);
         buttons.setWidthFull();
         buttons.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
 
-        Component qNum = allQ[currentIndex].drawUI();
-
-        layout.add(qNum);
-        layout.setAlignSelf(Alignment.START, h3);
-        layout.setAlignSelf(Alignment.START, qNum);
-        add(layout, buttons);
-
+        // 5) Style buttons
         next.setWidth("220px");
         next.setHeight("110px");
         prev.setWidth("220px");
@@ -138,21 +136,39 @@ public class SurveyOOPView extends VerticalLayout {
         next.getStyle().set("background-color", "#262ecaff").set("color", "white");
         prev.getStyle().set("font-size", "30px");
         next.getStyle().set("font-size", "30px");
-        
-        
 
-        // Add main content + buttons to this view
-        add(content, buttons);
+        // 6) Add heading + content + buttons to the page
+        add(h3, content, buttons);
 
-        // Show the first question initially
-        /*showQuestion(currentIndex);*/
-        
-        
-        
-        // Add each question's UI to the page
-        /*for (Question a : allQ) {
-            add(a.drawUI());
-        }*/
+        // 7) Show the first question
+        showQuestion(currentIndex);
+
+        // 8) Next / Previous button logic
+        next.addClickListener(e -> {
+            if (currentIndex < allQ.length - 1) {   // only if there IS a next question
+                currentIndex++;
+                survey.nextQuestion();              // keep internal index in sync (optional)
+                showQuestion(currentIndex);
+            }
+        });
+
+        prev.addClickListener(e -> {
+            if (currentIndex > 0) {                 // only if there IS a previous question
+                currentIndex--;
+                survey.previousQuestion();          // keep internal index in sync (optional)
+                showQuestion(currentIndex);
+            }
+        });
     }
 
+    private void showQuestion(int index) {
+        if (index < 0 || index >= allQ.length) {
+            return; // safety
+        }
+
+        content.removeAll();                        // remove old question UI
+        Component qComponent = allQ[index].drawUI(); // build new question UI
+        content.add(qComponent);                    // show it
+        content.setAlignSelf(FlexComponent.Alignment.START, qComponent);
+    }
 }

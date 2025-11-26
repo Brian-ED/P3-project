@@ -2,6 +2,8 @@ package com.example.application;
 
 import java.util.Optional;
 
+import com.example.application.Questions.QuestionUI;
+
 abstract class User {
     String fullName;
     /* TODO */ public void seeAnsweredSurvey() {}
@@ -30,7 +32,7 @@ class SleepAdvisor extends User {
 
 
 
-class DynamicSurvey {
+public class DynamicSurvey {
 
     DynamicQuestion[] questions;
     Integer currentQuestion;
@@ -38,7 +40,7 @@ class DynamicSurvey {
     public final QuestionUI[] surveyQuestions;
 
     // Use QuestionUI[] instead of Object[]
-    DynamicSurvey(QuestionUI[] questionsList) {
+    protected DynamicSurvey(QuestionUI[] questionsList) {
         this.currentQuestion = 0;
         this.surveyQuestions = questionsList;
 
