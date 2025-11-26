@@ -1,14 +1,12 @@
 package com.example.application.views;
 
-import java.util.Optional;
-
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
+
+import jakarta.annotation.security.RolesAllowed;
 
 class StatisticBox extends VerticalLayout {
   H3 title;
@@ -31,6 +29,7 @@ class StatisticBox extends VerticalLayout {
 }
 
 @Route("sleepadvisor")
+@RolesAllowed({"ADVISOR", "ADMIN"})
 public class SleepAdvisor extends VerticalLayout {
   public SleepAdvisor() {
     setHeightFull();

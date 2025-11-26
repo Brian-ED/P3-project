@@ -1,0 +1,11 @@
+package com.example.model;
+
+public enum QuestionType {
+    COMBOBOX,
+    TEXT_FIELD,
+    YES_NO,
+    NUMBER_FIELD,
+    CHECKBOX_GROUP,
+    TIME_FIELD,
+    YES_NO_ELABORATE,
+}
