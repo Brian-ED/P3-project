@@ -19,7 +19,10 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.Route;
 
+import jakarta.annotation.security.RolesAllowed;
+
 @Route("Citizen")
+@RolesAllowed({"CITIZEN", "ADMIN"})
 public class Citizen extends VerticalLayout {
     public Citizen() {
         // Creates variables that contains the current time so it can be used dynamically
