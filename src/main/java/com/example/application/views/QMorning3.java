@@ -1,6 +1,5 @@
 package com.example.application.views;
 
-import com.example.application.AllQ;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -30,7 +29,7 @@ public class QMorning3 extends VerticalLayout {
     layout.setJustifyContentMode(JustifyContentMode.START);
 
     // Set question
-    layout.add(new H3(AllQ.QUESTIONS[3]));
+    layout.add(new H3("Example question"));
     layout.add(new H3());
     //setAlignItems(FlexComponent.Alignment.CENTER);
 
