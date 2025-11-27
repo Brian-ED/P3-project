@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.vaadin.flow.component.Component;
-
 public class DynamicSurvey {
 
     private static Question AskMoreIfYesQuestion(String title, Question... more) {
@@ -58,7 +56,8 @@ public class DynamicSurvey {
         )
     };
 
-    public Integer currentQuestion = 0;
+    public Integer currentQuestionIndex = 0;
+    public Question currentQuestion;
     SurveyType surveyType;
     public final Integer length;
     public final Question[] surveyQuestions;
@@ -77,7 +76,7 @@ public class DynamicSurvey {
     // Should only have idempotent functions subscribed
     private void notifyCurrentQuestionChanged() {
         for (var l : listeners) {
-            l.currentQuestionChanged(currentQuestion);
+            l.currentQuestionChanged(currentQuestionIndex);
         }
     }
 
@@ -93,19 +92,20 @@ public class DynamicSurvey {
             case morning -> morningSurvey;
             case evening -> eveningSurvey;
         };
+        this.currentQuestion = surveyQuestions[currentQuestionIndex];
         this.length = surveyQuestions.length;
     }
 
     public void nextQuestion() {
-        if (currentQuestion + 1 < surveyQuestions.length) {
-            currentQuestion += 1;
+        if (currentQuestionIndex + 1 < surveyQuestions.length) {
+            currentQuestionIndex += 1;
             notifyCurrentQuestionChanged();
         }
     }
 
     public void previousQuestion() {
-        if (currentQuestion > 0) {
-            currentQuestion -= 1;
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex -= 1;
             notifyCurrentQuestionChanged();
         }
     }

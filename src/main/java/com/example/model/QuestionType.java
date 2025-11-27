@@ -7,5 +7,4 @@ public enum QuestionType {
     NUMBER_FIELD,
     CHECKBOX_GROUP,
     TIME_FIELD,
-    YES_NO_ELABORATE,
 }
