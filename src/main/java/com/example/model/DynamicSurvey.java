@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.vaadin.flow.component.Component;
+
 public class DynamicSurvey {
 
     private static Question AskMoreIfYesQuestion(String title, Question... more) {
@@ -56,7 +58,7 @@ public class DynamicSurvey {
         )
     };
 
-    Integer currentQuestion = 0;
+    public Integer currentQuestion = 0;
     SurveyType surveyType;
     public final Integer length;
     public final Question[] surveyQuestions;
@@ -84,7 +86,7 @@ public class DynamicSurvey {
         }
     }
 
-    DynamicSurvey(SurveyType surveyType) {
+    public DynamicSurvey(SurveyType surveyType) {
         this.surveyType = surveyType;
         this.surveyQuestions = switch (surveyType) {
             case morning -> morningSurvey;

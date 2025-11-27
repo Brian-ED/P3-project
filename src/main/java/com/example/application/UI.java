@@ -11,9 +11,9 @@ import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
 
-public class AskMoreIfYesQuestion {
+public class UI {
 
-    private Component drawYesNoElaborate(Question question) {
+    private static Component drawYesNoElaborate(Question question) {
         // Container for the yes/no question + any follow-up questions
         VerticalLayout container = new VerticalLayout();
 
@@ -41,34 +41,34 @@ public class AskMoreIfYesQuestion {
         return container;
     }
 
-    private Component drawComboBox(Question question) {
+    private static Component drawComboBox(Question question) {
             ComboBox<String> cb = new ComboBox<>(question.questionTitle); // label = question
             cb.setItems(question.answerCases.orElse(new String[0]));      // fill dropdown
             return cb;
     }
 
-    private Component drawTimeField(Question question) {
+    private static Component drawTimeField(Question question) {
         return new TimePicker(question.questionTitle);
     }
 
-    private Component drawCheckboxGroup(Question question) {
+    private static Component drawCheckboxGroup(Question question) {
         CheckboxGroup<String> x = new CheckboxGroup<>(question.questionTitle); // TODO Add listener as second argument here
         for (String s : question.answerCases.orElse(new String[0])) {
             x.add(s);
         }
         return x;
     }
-    private Component drawNumberField(Question question) {
+    private static Component drawNumberField(Question question) {
         return new NumberField(question.questionTitle);
     }
-    private Component drawTextField(Question question) {
+    private static Component drawTextField(Question question) {
         return new TextField(question.questionTitle);
     }
-    private Component drawYesNo(Question question) {
+    private static Component drawYesNo(Question question) {
         return new Checkbox(question.questionTitle);
     }
 
-    public Component drawUI(Question question) {
+    public static Component drawUI(Question question) {
         return switch (question.type) {
             case CHECKBOX_GROUP   -> drawCheckboxGroup (question);
             case COMBOBOX         -> drawComboBox      (question);
