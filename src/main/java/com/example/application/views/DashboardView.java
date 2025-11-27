@@ -13,8 +13,11 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
+import jakarta.annotation.security.RolesAllowed;
+
 @Route("dashboard")
 @PageTitle("Søvnrådgiver Dashboard")
+@RolesAllowed({"ADVISOR", "ADMIN"})
 public class DashboardView extends VerticalLayout {
 
     public DashboardView() {
