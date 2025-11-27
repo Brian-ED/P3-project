@@ -1,7 +1,9 @@
 package com.example.application.views;
 
 import com.example.application.UI;
+import com.example.model.AnswerPayload;
 import com.example.model.DynamicSurvey;
+import com.example.model.SurveyListener;
 import com.example.model.SurveyType;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
@@ -17,7 +19,19 @@ import jakarta.annotation.security.RolesAllowed;
 @RolesAllowed({"ADMIN", "CITIZEN"})
 public class SurveyOOPView extends VerticalLayout {
 
-    private int currentIndex = 0;
+    DynamicSurvey survey;
+
+    class ThisListener implements SurveyListener {
+        @Override
+        public void currentQuestionChanged(int newIndex) {
+            showQuestion(UI.drawUI(survey.surveyQuestions[survey.currentQuestion]));
+        }
+
+        @Override
+        public void questionAnswered(int index, AnswerPayload payload) {
+            // TODO
+        }
+    }
 
     // Layout that will contain the current question UI
     public VerticalLayout content;
@@ -25,7 +39,9 @@ public class SurveyOOPView extends VerticalLayout {
     public SurveyOOPView() {
 
         // 1) Choose which survey to show
-        DynamicSurvey survey = new DynamicSurvey(SurveyType.morning);
+        this.survey = new DynamicSurvey(SurveyType.morning);
+        SurveyListener listener = new ThisListener();
+        survey.addListener(listener);
 
         Button next = new Button("Næste >");
         Button prev = new Button("< Tilbage");
@@ -64,15 +80,8 @@ public class SurveyOOPView extends VerticalLayout {
 		showQuestion(UI.drawUI(survey.surveyQuestions[survey.currentQuestion]));
 
         // 8) Next / Previous button logic
-        next.addClickListener(e -> {
-            survey.nextQuestion();
-            showQuestion(UI.drawUI(survey.surveyQuestions[survey.currentQuestion]));
-        });
-
-        prev.addClickListener(e -> {
-            survey.previousQuestion();
-            showQuestion(UI.drawUI(survey.surveyQuestions[survey.currentQuestion]));
-        });
+        next.addClickListener(e -> survey.nextQuestion());
+        prev.addClickListener(e -> survey.previousQuestion());
     }
 
     private void showQuestion(Component qComponent) {

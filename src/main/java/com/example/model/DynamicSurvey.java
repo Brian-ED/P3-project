@@ -74,9 +74,10 @@ public class DynamicSurvey {
         listeners.remove(l);
     }
 
-    private void notifyCurrentQuestionChanged(int index) {
+    // Should only have idempotent functions subscribed
+    private void notifyCurrentQuestionChanged() {
         for (var l : listeners) {
-            l.currentQuestionChanged(index);
+            l.currentQuestionChanged(currentQuestion);
         }
     }
 
@@ -98,12 +99,14 @@ public class DynamicSurvey {
     public void nextQuestion() {
         if (currentQuestion + 1 < surveyQuestions.length) {
             currentQuestion += 1;
+            notifyCurrentQuestionChanged();
         }
     }
 
     public void previousQuestion() {
         if (currentQuestion > 0) {
             currentQuestion -= 1;
+            notifyCurrentQuestionChanged();
         }
     }
 
