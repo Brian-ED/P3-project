@@ -26,7 +26,7 @@ import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.RolesAllowed;
 
-@Route("Citizen")
+@Route("citizen")
 @RolesAllowed({"CITIZEN", "ADMIN"})
 @PageTitle("Klient Dashboard")
 public class Citizen extends VerticalLayout {
