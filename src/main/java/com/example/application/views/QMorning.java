@@ -21,7 +21,7 @@ public class QMorning extends VerticalLayout {
   H3 h3 = new H3();
   VerticalLayout layout = new VerticalLayout();
   HorizontalLayout buttonLayout = new HorizontalLayout();
-  
+
   public QMorning() {
     setAlignItems(FlexComponent.Alignment.CENTER);
     layout.setAlignItems(FlexComponent.Alignment.START);
