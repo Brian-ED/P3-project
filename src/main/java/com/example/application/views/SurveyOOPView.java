@@ -24,7 +24,7 @@ public class SurveyOOPView extends VerticalLayout {
     class ThisListener implements SurveyListener {
         @Override
         public void currentQuestionChanged(int newIndex) {
-            showQuestion(UI.drawUI(survey.currentQuestion));
+            showQuestion(UI.drawUI(survey.currentQuestion()));
         }
 
         @Override
@@ -77,7 +77,7 @@ public class SurveyOOPView extends VerticalLayout {
         add(h3, content, buttons);
 
         // 7) Show the first question
-		showQuestion(UI.drawUI(survey.currentQuestion));
+		showQuestion(UI.drawUI(survey.currentQuestion()));
 
         // 8) Next / Previous button logic
         next.addClickListener(e -> survey.nextQuestion());

@@ -57,7 +57,7 @@ public class DynamicSurvey {
     };
 
     public Integer currentQuestionIndex = 0;
-    public Question currentQuestion;
+    public Question currentQuestion() {return surveyQuestions[currentQuestionIndex];};
     SurveyType surveyType;
     public final Integer length;
     public final Question[] surveyQuestions;
@@ -92,7 +92,6 @@ public class DynamicSurvey {
             case morning -> morningSurvey;
             case evening -> eveningSurvey;
         };
-        this.currentQuestion = surveyQuestions[currentQuestionIndex];
         this.length = surveyQuestions.length;
     }
 
