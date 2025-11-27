@@ -54,6 +54,9 @@ flyway for managing database, so migrations are handled properly.
 ## TODO stuff to do before production
 Use `spring.jpa.hibernate.ddl-auto=validate` to verify the schemas at `resources/db/migrations`, and to enable versioned data migrations.
 
+Rename Survey to questionaire?
+Improve authentication, current authentication is plain data in-memory which is horrible but we want MitID asap as a replacement so current impl during development doesn't matter.
+
 # DB workaholic routine
 First tried implementing one table each answer type, then reconsidered.
 Considered one table each answer, disregarded.
