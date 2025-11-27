@@ -14,7 +14,7 @@ import jakarta.annotation.security.RolesAllowed;
 @Route("morning3")
 @RolesAllowed({"CITIZEN", "ADMIN"})
 public class QMorning3 extends VerticalLayout {
-  private static final Object[] QUESTIONS = null;
+
   Button next = new Button("Næste >");
   Button prev = new Button("< Tilbage");
 
@@ -22,7 +22,7 @@ public class QMorning3 extends VerticalLayout {
   H3 h3 = new H3();
   VerticalLayout layout = new VerticalLayout();
   HorizontalLayout buttonLayout = new HorizontalLayout();
-  
+
   public QMorning3() {
     setAlignItems(FlexComponent.Alignment.CENTER);
     layout.setAlignItems(FlexComponent.Alignment.START);
@@ -33,9 +33,6 @@ public class QMorning3 extends VerticalLayout {
     layout.add(new H3());
     //setAlignItems(FlexComponent.Alignment.CENTER);
 
-
-
-    
     // Put buttons in a horizontal layout
     HorizontalLayout buttons = new HorizontalLayout(prev, next);
     buttons.setWidthFull();
