@@ -15,9 +15,9 @@ import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.RolesAllowed;
 
-@Route("morning")
+@Route("survey")
 @RolesAllowed({"ADMIN", "CITIZEN"})
-public class SurveyOOPView extends VerticalLayout {
+public class Survey extends VerticalLayout {
 
     DynamicSurvey survey;
 
@@ -36,7 +36,7 @@ public class SurveyOOPView extends VerticalLayout {
     // Layout that will contain the current question UI
     public VerticalLayout content;
 
-    public SurveyOOPView() {
+    public Survey() {
 
         // 1) Choose which survey to show
         this.survey = new DynamicSurvey(SurveyType.morning);
