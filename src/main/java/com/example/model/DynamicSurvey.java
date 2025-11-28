@@ -17,43 +17,34 @@ public class DynamicSurvey {
     }
 
     public static Question[] morningSurvey = new Question[] {
-        AskMoreIfYesQuestion(
-            "Tager du nogen gange sovemedicin eller melatonin piller",
-            ComboBoxQuestion("Hvad tager du?", "Sovemedicin", "Melatonin")
-        ),
+        AskMoreIfYesQuestion("Tager du nogen gange sovemedicin eller melatonin piller",
+            ComboBoxQuestion("Hvad tager du?", "Sovemedicin", "Melatonin")),
         ComboBoxQuestion("Hvad foretog du dig de sidste par timer inden du gik i seng?", "Ting", "Sager"),
         RollQuestion("I går gik jeg i seng klokken:"),
         RollQuestion("Jeg slukkede lyset klokken:"),
         RollQuestion("Efter jeg slukkede lyset, sov jeg ca. efter:"),
-        ComboBoxQuestion("Jeg vågnede cirka x gange i løbet af natten:", "1", "2", "3"),
+        ComboBoxQuestion("Jeg vågnede cirka x gange i løbet af natten:",
+            "1", "2", "3"),
         RollQuestion("Jeg var sammenlagt vågen i cirka x minutter i løbet af natten"),
         RollQuestion("I morges vågnede jeg klokken:"),
         RollQuestion("Og jeg stod op klokken:")
     };
     public static Question[] eveningSurvey = new Question[] {
-        AskMoreIfYesQuestion(
-            "Har du været fysisk aktiv i dag?",
+        AskMoreIfYesQuestion("Har du været fysisk aktiv i dag?",
             RollQuestion("Hvor mange minutter?"),
-            RollQuestion("Hvornår på dagen?")
-        ),
-        AskMoreIfYesQuestion(
-            "Har du været ude i dagslys?",
-            RollQuestion("Hvornår på dagen?")
-        ),
-        AskMoreIfYesQuestion(
-            "Har du drukket koffeinholdige drikke i dag?",
+            RollQuestion("Hvornår på dagen?")),
+        AskMoreIfYesQuestion("Har du været ude i dagslys?",
+            RollQuestion("Hvornår på dagen?")),
+        AskMoreIfYesQuestion("Har du drukket koffeinholdige drikke i dag?",
             ComboBoxQuestion ("Hvilke drikke (flere kan vælges)", "Monster", "Kaffe", "Sodavand"),
-            RollQuestion("Hvornår på dagen indtager du den sidste drik?")
-        ),
+            RollQuestion("Hvornår på dagen indtager du den sidste drik?")),
         AskMoreIfYesQuestion(
             "Har du drukket alkohol?",
             RollQuestion ("Hvornår på dagen drak du den sidste genstand?"),
-            ComboBoxQuestion("Hvor mange genstande har du ca. drukket i løbet af dagen?", "1", "2", "3")
-        ),
-        AskMoreIfYesQuestion(
-            "Har du sovet i løbet af dagen?",
-            RollQuestion("Hvornår på dagen")
-        )
+            ComboBoxQuestion("Hvor mange genstande har du ca. drukket i løbet af dagen?",
+                "1", "2", "3")),
+        AskMoreIfYesQuestion("Har du sovet i løbet af dagen?",
+            RollQuestion("Hvornår på dagen"))
     };
 
     public Integer currentQuestionIndex = 0;
