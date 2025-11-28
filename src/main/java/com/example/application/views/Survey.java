@@ -53,7 +53,7 @@ public class Survey extends VerticalLayout {
         setJustifyContentMode(JustifyContentMode.BETWEEN);
 
         // 3) Layout that holds the *current* question
-        content = new VerticalLayout();
+        this.content = new VerticalLayout();
         content.setAlignItems(FlexComponent.Alignment.END);
         content.setWidth("60%");
         content.setPadding(true);

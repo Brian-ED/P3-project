@@ -1,6 +1,7 @@
 package com.example.application.security.ui.view;
 
 import com.example.database.PostgreSQLDatabaseControler;
+import com.example.model.Citizen;
 import com.example.model.DatabaseControler;
 import com.example.model.Model;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -16,16 +17,15 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 
 class ModelSetup implements ComponentEventListener<LoginEvent> {
 
-    private Model model;
-
 	@Override
 	public void onComponentEvent(LoginEvent event) {
         DatabaseControler db = new PostgreSQLDatabaseControler();
 
-        this.model = new Model(db);
-
-        // Fire login event
-        model.userLoggedIn(event.getUsername());;
+        if (event.getUsername() == "citizen") {
+            String temporaryCitizenName = "Josh Isenhower";
+            Citizen citizen = new Citizen(temporaryCitizenName);
+			Model.InitModel(db, citizen);
+        }
 	}
 }
 

@@ -29,8 +29,8 @@ import jakarta.annotation.security.RolesAllowed;
 @Route("citizen")
 @RolesAllowed({"CITIZEN", "ADMIN"})
 @PageTitle("Klient Dashboard")
-public class Citizen extends VerticalLayout {
-    public Citizen() {
+public class CitizenView extends VerticalLayout {
+    public CitizenViewView() {
         // Creates variables that contains the current time so it can be used dynamically
         LocalDateTime now = LocalDateTime.now();
         String currentDate = now.format(DateTimeFormatter.ofPattern("EEEE 'den' d. MMMM yyyy")); // getAnsweredDate()
