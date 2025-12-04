@@ -62,7 +62,7 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
                 var logout = new Button("Logout", VaadinIcon.POWER_OFF.create());
                 logout.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
                 logout.addClickListener(e -> authenticationContext.logout()); 
-            logout.getElement().getStyle().set("background", "#2219c3ff");
+            logout.getElement().getStyle().set("background", "darkblue");
             logout.getElement().getStyle().set("color", "white");
             logout.getElement().getStyle().set("border-radius", "8px");
             logout.getElement().getStyle().set("padding", "8px 14px");
