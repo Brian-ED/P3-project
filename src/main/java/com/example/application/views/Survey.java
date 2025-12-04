@@ -68,8 +68,8 @@ public class Survey extends VerticalLayout {
         next.setHeight("110px");
         prev.setWidth("220px");
         prev.setHeight("110px");
-        prev.getStyle().set("background-color", "#262ecaff").set("color", "white");
-        next.getStyle().set("background-color", "#262ecaff").set("color", "white");
+        prev.getStyle().set("background-color", "darkblue").set("color", "white");
+        next.getStyle().set("background-color", "darkblue").set("color", "white");
         prev.getStyle().set("font-size", "30px");
         next.getStyle().set("font-size", "30px");
 
