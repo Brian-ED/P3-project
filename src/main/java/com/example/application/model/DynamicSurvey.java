@@ -1,5 +1,6 @@
-package com.example.model;
+package com.example.application.model;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -111,6 +112,6 @@ public class DynamicSurvey {
             answers[i] = q.orElseThrow();
         }
 
-        return Optional.of(new AnsweredSurvey(answers, surveyType));
+        return Optional.of(new AnsweredSurvey(answers, surveyType, ZonedDateTime.now()));
     }
 }

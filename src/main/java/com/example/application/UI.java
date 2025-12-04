@@ -1,6 +1,6 @@
 package com.example.application;
 
-import com.example.model.Question;
+import com.example.application.model.Question;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.combobox.ComboBox;

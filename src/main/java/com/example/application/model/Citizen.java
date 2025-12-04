@@ -1,4 +1,4 @@
-package com.example.model;
+package com.example.application.model;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,10 +30,14 @@ class EventSource<T> {
 
 
 public class Citizen implements User {
-    public Citizen(String fullName) {
+    public Citizen(String fullName, Long id, AnsweredSurvey[] answeredSurveys, Optional<SleepAdvisor> assignedAdvisor) {
         this.fullName = fullName;
+        this.id = id;
+        this.answeredSurveys = answeredSurveys;
+        this.assignedAdvisor = assignedAdvisor;
     }
 
+    public final Long id;
     private String fullName;
 
     @Override
@@ -41,8 +45,9 @@ public class Citizen implements User {
         return fullName;
     }
 
-    private Optional<DynamicSurvey> currentSurvey;
-    private SleepAdvisor assignedAdvisor;
+    public final DynamicSurvey currentSurveyMorning = new DynamicSurvey(SurveyType.morning);
+    public final DynamicSurvey currentSurveyEvening = new DynamicSurvey(SurveyType.evening);
+    private Optional<SleepAdvisor> assignedAdvisor;
     private AnsweredSurvey[] answeredSurveys;
 
     private EventSource<Integer> userID = new EventSource<>();
@@ -53,11 +58,18 @@ public class Citizen implements User {
     /* TODO */ public void seeAnsweredSurvey() {}
     /* TODO */ public void answerMorningSurvey() {}
     /* TODO */ public void answerEveningSurvey() {}
-    public void changeAssignedAdvisor(SleepAdvisor newSleepAdvisor) {
+    public void changeAssignedAdvisor(Optional<SleepAdvisor> newSleepAdvisor) {
         this.assignedAdvisor = newSleepAdvisor;
     }
-	@Override
+    public Optional<SleepAdvisor> getAssignedAdvisor() {
+        return this.assignedAdvisor;
+    }
+    @Override
 	public UserType getUserType() {
 		return UserType.CITIZEN;
 	}
+    public AnsweredSurvey[] getSurveys() {
+        return this.answeredSurveys;
+    };
+
 }

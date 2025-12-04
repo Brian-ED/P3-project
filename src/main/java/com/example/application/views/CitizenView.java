@@ -1,8 +1,14 @@
 package com.example.application.views;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
+import com.example.application.model.Answer;
+import com.example.application.model.AnsweredSurvey;
+import com.example.application.model.Citizen;
+import com.example.application.model.Model;
+import com.example.application.model.SurveyType;
+import com.example.application.security.SecurityUtils;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -24,14 +30,17 @@ import jakarta.annotation.security.RolesAllowed;
 @RolesAllowed({"CITIZEN", "ADMIN"})
 @PageTitle("Klient Dashboard")
 public class CitizenView extends VerticalLayout {
-    public CitizenView() {
-        // Creates variables that contains the current time so it can be used dynamically
-        LocalDateTime now = LocalDateTime.now();
-        String currentDate = now.format(DateTimeFormatter.ofPattern("EEEE 'den' d. MMMM yyyy")); // getAnsweredDate()
-        String currentTime = now.format(DateTimeFormatter.ofPattern("HH.mm")); // getAnsweredTime()
 
-        // Gets the name of the user so that it can be used to write "velkommen, Username"
-        String Username = "Navn"; // getUserName()
+    private final Model model;
+
+    public CitizenView(Model model) {
+        this.model = model;
+        // Setup user
+        Citizen citizen = model.getCitizen().orElse(model.initCitizen(SecurityUtils.getUsername())); // TODO handle this error case better. There should be an error screen since this shouldn't happen. It would happen if a advisor came into this site and somehow got access.
+        String Username = citizen.getFullName();
+        AnsweredSurvey[] pastSurveys = citizen.getSurveys(); // TODO @Jonas should figure out how to integrate this into this site and display all surveys, not just one.
+        AnsweredSurvey temporaryMorningSurvey = new AnsweredSurvey(new Answer<?>[0], SurveyType.morning, ZonedDateTime.now());
+        AnsweredSurvey temporaryEveningSurvey = new AnsweredSurvey(new Answer<?>[0], SurveyType.evening, ZonedDateTime.now());
 
         // Creates the header beam
         HorizontalLayout header = new HorizontalLayout();
@@ -166,30 +175,30 @@ public class CitizenView extends VerticalLayout {
 
             Button viewDataButton1 = new Button("Se data", new Icon(VaadinIcon.CHART));
             viewDataButton1.getElement().getStyle()
-            .set("border-radius", "8px")
-            .set("background", "white")
-            .set("border", "1px solid rgba(15,23,42,0.06)")
-            .set("padding", "6px 10px")
-            .set("font-size", "13px")
-            .set("margin-left", "100px");
+                .set("border-radius", "8px")
+                .set("background", "white")
+                .set("border", "1px solid rgba(15,23,42,0.06)")
+                .set("padding", "6px 10px")
+                .set("font-size", "13px")
+                .set("margin-left", "100px");
             Hr hr1 = new Hr();
             Button viewDataButton2 = new Button("Se data", new Icon(VaadinIcon.CHART));
             viewDataButton2.getElement().getStyle()
-            .set("border-radius", "8px")
-            .set("background", "white")
-            .set("border", "1px solid rgba(15,23,42,0.06)")
-            .set("padding", "6px 10px")
-            .set("font-size", "13px")
-            .set("margin-left", "100px");
+                .set("border-radius", "8px")
+                .set("background", "white")
+                .set("border", "1px solid rgba(15,23,42,0.06)")
+                .set("padding", "6px 10px")
+                .set("font-size", "13px")
+                .set("margin-left", "100px");
             Hr hr2 = new Hr();
             Button viewDataButton3 = new Button("Se data", new Icon(VaadinIcon.CHART));
             viewDataButton3.getElement().getStyle()
-            .set("border-radius", "8px")
-            .set("background", "white")
-            .set("border", "1px solid rgba(15,23,42,0.06)")
-            .set("padding", "6px 10px")
-            .set("font-size", "13px")
-            .set("margin-left", "100px");
+                .set("border-radius", "8px")
+                .set("background", "white")
+                .set("border", "1px solid rgba(15,23,42,0.06)")
+                .set("padding", "6px 10px")
+                .set("font-size", "13px")
+                .set("margin-left", "100px");
             Hr hr3 = new Hr();
 
             Div entry1 = new Div();
@@ -203,7 +212,7 @@ public class CitizenView extends VerticalLayout {
 
             listLayout.add(entry1, entry2, entry3);
             dialog.add(morningHorizontal, listLayout);
-            
+
             dialog.open();
         });
 
@@ -314,7 +323,7 @@ public class CitizenView extends VerticalLayout {
         .set("margin-bottom", "-35px");
         Span lastestAnswerSpan1 = new Span("Oversigt over dine seneste søvnregistreringer:");
         lastestAnswerSpan1.getStyle().set("padding", "20px").set("display", "block");
-        Span lastestAnswerSpan2 = new Span(currentDate);
+        Span lastestAnswerSpan2 = new Span(temporaryMorningSurvey.whenAnswered.format(DateTimeFormatter.ofPattern("EEEE 'den' d. MMMM yyyy")));
         lastestAnswerSpan2.getStyle()
         .set("padding", "20px")
         .set("margin-top", "0px")

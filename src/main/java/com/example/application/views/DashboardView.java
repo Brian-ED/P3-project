@@ -3,8 +3,9 @@ package com.example.application.views;
 import java.util.*;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import jakarta.annotation.security.PermitAll;
+
+import com.example.application.model.Citizen;
 import com.vaadin.flow.component.AbstractField;
-import com.example.model.Citizen;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
