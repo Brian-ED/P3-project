@@ -1,4 +1,4 @@
-1. MEDIUM: Inside the following file `src/main/java/com/example/application/database/PostgreSQLDatabaseControler.java`, Read every value in AnsweredSurveyEveningTableRow and convert it to answer<> and place it in the answers array.
+1. Brian MEDIUM: Inside the following file `src/main/java/com/example/application/database/PostgreSQLDatabaseControler.java`, Read every value in AnsweredSurveyEveningTableRow and convert it to answer<> and place it in the answers array.
 Needed for submitting surveys without error.
 While doing this, collumns need to be added to the AnsweredSurveyRow class.
 
