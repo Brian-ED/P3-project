@@ -1,4 +1,4 @@
-1. Brian MEDIUM: Inside the following file `src/main/java/com/example/application/database/PostgreSQLDatabaseControler.java`, Read every value in AnsweredSurveyEveningTableRow and convert it to answer<> and place it in the answers array.
+1. ✅ Brian MEDIUM: Inside the following file `src/main/java/com/example/application/database/PostgreSQLDatabaseControler.java`, Read every value in AnsweredSurveyEveningTableRow and convert it to answer<> and place it in the answers array.
 Needed for submitting surveys without error.
 While doing this, collumns need to be added to the AnsweredSurveyRow class.
 
@@ -18,4 +18,6 @@ This may be easier to do after 1.
 
 8. Implement observer pattern in model.
 
-9. Jonas EASY Bedre UI for citizenview
+9. Jonas EASY: Bedre UI for citizenview
+
+10. BRIAN EASY "Hvor mange genstande har du ca. drukket i løbet af dagen?", "1", "2", "3"" is correct order, "when" first, then combobox. Some aren't, fix those.
