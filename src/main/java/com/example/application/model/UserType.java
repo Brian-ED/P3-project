@@ -1,4 +1,4 @@
-package com.example.model;
+package com.example.application.model;
 
 public enum UserType {
     CITIZEN,

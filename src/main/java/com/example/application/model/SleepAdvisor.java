@@ -1,9 +1,11 @@
-package com.example.model;
+package com.example.application.model;
+
+import java.util.Optional;
 
 public class SleepAdvisor implements User {
     private String fullName;
 
-    SleepAdvisor(String fullName) {
+    public SleepAdvisor(String fullName) {
         this.fullName = fullName;
     }
 
@@ -17,7 +19,7 @@ public class SleepAdvisor implements User {
     /* TODO */ public void sortCitizensByAdvisor() {}
     /* TODO */ public void sortCitizensByName() {}
     public void changeAssignedAdvisor(Citizen citizen) {
-        citizen.changeAssignedAdvisor(this);
+        citizen.changeAssignedAdvisor(Optional.of(this));
     }
     /* TODO */ public void seeCitizenData() {}
 

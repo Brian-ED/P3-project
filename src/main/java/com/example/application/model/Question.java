@@ -1,9 +1,9 @@
-package com.example.model;
+package com.example.application.model;
 
 import java.util.Optional;
 
-import com.example.database.ClDiDB.YesOrNoAnswer;
-import com.example.model.AnswerPayloads.YesOrNoPayload;
+import com.example.application.database.ClDiDB.YesOrNoAnswer;
+import com.example.application.model.AnswerPayloads.YesOrNoPayload;
 
 public class Question {
 
