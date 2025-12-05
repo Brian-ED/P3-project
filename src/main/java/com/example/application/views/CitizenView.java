@@ -25,6 +25,7 @@ import jakarta.annotation.security.RolesAllowed;
 @PageTitle("Klient Dashboard")
 public class CitizenView extends VerticalLayout {
     public CitizenView() {
+        getElement().getStyle().set("background-color", "#f7f7f7ff");
         // Creates variables that contains the current time so it can be used dynamically
         LocalDateTime now = LocalDateTime.now();
         String currentDate = now.format(DateTimeFormatter.ofPattern("EEEE 'den' d. MMMM yyyy")); // getAnsweredDate()
@@ -49,13 +50,7 @@ public class CitizenView extends VerticalLayout {
             h2
         );
 
-        Button logoutButton = new Button("Log ud");
-        logoutButton.getStyle()
-        .set("background-color","darkblue")
-        .set("color","white")
-        .set("cursor", "pointer");
-
-        header.add(leftSide, logoutButton);
+        header.add(leftSide);
         add(header);
         Hr hr = new Hr();
         hr.getStyle()
@@ -65,7 +60,10 @@ public class CitizenView extends VerticalLayout {
 
         // Creates the "morninganswer box"
         Card morningCard = new Card();
-        morningCard.getStyle().set("padding", "20px");
+        morningCard.getStyle()
+        .set("background-color", "white")
+        .set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)")
+        .set("padding", "20px");
         H2 morningH2 = new H2("Morgensvar");
         morningH2.getElement().setProperty("innerHTML", 
     "<span style='color: orange;'>✹</span> Morgensvar");
@@ -89,7 +87,10 @@ public class CitizenView extends VerticalLayout {
 
         // Creates the "eveninganswer box"
         Card eveningCard = new Card();
-        eveningCard.getStyle().set("padding", "20px");
+        eveningCard.getStyle()
+        .set("background-color", "white")
+        .set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)")
+        .set("padding", "20px");
         H2 eveningH2 = new H2("Aftensvar");
         eveningH2.getElement().setProperty("innerHTML", 
     "<span style='color: purple;'>☾</span> Aftensvar");
