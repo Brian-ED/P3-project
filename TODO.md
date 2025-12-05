@@ -1,6 +1,6 @@
 1. MEDIUM: Inside the following file `src/main/java/com/example/application/database/PostgreSQLDatabaseControler.java`, Read every value in AnsweredSurveyEveningTableRow and convert it to answer<> and place it in the answers array.
 Needed for submitting surveys without error.
-While doing this, collumns need to be added to the AnsweredSurvey type.
+While doing this, collumns need to be added to the AnsweredSurveyRow class.
 
 2. MEDIUM: In the same file as above: `src/main/java/com/example/application/database/PostgreSQLDatabaseControler.java`
 There is a function called CitizenRowToCitizen. Implement CitizenToCitizenRow.
