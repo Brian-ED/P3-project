@@ -8,4 +8,6 @@ There is a function called CitizenRowToCitizen. Implement CitizenToCitizenRow.
 
 4. EASY-MEDIUM: Like how `src/main/java/com/example/application/views/CitizenView.java` uses the database, please also add the database to the other views.
 
-5. EASY...BUT LOOONG: Test as many methods as possible.
+5. MEDIUM AND LOOONG: Test as many methods as possible, using vaadin's testing system.
+
+6. MEDIUM: make testing implementations of the Model interface. This requires researching how you test via dependency injection in vaadin.
