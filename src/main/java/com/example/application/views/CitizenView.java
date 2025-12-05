@@ -8,14 +8,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
-
-import com.vaadin.flow.component.accordion.Accordion;
 import com.example.application.model.Answer;
 import com.example.application.model.AnswerPayload;
-import com.example.application.model.AnswerPayloads;
+import com.example.application.model.AnswerPayload.ComboBoxPayload;
+import com.example.application.model.AnswerPayload.RollPayload;
+import com.example.application.model.AnswerPayload.YesOrNoElaborateComboboxPayload;
+import com.example.application.model.AnswerPayload.YesOrNoPayload;
 import com.example.application.model.AnsweredSurvey;
 import com.example.application.model.Citizen;
 import com.example.application.model.Model;
@@ -536,19 +535,19 @@ public class CitizenView extends VerticalLayout {
         }
         
         // Behandl de forskellige typer payload
-        if (payload instanceof AnswerPayloads.YesOrNoPayload yesNoPayload) {
+        if (payload instanceof YesOrNoPayload yesNoPayload) {
             return yesNoPayload.yesNo() ? "Ja" : "Nej";
         }
         
-        if (payload instanceof AnswerPayloads.YesOrNoElaborateIntPayload elaboratePayload) {
+        if (payload instanceof YesOrNoElaborateComboboxPayload elaboratePayload) {
             String base = elaboratePayload.yesNo() ? "Ja" : "Nej";
-            if (elaboratePayload.elaborate() > 0) {
-                return base + " (" + elaboratePayload.elaborate() + ")";
+            if (elaboratePayload.whichIsSelected() > 0) {
+                return base + " (" + elaboratePayload.whichIsSelected() + ")";
             }
             return base;
         }
         
-        if (payload instanceof AnswerPayloads.RollPayload rollPayload) {
+        if (payload instanceof RollPayload rollPayload) {
             // Konverter Instant til læselig tid
             java.time.format.DateTimeFormatter formatter = 
                 java.time.format.DateTimeFormatter.ofPattern("HH:mm")
@@ -556,7 +555,7 @@ public class CitizenView extends VerticalLayout {
             return formatter.format(rollPayload.timestamp());
         }
         
-        if (payload instanceof AnswerPayloads.ComboBoxPayload comboBoxPayload) {
+        if (payload instanceof ComboBoxPayload comboBoxPayload) {
             // Her skal vi vide hvilke valgmuligheder der er
             // Returner index eller værdi
             return "Valg " + comboBoxPayload.whichIsSelected();

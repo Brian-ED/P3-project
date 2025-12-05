@@ -3,7 +3,7 @@ package com.example.application.model;
 import java.util.Optional;
 
 import com.example.application.database.ClDiDB.YesOrNoAnswer;
-import com.example.application.model.AnswerPayloads.YesOrNoPayload;
+import com.example.application.model.AnswerPayload.YesOrNoPayload;
 
 public class Question {
 
@@ -36,6 +36,6 @@ public class Question {
     // Temporary till Answers are properly implement
     public Answer<?> answer() {
         YesOrNoPayload p = new YesOrNoPayload(true);
-        return new YesOrNoAnswer(p);
+        return new YesOrNoAnswer() {{answer(p);}};
     }
 }

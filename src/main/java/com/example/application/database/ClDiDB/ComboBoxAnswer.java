@@ -1,8 +1,7 @@
 package com.example.application.database.ClDiDB;
 
 import com.example.application.model.Answer;
-import com.example.application.model.AnswerPayloads;
-import com.example.application.model.AnswerPayloads.ComboBoxPayload;
+import com.example.application.model.AnswerPayload.ComboBoxPayload;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -10,8 +9,13 @@ import jakarta.persistence.Embeddable;
 @Embeddable
 public class ComboBoxAnswer extends Answer<ComboBoxPayload> {
 
-    protected ComboBoxAnswer(AnswerPayloads.ComboBoxPayload payloadType) {
-        super(AnswerPayloads.ComboBoxPayload.class);
+    public ComboBoxAnswer() {
+        super(ComboBoxPayload.class);
+    }
+
+    public ComboBoxAnswer(ComboBoxPayload p) {
+        super(ComboBoxPayload.class);
+        answer(p);
     }
 
     @Column(nullable = false)
@@ -21,4 +25,9 @@ public class ComboBoxAnswer extends Answer<ComboBoxPayload> {
     public void answer(ComboBoxPayload p) {
         this.whichIsSelected = p.whichIsSelected();
     }
+
+	@Override
+	public ComboBoxPayload toPayload() {
+        return new ComboBoxPayload(whichIsSelected);
+	}
 }
