@@ -86,7 +86,7 @@ public class CitizenView extends VerticalLayout {
         .set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)")
         .set("padding", "20px");
         H2 morningH2 = new H2("Morgensvar");
-        morningH2.getElement().setProperty("innerHTML", 
+        morningH2.getElement().setProperty("innerHTML",
     "<span style='color: orange;'>✹</span> Morgensvar");
         morningH2.getStyle().set("padding", "20px");
         Span morningSpan = new Span("Udfyld dit morgenskema om nattens søvn");
@@ -101,8 +101,8 @@ public class CitizenView extends VerticalLayout {
         .set("cursor", "pointer");
         morningCard.setWidth("100%");
         morningCard.add(
-            morningH2, 
-            morningSpan, 
+            morningH2,
+            morningSpan,
             morningButton
         );
 
@@ -113,7 +113,7 @@ public class CitizenView extends VerticalLayout {
         .set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)")
         .set("padding", "20px");
         H2 eveningH2 = new H2("Aftensvar");
-        eveningH2.getElement().setProperty("innerHTML", 
+        eveningH2.getElement().setProperty("innerHTML",
     "<span style='color: purple;'>☾</span> Aftensvar");
         eveningH2.getStyle().set("padding", "20px");
         Span eveningSpan = new Span("Udfyld dit aftensskema om dagens aktiviteter");
@@ -128,8 +128,8 @@ public class CitizenView extends VerticalLayout {
         .set("cursor", "pointer");
         eveningCard.setWidth("100%");
         eveningCard.add(
-            eveningH2, 
-            eveningSpan, 
+            eveningH2,
+            eveningSpan,
             eveningButton
         );
 
@@ -177,7 +177,7 @@ public class CitizenView extends VerticalLayout {
             .set("color","white")
             .set("cursor", "pointer");
             dialog.setWidth("60%");
-    
+
             VerticalLayout listLayout = new VerticalLayout();
             listLayout.setSpacing(true);
             listLayout.setPadding(true);
@@ -187,12 +187,12 @@ public class CitizenView extends VerticalLayout {
 
             // Gruppér skemaer efter dato
             Map<LocalDate, List<AnsweredSurvey>> surveysByDate = new TreeMap<>(Collections.reverseOrder());
-    
+
             for (AnsweredSurvey survey : allSurveys) {
                 LocalDate date = survey.getWhenAnswered().toLocalDate();
                 surveysByDate.computeIfAbsent(date, k -> new ArrayList<>()).add(survey);
             }
-    
+
             // Generér en entry for hver dato (nyeste først)
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH.mm");
@@ -200,7 +200,7 @@ public class CitizenView extends VerticalLayout {
             for (Map.Entry<LocalDate, List<AnsweredSurvey>> entry : surveysByDate.entrySet()) {
                 LocalDate date = entry.getKey();
                 List<AnsweredSurvey> surveysOnDate = entry.getValue();
-        
+
                 // Find morgen- og aftenskemaer for denne dato
                 String morningTime = null;
                 String eveningTime = null;
@@ -216,7 +216,7 @@ public class CitizenView extends VerticalLayout {
                         eveningSurvey = survey;
                     }
                 }
-        
+
                 // Opret kun entry hvis mindst et skema er udfyldt
                 if (morningTime != null || eveningTime != null) {
                     // Byg teksten for tidspunkter præcis som på billedet
@@ -230,7 +230,7 @@ public class CitizenView extends VerticalLayout {
                         }
                         timeText.append("(Aftensvar: ").append(eveningTime).append(")");
                     }
-            
+
                 // Opret "Se data" knap med ikon
                 Button viewDataButton = new Button("Se data", new Icon(VaadinIcon.CHART));
                 viewDataButton.getElement().getStyle()
@@ -240,14 +240,14 @@ public class CitizenView extends VerticalLayout {
                     .set("padding", "6px 10px")
                     .set("font-size", "13px")
                     .set("margin-left", "10px");
-                    
+
                 // Tilføj click listener til knappen
                 LocalDate currentDate = date;
                 AnsweredSurvey finalMorningSurvey = morningSurvey;
                 AnsweredSurvey finalEveningSurvey = eveningSurvey;
                 String finalMorningTime = morningTime;
                 String finalEveningTime = eveningTime;
-                    
+
                 viewDataButton.addClickListener(event -> {
                     Dialog dataDialog = new Dialog();
                     dataDialog.setHeight("90%");
@@ -397,45 +397,45 @@ public class CitizenView extends VerticalLayout {
                             .set("padding", "40px");
                         contentLayout.add(noData);
                     }
-                
+
                     dataDialog.add(headerLayout, contentLayout);
                     dataDialog.open();
                 });
-            
+
                 // Opret spans for data entry - PRÆCIS SOM PÅ BILLEDET
                 Span dateSpan = new Span("Svar - Registreret: " + date.format(dateFormatter));
                 dateSpan.getStyle()
                     .set("display", "inline-block")
                     .set("font-weight", "500");
-            
+
                 Span timeSpan = new Span(timeText.toString());
                 timeSpan.getElement().getStyle()
                     .set("margin-left", "200px")
                     .set("display", "inline-block")
                     .set("color", "#666");
-            
+
                 Hr HR = new Hr();
                 hr.getStyle()
                     .set("margin-top", "10px")
                     .set("margin-bottom", "10px");
-            
+
                 // Opret entry container - struktur præcis som på billedet
                 Div entryDiv = new Div();
                 entryDiv.getStyle()
                     .set("white-space", "nowrap")
                     .set("padding", "10px 0");
-            
+
                 // Tilføj elementer i den rigtige rækkefølge: dato → tider → knap
                 entryDiv.add(dateSpan);
                 entryDiv.add(timeSpan);
                 entryDiv.add(viewDataButton);
                 entryDiv.add(hr);
-            
+
                 listLayout.add(entryDiv);
             }
             // Hvis både morningTime og eveningTime er null, oprettes INGEN linje
         }
-    
+
             // Hvis der ikke er nogen data
             if (listLayout.getComponentCount() == 0) {
                 Span noDataSpan = new Span("Ingen skemadata fundet");
@@ -445,7 +445,7 @@ public class CitizenView extends VerticalLayout {
                     .set("padding", "20px");
                 listLayout.add(noDataSpan);
             }
-    
+
             dialog.add(morningHorizontal, listLayout);
             dialog.open();
         });
@@ -479,7 +479,7 @@ public class CitizenView extends VerticalLayout {
         .set("display", "block");
         latestAnswersCard.setWidth("50%");
         latestAnswersCard.add(
-            lastestAnswerH3, 
+            lastestAnswerH3,
             lastestAnswerSpan1,
             lastestAnswerSpan2
         );
@@ -503,12 +503,12 @@ public class CitizenView extends VerticalLayout {
         } catch (Exception e) {
             // Reflection fejlede - Answer har måske ikke et question felt
         }
-        
+
         // Alternativt - hvis Answer gemmer spørgsmåls-ID eller noget andet
         return "Spørgsmål"; // Placeholder indtil vi ser Answer-implementationerne
     }
-    
-    
+
+
     //Henter og formaterer svaret fra et Answer objekt
     private String getAnswerValue(Answer<?> answer) {
         try {
@@ -516,29 +516,29 @@ public class CitizenView extends VerticalLayout {
             // Dette afhænger af hvordan Answer klasserne gemmer data
             java.lang.reflect.Method getPayloadMethod = answer.getClass().getMethod("getPayload");
             AnswerPayload payload = (AnswerPayload) getPayloadMethod.invoke(answer);
-            
+
             if (payload != null) {
                 return formatAnswerPayload(payload);
             }
         } catch (Exception e) {
             // Prøv en anden tilgang
         }
-        
+
         return "Ikke besvaret";
     }
-    
-    
+
+
     //Formaterer AnswerPayload til en læsbar tekst
     private String formatAnswerPayload(AnswerPayload payload) {
         if (payload == null) {
             return "Ikke besvaret";
         }
-        
+
         // Behandl de forskellige typer payload
         if (payload instanceof YesOrNoPayload yesNoPayload) {
             return yesNoPayload.yesNo() ? "Ja" : "Nej";
         }
-        
+
         if (payload instanceof YesOrNoElaborateComboboxPayload elaboratePayload) {
             String base = elaboratePayload.yesNo() ? "Ja" : "Nej";
             if (elaboratePayload.whichIsSelected() > 0) {
@@ -546,21 +546,21 @@ public class CitizenView extends VerticalLayout {
             }
             return base;
         }
-        
+
         if (payload instanceof RollPayload rollPayload) {
             // Konverter Instant til læselig tid
-            java.time.format.DateTimeFormatter formatter = 
+            java.time.format.DateTimeFormatter formatter =
                 java.time.format.DateTimeFormatter.ofPattern("HH:mm")
                     .withZone(java.time.ZoneId.systemDefault());
             return formatter.format(rollPayload.timestamp());
         }
-        
+
         if (payload instanceof ComboBoxPayload comboBoxPayload) {
             // Her skal vi vide hvilke valgmuligheder der er
             // Returner index eller værdi
             return "Valg " + comboBoxPayload.whichIsSelected();
         }
-        
+
         return payload.toString();
     }
 
