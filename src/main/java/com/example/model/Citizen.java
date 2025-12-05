@@ -29,10 +29,18 @@ class EventSource<T> {
 }
 
 
-public class Citizen {
-    public Citizen() {}
+public class Citizen implements User {
+    public Citizen(String fullName) {
+        this.fullName = fullName;
+    }
 
     private String fullName;
+
+    @Override
+    public String getFullName() {
+        return fullName;
+    }
+
     private Optional<DynamicSurvey> currentSurvey;
     private SleepAdvisor assignedAdvisor;
     private AnsweredSurvey[] answeredSurveys;
@@ -48,4 +56,8 @@ public class Citizen {
     public void changeAssignedAdvisor(SleepAdvisor newSleepAdvisor) {
         this.assignedAdvisor = newSleepAdvisor;
     }
+	@Override
+	public UserType getUserType() {
+		return UserType.CITIZEN;
+	}
 }

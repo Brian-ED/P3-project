@@ -9,30 +9,26 @@ import java.util.concurrent.TimeUnit;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.card.Card;
-import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.RolesAllowed;
 
-@Route("Citizen")
+@Route("citizen")
 @RolesAllowed({"CITIZEN", "ADMIN"})
 @PageTitle("Klient Dashboard")
-public class Citizen extends VerticalLayout {
-    public Citizen() {
+public class CitizenView extends VerticalLayout {
+    public CitizenView() {
         // Creates variables that contains the current time so it can be used dynamically
         LocalDateTime now = LocalDateTime.now();
         String currentDate = now.format(DateTimeFormatter.ofPattern("EEEE 'den' d. MMMM yyyy")); // getAnsweredDate()

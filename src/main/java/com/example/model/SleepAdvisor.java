@@ -1,7 +1,17 @@
 package com.example.model;
 
-public class SleepAdvisor {
-    String fullName;
+public class SleepAdvisor implements User {
+    private String fullName;
+
+    SleepAdvisor(String fullName) {
+        this.fullName = fullName;
+    }
+
+    @Override
+    public String getFullName() {
+        return fullName;
+    }
+
     /* TODO */ public void searchCitizensList() {}
     /* TODO */ public void showOnlyYourCitizens() {}
     /* TODO */ public void sortCitizensByAdvisor() {}
@@ -10,4 +20,9 @@ public class SleepAdvisor {
         citizen.changeAssignedAdvisor(this);
     }
     /* TODO */ public void seeCitizenData() {}
+
+	@Override
+	public UserType getUserType() {
+		return UserType.ADVISOR;
+	}
 }

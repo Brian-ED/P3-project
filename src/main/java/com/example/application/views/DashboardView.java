@@ -1,8 +1,13 @@
 package com.example.application.views;
 
+import java.util.*;
+
+import com.vaadin.flow.component.AbstractField;
+import com.example.model.Citizen;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -13,9 +18,15 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
+import jakarta.annotation.security.RolesAllowed;
+
 @Route("dashboard")
 @PageTitle("Søvnrådgiver Dashboard")
+@RolesAllowed({"ADVISOR", "ADMIN"})
 public class DashboardView extends VerticalLayout {
+
+    private List<Citizen> citizens = new ArrayList<>();
+    private VerticalLayout listContainer;
 
     public DashboardView() {
         setSizeFull();
@@ -116,32 +127,77 @@ public class DashboardView extends VerticalLayout {
             }
         });
 
-        searchAndToggle.add(search, toggleSwitch);
+        ComboBox<String> sortBox = new ComboBox<>();
+        sortBox.setPlaceholder("Sorter efter");
+        sortBox.setItems("Navn", "Sidste indtastning", "Tilstand (Moderat/Ukendt)");
+        sortBox.setWidth("180px");
+
+        searchAndToggle.add(search, sortBox, toggleSwitch);
+        
+        sortBox.addValueChangeListener(
+        (com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent<ComboBox<String>, String> e) -> {
+            String selected = e.getValue();
+            if (selected == null) return;
+
+            switch (selected) {
+
+                case "Navn":
+                    citizens.sort(Comparator.comparing(Citizen::getName));
+                    break;
+
+                case "Sidste indtastning":
+                    citizens.sort(Comparator
+                            .comparing((Citizen c) -> {
+                                String v = c.getLastEntry();
+                                return v.equals("Ingen indtastninger") || v.equals("-") ? "0000-00-00" : v;
+                            })
+                            .reversed()
+                    );
+                    break;
+
+                case "Tilstand (Moderat/Ukendt)":
+                    citizens.sort(Comparator.comparing(
+                            (Citizen c) -> "Moderat".equalsIgnoreCase(c.getSeverity()) ? 0 : 1)
+                    );
+                    break;
+            }
+
+            refreshList();
+        }
+);
 
         mainHeaderRow.add(titleBlock);
         mainHeaderRow.expand(titleBlock);
         mainHeaderRow.add(searchAndToggle);
 
         // Citizen list container
-        VerticalLayout listContainer = new VerticalLayout();
+        listContainer = new VerticalLayout();
         listContainer.setPadding(false);
         listContainer.setSpacing(false);
         listContainer.setWidthFull();
 
         // Add citizens (sample rows) — replicate the visual style from screenshot
-        listContainer.add(createCitizenRow("Parsa Gholami", "Ingen indtastninger", "Ukendt", false));
-        listContainer.add(createCitizenRow("Alexander Ølholm", "2025-10-19", "Moderat", true));
-        listContainer.add(createCitizenRow("Patrick Kure", "2025-10-20", "Ukendt", false));
-        listContainer.add(createCitizenRow("Brian Ellingsgaard", "2025-10-19", "Ukendt", false));
-        listContainer.add(createCitizenRow("Jonas", "2025-10-18", "Ukendt", false));
-        listContainer.add(createCitizenRow("John Doe", "-", "Ukendt", false));
+        citizens.add(new Citizen("Parsa Gholami", "Ingen indtastninger", "Ukendt", false));
+        citizens.add(new Citizen("Alexander Ølholm", "2025-10-19", "Moderat", true));
+        citizens.add(new Citizen("Patrick Kure", "2025-10-20", "Ukendt", false));
+        citizens.add(new Citizen("Brian Ellingsgaard", "2025-10-19", "Ukendt", false));
+        citizens.add(new Citizen("Jonas", "2025-10-18", "Ukendt", false));
+        citizens.add(new Citizen("John Doe", "-", "Ukendt", false));
+
+        refreshList();
+
 
         mainCard.add(mainHeaderRow, listContainer);
 
         content.add(statsRow, mainCard);
         add(content);
     }
-
+    private void refreshList() {
+         listContainer.removeAll();
+    for (Citizen c : citizens) {
+        listContainer.add(createCitizenRow(c)); // pass the full object
+    }
+}
     private Div createStatCard(String highlightlabel, String value, String label) {
         Div card = new Div();
         card.getStyle().set("background", "white");
@@ -171,7 +227,7 @@ public class DashboardView extends VerticalLayout {
         return card;
     }
 
-    private HorizontalLayout createCitizenRow(String name, String lastEntry, String severity, boolean highlight) {
+    private HorizontalLayout createCitizenRow(Citizen c) {
         HorizontalLayout row = new HorizontalLayout();
         row.setWidthFull();
         row.setPadding(true);
@@ -179,7 +235,7 @@ public class DashboardView extends VerticalLayout {
         row.getStyle().set("padding", "12px");
         row.getStyle().set("border-radius", "10px");
         row.getStyle().set("margin-bottom", "8px");
-        row.getStyle().set("background", highlight ? "#fffbeb" : "transparent"); // light highlight for moderate
+        row.getStyle().set("background", c.isHighlight() ? "#fffbeb" : "transparent"); // light highlight for moderate
         row.getStyle().set("border", "1px solid rgba(15,23,42,0.03)");
 
         // Avatar circle with initials
@@ -194,18 +250,18 @@ public class DashboardView extends VerticalLayout {
         avatar.getStyle().set("color", "#1f2937");
         avatar.getStyle().set("font-weight", "600");
         avatar.getStyle().set("font-size", "14px");
-        avatar.add(new Span(getInitials(name)));
+        avatar.add(new Span(getInitials(c.getName())));
 
         // Info block
         VerticalLayout info = new VerticalLayout();
         info.setPadding(false);
         info.setSpacing(false);
 
-        Span nameLabel = new Span(name);
+        Span nameLabel = new Span(c.getName());
         nameLabel.getStyle().set("font-weight", "600");
         nameLabel.getStyle().set("font-size", "14px");
 
-        Span sub = new Span("Sidste indtastning: " + lastEntry);
+        Span sub = new Span("Sidste indtastning: " + c.getLastEntry());
         sub.getStyle().set("color", "#64748b");
         sub.getStyle().set("font-size", "13px");
 
@@ -217,13 +273,13 @@ public class DashboardView extends VerticalLayout {
         rightActions.setSpacing(true);
         rightActions.setAlignItems(Alignment.CENTER);
 
-        Span severityBadge = new Span(severity);
+        Span severityBadge = new Span(c.getSeverity());
         severityBadge.getStyle().set("padding", "6px 10px");
         severityBadge.getStyle().set("border-radius", "999px");
         severityBadge.getStyle().set("font-size", "13px");
         severityBadge.getStyle().set("font-weight", "600");
         // color based on severity
-        if ("Moderat".equalsIgnoreCase(severity)) {
+        if ("Moderat".equalsIgnoreCase(c.getSeverity())) {
             severityBadge.getStyle().set("background", "#fff7ed");
             severityBadge.getStyle().set("color", "#92400e");
             severityBadge.getStyle().set("border", "1px solid rgba(245,158,11,0.12)");
@@ -233,20 +289,36 @@ public class DashboardView extends VerticalLayout {
             severityBadge.getStyle().set("border", "1px solid rgba(99,102,241,0.08)");
         }
 
-        Span advisor = new Span("Ingen søvnrådgiver");
-        advisor.getStyle().set("color", "#64748b");
-        advisor.getStyle().set("font-size", "13px");
-        advisor.getStyle().set("padding", "6px 8px");
-        advisor.getStyle().set("border-radius", "8px");
-        advisor.getStyle().set("border", "1px solid rgba(15,23,42,0.04)");
-        advisor.getStyle().set("background", "transparent");
+ ComboBox<String> advisorCombo = new ComboBox<>();
+advisorCombo.setPlaceholder("Vælg søvnrådgiver");
 
-        // small icon for sort / trend (visual)
-        Icon trend = new Icon(VaadinIcon.TRENDING_UP);
-        trend.getStyle().set("width", "20px");
-        trend.getStyle().set("height", "20px");
-        trend.getStyle().set("color", "#94a3b8");
+// Options in the dropdown
+advisorCombo.setItems(
+        "Ingen søvnrådgiver",
+        "Anna Hansen",
+        "Peter Nielsen",
+        "Maria Jensen",
+        "John Doe"
+);
 
+// Default selection
+advisorCombo.setValue(c.getAdvisor());
+
+// Styling (similar to your Span)
+advisorCombo.getStyle().set("color", "#64748b");
+advisorCombo.getStyle().set("font-size", "13px");
+advisorCombo.getStyle().set("padding", "6px 8px");
+advisorCombo.getStyle().set("border-radius", "8px");
+advisorCombo.getStyle().set("border", "1px solid rgba(15,23,42,0.04)");
+advisorCombo.getStyle().set("background", "transparent");
+advisorCombo.setWidth("200px");
+
+    advisorCombo.addValueChangeListener(event -> {
+        String selected = event.getValue();
+        if (selected != null) {
+            c.setAdvisor(selected); 
+        }
+    });
         Button viewData = new Button("Se data", new Icon(VaadinIcon.CHART));
         viewData.getElement().getStyle().set("border-radius", "8px");
         viewData.getElement().getStyle().set("background", "white");
@@ -254,7 +326,7 @@ public class DashboardView extends VerticalLayout {
         viewData.getElement().getStyle().set("padding", "6px 10px");
         viewData.getElement().getStyle().set("font-size", "13px");
 
-        rightActions.add(severityBadge, advisor, trend, viewData);
+        rightActions.add(severityBadge, advisorCombo, viewData);
 
         // Expand info to use remaining space
         row.add(avatar, info);
@@ -298,4 +370,31 @@ public class DashboardView extends VerticalLayout {
             return ("" + parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
         }
     }
+
+    static class Citizen {
+        private final String name;
+        private final String lastEntry;
+        private final String severity;
+        private final boolean highlight;
+
+        private String advisor;
+
+        Citizen(String name, String lastEntry, String severity, boolean highlight) {
+            this.name = name;
+            this.lastEntry = lastEntry;
+            this.severity = severity;
+            this.highlight = highlight;
+            this.advisor = "Ingen søvnrådgiver"; 
+        }
+        
+        public String getName() { return name; }
+        public String getLastEntry() { return lastEntry; }
+        public String getSeverity() { return severity; }
+        public boolean isHighlight() { return highlight; }
+
+        public String getAdvisor() { return advisor; }
+
+        public void setAdvisor(String advisor) { this.advisor = advisor; }
+    }
+
 }
