@@ -17,3 +17,5 @@ This may be easier to do after 1.
 7. MEDIUM-HARD: Like how `src/main/java/com/example/application/views/CitizenView.java` uses the database, please also add the database to the survey view. This heavily relies on 1. and 2. being done.
 
 8. Implement observer pattern in model.
+
+9. Jonas EASY Bedre UI for citizenview
