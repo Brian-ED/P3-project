@@ -1,16 +1,25 @@
 package com.example.application.views;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+
 import com.vaadin.flow.component.accordion.Accordion;
 import com.example.application.model.Answer;
+import com.example.application.model.AnswerPayload;
+import com.example.application.model.AnswerPayloads;
 import com.example.application.model.AnsweredSurvey;
 import com.example.application.model.Citizen;
 import com.example.application.model.Model;
+import com.example.application.model.Question;
 import com.example.application.model.SurveyType;
 import com.example.application.security.SecurityUtils;
 import com.vaadin.flow.component.button.Button;
@@ -146,6 +155,7 @@ public class CitizenView extends VerticalLayout {
         latestMorningH3.add(tekstHistorik);
         latestMorningAnswersDiv.add(latestMorningH3);
 
+        //Listens if the "History button" is clicked
         latestMorningAnswersDiv.addClickListener(e -> {
             Dialog dialog = new Dialog();
             Button morningDialogButton = new Button("Luk", click -> dialog.close());
@@ -155,9 +165,8 @@ public class CitizenView extends VerticalLayout {
             h3Morning.getStyle().set("color", "darkblue");
             leftSideMorning.setSpacing(false);
             leftSideMorning.setPadding(false);
-            leftSideMorning.add(
-            h3Morning
-        );
+            leftSideMorning.add(h3Morning);
+
             morningHorizontal.setPadding(true);
             morningHorizontal.setWidthFull();
             morningHorizontal.setJustifyContentMode(JustifyContentMode.BETWEEN);
@@ -169,112 +178,276 @@ public class CitizenView extends VerticalLayout {
             .set("color","white")
             .set("cursor", "pointer");
             dialog.setWidth("60%");
+    
             VerticalLayout listLayout = new VerticalLayout();
             listLayout.setSpacing(true);
             listLayout.setPadding(true);
 
-            Button viewDataButton1 = new Button("Se data", new Icon(VaadinIcon.CHART));
-            viewDataButton1.getElement().getStyle()
-            .set("border-radius", "8px")
-            .set("background", "white")
-            .set("border", "1px solid rgba(15,23,42,0.06)")
-            .set("padding", "6px 10px")
-            .set("font-size", "13px")
-            .set("margin-left", "10px");
-            Hr hr1 = new Hr();
+            // HENT ALLE BESVAREDE SKEMAER FRA CITIZEN
+            AnsweredSurvey[] allSurveys = citizen.getSurveys();
 
-            viewDataButton1.addClickListener(event -> {
-                Dialog dataDialog = new Dialog();
-                dataDialog.setHeight("90%");
-                Button morningDialogButton1 = new Button("Luk", click -> dataDialog.close());
-                HorizontalLayout morningHorizontal1 = new HorizontalLayout();
-                VerticalLayout leftSideMorning1 = new VerticalLayout();
-                H3 h3Morning1 = new H3("Morningsurvey");
-                H3 h3Evening1 = new H3("Eveningsurvey");
-                leftSideMorning1.setSpacing(false);
-                leftSideMorning1.setPadding(false);
-                leftSideMorning1.add(
-                h3Morning1
-                );
+            // Gruppér skemaer efter dato
+            Map<LocalDate, List<AnsweredSurvey>> surveysByDate = new TreeMap<>(Collections.reverseOrder());
+    
+            for (AnsweredSurvey survey : allSurveys) {
+                LocalDate date = survey.getWhenAnswered().toLocalDate();
+                surveysByDate.computeIfAbsent(date, k -> new ArrayList<>()).add(survey);
+            }
+    
+            // Generér en entry for hver dato (nyeste først)
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH.mm");
+
+            for (Map.Entry<LocalDate, List<AnsweredSurvey>> entry : surveysByDate.entrySet()) {
+                LocalDate date = entry.getKey();
+                List<AnsweredSurvey> surveysOnDate = entry.getValue();
+        
+                // Find morgen- og aftenskemaer for denne dato
+                String morningTime = null;
+                String eveningTime = null;
+                AnsweredSurvey morningSurvey = null;
+                AnsweredSurvey eveningSurvey = null;
+
+                for (AnsweredSurvey survey : surveysOnDate) {
+                    if (survey.getType() == SurveyType.morning) {
+                        morningTime = survey.getWhenAnswered().format(timeFormatter);
+                        morningSurvey = survey;
+                    } else if (survey.getType() == SurveyType.evening) {
+                        eveningTime = survey.getWhenAnswered().format(timeFormatter);
+                        eveningSurvey = survey;
+                    }
+                }
+        
+                // Opret kun entry hvis mindst et skema er udfyldt
+                if (morningTime != null || eveningTime != null) {
+                    // Byg teksten for tidspunkter præcis som på billedet
+                    StringBuilder timeText = new StringBuilder();
+                    if (morningTime != null) {
+                        timeText.append("(Morgensvar: ").append(morningTime).append(")");
+                    }
+                    if (eveningTime != null) {
+                        if (morningTime != null) {
+                            timeText.append(" - ");
+                        }
+                        timeText.append("(Aftensvar: ").append(eveningTime).append(")");
+                    }
+            
+                // Opret "Se data" knap med ikon
+                Button viewDataButton = new Button("Se data", new Icon(VaadinIcon.CHART));
+                viewDataButton.getElement().getStyle()
+                    .set("border-radius", "8px")
+                    .set("background", "white")
+                    .set("border", "1px solid rgba(15,23,42,0.06)")
+                    .set("padding", "6px 10px")
+                    .set("font-size", "13px")
+                    .set("margin-left", "10px");
+                    
+                // Tilføj click listener til knappen
+                LocalDate currentDate = date;
+                AnsweredSurvey finalMorningSurvey = morningSurvey;
+                AnsweredSurvey finalEveningSurvey = eveningSurvey;
+                String finalMorningTime = morningTime;
+                String finalEveningTime = eveningTime;
+                    
+                viewDataButton.addClickListener(event -> {
+                    Dialog dataDialog = new Dialog();
+                    dataDialog.setHeight("90%");
+                    dataDialog.setWidth("80%");
+
+                    Button closeButton = new Button("Luk", click -> dataDialog.close());
+                    HorizontalLayout headerLayout = new HorizontalLayout();
+                    VerticalLayout leftSideHeader = new VerticalLayout();
+
+                    H3 dialogTitle = new H3("Skemadata for " + date.format(dateFormatter));
+                    leftSideHeader.setSpacing(false);
+                    leftSideHeader.setPadding(false);
+                    leftSideHeader.add(dialogTitle);
+
+                    headerLayout.setPadding(true);
+                    headerLayout.setWidthFull();
+                    headerLayout.setJustifyContentMode(JustifyContentMode.BETWEEN);
+                    headerLayout.setAlignItems(Alignment.CENTER);
+                    headerLayout.add(leftSideHeader, closeButton);
+                    headerLayout.getStyle().set("margin-top", "-30px");
+
+                    closeButton.getStyle()
+                        .set("background-color", "darkblue")
+                        .set("color", "white")
+                        .set("cursor", "pointer")
+                        .set("padding", "10px 20px");
+
+                    VerticalLayout contentLayout = new VerticalLayout();
+                    contentLayout.setSpacing(true);
+                    contentLayout.setPadding(true);
+                    contentLayout.setWidthFull();
+
+                    // Tilføj tidspunkter øverst i dialogen
+                    Div timeInfoDiv = new Div();
+                    if (finalMorningTime != null && finalEveningTime != null) {
+                        timeInfoDiv.add(new Span("Morgensvar kl. " + finalMorningTime + " | Aftensvar kl. " + finalEveningTime));
+                    } else if (finalMorningTime != null) {
+                        timeInfoDiv.add(new Span("Morgensvar kl. " + finalMorningTime));
+                    } else if (finalEveningTime != null) {
+                        timeInfoDiv.add(new Span("Aftensvar kl. " + finalEveningTime));
+                    }
+                    timeInfoDiv.getStyle()
+                        .set("margin-bottom", "20px")
+                        .set("font-weight", "bold")
+                        .set("color", "#666");
+                    contentLayout.add(timeInfoDiv);
+
+                    // Vis morgenundersøgelse hvis den findes
+                    if (finalMorningSurvey != null) {
+                        H3 morningTitle = new H3("Morgenskema");
+                        morningTitle.getStyle()
+                            .set("color", "orange")
+                            .set("margin-bottom", "15px")
+                            .set("margin-top", "0");
+                        contentLayout.add(morningTitle);
+
+                        // Vis alle svar fra morgenundersøgelsen
+                        Answer<?>[] morningAnswers = finalMorningSurvey.getAnswers();
+                        if (morningAnswers != null && morningAnswers.length > 0) {
+                            for (Answer<?> answer : morningAnswers) {
+                                Div answerDiv = new Div();
+                                Span questionSpan = new Span(getQuestionText(answer) + ": ");
+                                questionSpan.getStyle().set("font-weight", "bold");
+
+                                Span answerValueSpan = new Span(getAnswerValue(answer));
+                                answerValueSpan.getStyle().set("color", "#0066cc");
+
+                                answerDiv.add(questionSpan, answerValueSpan);
+                                answerDiv.getStyle()
+                                    .set("margin-left", "15px")
+                                    .set("margin-bottom", "8px")
+                                    .set("padding", "5px 10px")
+                                    .set("background-color", "#f5f5f5")
+                                    .set("border-radius", "4px");
+                                contentLayout.add(answerDiv);
+                            }
+                        } else {
+                            Span noAnswers = new Span("Ingen svar registreret for morgenskemaet");
+                            noAnswers.getStyle()
+                                .set("color", "gray")
+                                .set("font-style", "italic")
+                                .set("margin-left", "15px");
+                            contentLayout.add(noAnswers);
+                        }
+
+                        // Tilføj separator kun hvis der også er aftenundersøgelse
+                        if (finalEveningSurvey != null) {
+                            Hr separator = new Hr();
+                            separator.getStyle()
+                                .set("margin-top", "20px")
+                                .set("margin-bottom", "20px");
+                            contentLayout.add(separator);
+                        }
+                    }
+
+                    // Vis aftenundersøgelse hvis den findes
+                    if (finalEveningSurvey != null) {
+                        H3 eveningTitle = new H3("Aftenskema");
+                        eveningTitle.getStyle()
+                            .set("color", "purple")
+                            .set("margin-bottom", "15px");
+
+                        // Hvis der ikke var morgenundersøgelse, fjern top margin
+                        if (finalMorningSurvey == null) {
+                            eveningTitle.getStyle().set("margin-top", "0");
+                        }
+
+                        contentLayout.add(eveningTitle);
+
+                        // Vis alle svar fra aftenundersøgelse
+                        Answer<?>[] eveningAnswers = finalEveningSurvey.getAnswers();
+                        if (eveningAnswers != null && eveningAnswers.length > 0) {
+                            for (Answer<?> answer : eveningAnswers) {
+                                Div answerDiv = new Div();
+                                Span questionSpan = new Span(getQuestionText(answer) + ": ");
+                                questionSpan.getStyle().set("font-weight", "bold");
+
+                                Span answerValueSpan = new Span(getAnswerValue(answer));
+                                answerValueSpan.getStyle().set("color", "#0066cc");
+
+                                answerDiv.add(questionSpan, answerValueSpan);
+                                answerDiv.getStyle()
+                                    .set("margin-left", "15px")
+                                    .set("margin-bottom", "8px")
+                                    .set("padding", "5px 10px")
+                                    .set("background-color", "#f5f5f5")
+                                    .set("border-radius", "4px");
+                                contentLayout.add(answerDiv);
+                            }
+                        } else {
+                            Span noAnswers = new Span("Ingen svar registreret for aftenskemaet");
+                            noAnswers.getStyle()
+                                .set("color", "gray")
+                                .set("font-style", "italic")
+                                .set("margin-left", "15px");
+                            contentLayout.add(noAnswers);
+                        }
+                    }
+
+                    // Hvis ingen skemaer har svar (dette burde ikke ske da vi kun opretter knap hvis mindst et er udfyldt)
+                    if (finalMorningSurvey == null && finalEveningSurvey == null) {
+                        Span noData = new Span("Ingen skemadata tilgængelig for denne dato");
+                        noData.getStyle()
+                            .set("color", "gray")
+                            .set("font-style", "italic")
+                            .set("text-align", "center")
+                            .set("padding", "40px");
+                        contentLayout.add(noData);
+                    }
                 
-                morningHorizontal1.setPadding(true);
-                morningHorizontal1.setWidthFull();
-                morningHorizontal1.setJustifyContentMode(JustifyContentMode.BETWEEN);
-                morningHorizontal1.setAlignItems(Alignment.CENTER);
-                morningHorizontal1.add(leftSideMorning1, morningDialogButton1);
-                morningHorizontal1.getStyle().set("margin-top", "-30px");
-                morningDialogButton1.getStyle()
-                .set("background-color","darkblue")
-                .set("color","white")
-                .set("cursor", "pointer");
-                dialog.setWidth("60%");
-                VerticalLayout listLayout1 = new VerticalLayout();
-                listLayout1.setSpacing(true);
-                listLayout1.setPadding(true);
-                Span span1 = new Span("Skal voksne sove 7-9 timer pr. nat? - Svar: Ja");
-                Span span2 = new Span("Er REM-søvn den fase hvor vi drømmer mest? - Svar: Ja");
-                Span span3 = new Span("Kan mangel på søvn påvirke koncentrationen? - Svar: Ja");
-                Span span4 = new Span("Er kaffe godt at drikke lige før sengetid? - Svar: Nej");
-                Span span5 = new Span("Kaldes søvnløshed for insomnia? - Svar: Ja");
-                Span span6 = new Span("Påvirker blåt lys fra skærme søvnen negativt? - Svar: Ja");
-                Span span7 = new Span("Er det sundt at sove med lys tændt? - Svar: Nej");
-                Span span8 = new Span("Kan regelmæssig motion forbedre søvnkvaliteten? - Svar: Ja");
-                Span span9 = new Span("Er søvnapnø en ufarlig tilstand? - Svar: Nej");
-                Span span10 = new Span("Er døgnrytme det samme som cirkadisk rytme? - Svar: Ja");
-                listLayout1.add(span1, span2, span3, span4, span5, span6, span7, span8, span9, span10, h3Evening1, span1, span2, span3, span4);
-                dataDialog.add(morningHorizontal1, listLayout1);
-                dataDialog.open();
-            });
-
-            Button viewDataButton2 = new Button("Se data", new Icon(VaadinIcon.CHART));
-            viewDataButton2.getElement().getStyle()
-            .set("border-radius", "8px")
-            .set("background", "white")
-            .set("border", "1px solid rgba(15,23,42,0.06)")
-            .set("padding", "6px 10px")
-            .set("font-size", "13px")
-            .set("margin-left", "10px");
-            Hr hr2 = new Hr();
-            viewDataButton2.addClickListener(event -> {
-                Dialog dataDialog = new Dialog();
-            });
-            Button viewDataButton3 = new Button("Se data", new Icon(VaadinIcon.CHART));
-            viewDataButton3.getElement().getStyle()
-            .set("border-radius", "8px")
-            .set("background", "white")
-            .set("border", "1px solid rgba(15,23,42,0.06)")
-            .set("padding", "6px 10px")
-            .set("font-size", "13px")
-            .set("margin-left", "10px");
-            Hr hr3 = new Hr();
-            viewDataButton3.addClickListener(event -> {
-                Dialog dataDialog = new Dialog();
-            });
-            Span s1 = new Span("(Morgensvar: 10.40) - (Aftensvar: 20.35)"); 
-            s1.getElement().getStyle()
-            .set("margin-left", "200px");
-            Span s2 = new Span("(Morgensvar: 09.30) - (Aftensvar: 21.15)");
-            s2.getElement().getStyle()
-            .set("margin-left", "200px");
-            Span s3 = new Span("(Morgensvar: 08.05) - (Aftensvar: 22.50)");
-            s3.getElement().getStyle()
-            .set("margin-left", "200px");
-
-            Div entry1 = new Div();
-            entry1.getStyle().set("white-space", "pre");
-            entry1.add(new Span("Svar - Registreret: 04/12/2025"), s1, viewDataButton1, hr1);
-
-            Div entry2 = new Div();
-            entry2.getStyle().set("white-space", "pre");
-            entry2.add(new Span("Svar - Registreret: 03/12/2025"), s2, viewDataButton2, hr2);
-
-            Div entry3 = new Div();
-            entry3.getStyle().set("white-space", "pre");
-            entry3.add(new Span("Svar - Registreret: 02/12/2025"), s3, viewDataButton3, hr3);
-
-            listLayout.add(entry1, entry2, entry3);
+                    dataDialog.add(headerLayout, contentLayout);
+                    dataDialog.open();
+                });
+            
+                // Opret spans for data entry - PRÆCIS SOM PÅ BILLEDET
+                Span dateSpan = new Span("Svar - Registreret: " + date.format(dateFormatter));
+                dateSpan.getStyle()
+                    .set("display", "inline-block")
+                    .set("font-weight", "500");
+            
+                Span timeSpan = new Span(timeText.toString());
+                timeSpan.getElement().getStyle()
+                    .set("margin-left", "200px")
+                    .set("display", "inline-block")
+                    .set("color", "#666");
+            
+                Hr HR = new Hr();
+                hr.getStyle()
+                    .set("margin-top", "10px")
+                    .set("margin-bottom", "10px");
+            
+                // Opret entry container - struktur præcis som på billedet
+                Div entryDiv = new Div();
+                entryDiv.getStyle()
+                    .set("white-space", "nowrap")
+                    .set("padding", "10px 0");
+            
+                // Tilføj elementer i den rigtige rækkefølge: dato → tider → knap
+                entryDiv.add(dateSpan);
+                entryDiv.add(timeSpan);
+                entryDiv.add(viewDataButton);
+                entryDiv.add(hr);
+            
+                listLayout.add(entryDiv);
+            }
+            // Hvis både morningTime og eveningTime er null, oprettes INGEN linje
+        }
+    
+            // Hvis der ikke er nogen data
+            if (listLayout.getComponentCount() == 0) {
+                Span noDataSpan = new Span("Ingen skemadata fundet");
+                noDataSpan.getStyle()
+                    .set("color", "gray")
+                    .set("font-style", "italic")
+                    .set("padding", "20px");
+                listLayout.add(noDataSpan);
+            }
+    
             dialog.add(morningHorizontal, listLayout);
-
             dialog.open();
         });
 
@@ -289,6 +462,8 @@ public class CitizenView extends VerticalLayout {
         .set("margin-top", "20px")
         .set("display", "block")
         .set("margin", "0 auto")
+        .set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)")
+        .set("background-color", "white")
         .set("padding", "16px");
         H3 lastestAnswerH3 = new H3("📆︎ Seneste indtastninger");
         lastestAnswerH3.getStyle()
@@ -313,4 +488,81 @@ public class CitizenView extends VerticalLayout {
         latestAnswersCard.add(sideBySideCards2);
         add(latestAnswersCard);
     }
+    /**
+     * Henter spørgsmålsteksten fra et Answer objekt
+     * NOTE: Vi skal gætte at Answer har en reference til Question
+     * Hvis ikke, skal vi overveje en anden struktur
+     */
+    private String getQuestionText(Answer<?> answer) {
+        // Dette afhænger af hvordan Answer klasserne er implementeret
+        // Hvis Answer har et question felt:
+        try {
+            java.lang.reflect.Field questionField = answer.getClass().getDeclaredField("question");
+            questionField.setAccessible(true);
+            Question question = (Question) questionField.get(answer);
+            return question.questionTitle;
+        } catch (Exception e) {
+            // Reflection fejlede - Answer har måske ikke et question felt
+        }
+        
+        // Alternativt - hvis Answer gemmer spørgsmåls-ID eller noget andet
+        return "Spørgsmål"; // Placeholder indtil vi ser Answer-implementationerne
+    }
+    
+    
+    //Henter og formaterer svaret fra et Answer objekt
+    private String getAnswerValue(Answer<?> answer) {
+        try {
+            // Brug reflection for at få payload fra Answer
+            // Dette afhænger af hvordan Answer klasserne gemmer data
+            java.lang.reflect.Method getPayloadMethod = answer.getClass().getMethod("getPayload");
+            AnswerPayload payload = (AnswerPayload) getPayloadMethod.invoke(answer);
+            
+            if (payload != null) {
+                return formatAnswerPayload(payload);
+            }
+        } catch (Exception e) {
+            // Prøv en anden tilgang
+        }
+        
+        return "Ikke besvaret";
+    }
+    
+    
+    //Formaterer AnswerPayload til en læsbar tekst
+    private String formatAnswerPayload(AnswerPayload payload) {
+        if (payload == null) {
+            return "Ikke besvaret";
+        }
+        
+        // Behandl de forskellige typer payload
+        if (payload instanceof AnswerPayloads.YesOrNoPayload yesNoPayload) {
+            return yesNoPayload.yesNo() ? "Ja" : "Nej";
+        }
+        
+        if (payload instanceof AnswerPayloads.YesOrNoElaborateIntPayload elaboratePayload) {
+            String base = elaboratePayload.yesNo() ? "Ja" : "Nej";
+            if (elaboratePayload.elaborate() > 0) {
+                return base + " (" + elaboratePayload.elaborate() + ")";
+            }
+            return base;
+        }
+        
+        if (payload instanceof AnswerPayloads.RollPayload rollPayload) {
+            // Konverter Instant til læselig tid
+            java.time.format.DateTimeFormatter formatter = 
+                java.time.format.DateTimeFormatter.ofPattern("HH:mm")
+                    .withZone(java.time.ZoneId.systemDefault());
+            return formatter.format(rollPayload.timestamp());
+        }
+        
+        if (payload instanceof AnswerPayloads.ComboBoxPayload comboBoxPayload) {
+            // Her skal vi vide hvilke valgmuligheder der er
+            // Returner index eller værdi
+            return "Valg " + comboBoxPayload.whichIsSelected();
+        }
+        
+        return payload.toString();
+    }
+
 }
