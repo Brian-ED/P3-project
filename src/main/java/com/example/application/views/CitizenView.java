@@ -2,7 +2,11 @@ package com.example.application.views;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
+import com.vaadin.flow.component.accordion.Accordion;
 import com.example.application.model.Answer;
 import com.example.application.model.AnsweredSurvey;
 import com.example.application.model.Citizen;
@@ -134,25 +138,20 @@ public class CitizenView extends VerticalLayout {
         .set("cursor", "pointer")
         .set("background-color", "lightgray")
         .set("margin-top", "1px")
-        .set("border-radius", "8px");
+        .set("border-radius", "8px")
+        .set("text-align", "center");
         latestMorningAnswersDiv.setWidth("100%");
         H3 latestMorningH3 = new H3();
-        latestMorningH3.getElement().setProperty("innerHTML", 
-    "<span style='color: orange;'>✹</span> Morgensvar");
-        Span registeredMorning = new Span("Registreret");
-        registeredMorning.getStyle()
-        .set("padding", "25px");
-        latestMorningAnswersDiv.add(
-            latestMorningH3,
-            registeredMorning
-        );
+        Span tekstHistorik = new Span("Historik");
+        latestMorningH3.add(tekstHistorik);
+        latestMorningAnswersDiv.add(latestMorningH3);
 
         latestMorningAnswersDiv.addClickListener(e -> {
             Dialog dialog = new Dialog();
             Button morningDialogButton = new Button("Luk", click -> dialog.close());
             HorizontalLayout morningHorizontal = new HorizontalLayout();
             VerticalLayout leftSideMorning = new VerticalLayout();
-            H3 h3Morning = new H3("Morgensvarshistorik:");
+            H3 h3Morning = new H3("Historik:");
             h3Morning.getStyle().set("color", "darkblue");
             leftSideMorning.setSpacing(false);
             leftSideMorning.setPadding(false);
@@ -176,40 +175,102 @@ public class CitizenView extends VerticalLayout {
 
             Button viewDataButton1 = new Button("Se data", new Icon(VaadinIcon.CHART));
             viewDataButton1.getElement().getStyle()
-                .set("border-radius", "8px")
-                .set("background", "white")
-                .set("border", "1px solid rgba(15,23,42,0.06)")
-                .set("padding", "6px 10px")
-                .set("font-size", "13px")
-                .set("margin-left", "100px");
+            .set("border-radius", "8px")
+            .set("background", "white")
+            .set("border", "1px solid rgba(15,23,42,0.06)")
+            .set("padding", "6px 10px")
+            .set("font-size", "13px")
+            .set("margin-left", "10px");
             Hr hr1 = new Hr();
+
+            viewDataButton1.addClickListener(event -> {
+                Dialog dataDialog = new Dialog();
+                dataDialog.setHeight("90%");
+                Button morningDialogButton1 = new Button("Luk", click -> dataDialog.close());
+                HorizontalLayout morningHorizontal1 = new HorizontalLayout();
+                VerticalLayout leftSideMorning1 = new VerticalLayout();
+                H3 h3Morning1 = new H3("Morningsurvey");
+                H3 h3Evening1 = new H3("Eveningsurvey");
+                leftSideMorning1.setSpacing(false);
+                leftSideMorning1.setPadding(false);
+                leftSideMorning1.add(
+                h3Morning1
+                );
+                
+                morningHorizontal1.setPadding(true);
+                morningHorizontal1.setWidthFull();
+                morningHorizontal1.setJustifyContentMode(JustifyContentMode.BETWEEN);
+                morningHorizontal1.setAlignItems(Alignment.CENTER);
+                morningHorizontal1.add(leftSideMorning1, morningDialogButton1);
+                morningHorizontal1.getStyle().set("margin-top", "-30px");
+                morningDialogButton1.getStyle()
+                .set("background-color","darkblue")
+                .set("color","white")
+                .set("cursor", "pointer");
+                dialog.setWidth("60%");
+                VerticalLayout listLayout1 = new VerticalLayout();
+                listLayout1.setSpacing(true);
+                listLayout1.setPadding(true);
+                Span span1 = new Span("Skal voksne sove 7-9 timer pr. nat? - Svar: Ja");
+                Span span2 = new Span("Er REM-søvn den fase hvor vi drømmer mest? - Svar: Ja");
+                Span span3 = new Span("Kan mangel på søvn påvirke koncentrationen? - Svar: Ja");
+                Span span4 = new Span("Er kaffe godt at drikke lige før sengetid? - Svar: Nej");
+                Span span5 = new Span("Kaldes søvnløshed for insomnia? - Svar: Ja");
+                Span span6 = new Span("Påvirker blåt lys fra skærme søvnen negativt? - Svar: Ja");
+                Span span7 = new Span("Er det sundt at sove med lys tændt? - Svar: Nej");
+                Span span8 = new Span("Kan regelmæssig motion forbedre søvnkvaliteten? - Svar: Ja");
+                Span span9 = new Span("Er søvnapnø en ufarlig tilstand? - Svar: Nej");
+                Span span10 = new Span("Er døgnrytme det samme som cirkadisk rytme? - Svar: Ja");
+                listLayout1.add(span1, span2, span3, span4, span5, span6, span7, span8, span9, span10, h3Evening1, span1, span2, span3, span4);
+                dataDialog.add(morningHorizontal1, listLayout1);
+                dataDialog.open();
+            });
+
             Button viewDataButton2 = new Button("Se data", new Icon(VaadinIcon.CHART));
             viewDataButton2.getElement().getStyle()
-                .set("border-radius", "8px")
-                .set("background", "white")
-                .set("border", "1px solid rgba(15,23,42,0.06)")
-                .set("padding", "6px 10px")
-                .set("font-size", "13px")
-                .set("margin-left", "100px");
+            .set("border-radius", "8px")
+            .set("background", "white")
+            .set("border", "1px solid rgba(15,23,42,0.06)")
+            .set("padding", "6px 10px")
+            .set("font-size", "13px")
+            .set("margin-left", "10px");
             Hr hr2 = new Hr();
+            viewDataButton2.addClickListener(event -> {
+                Dialog dataDialog = new Dialog();
+            });
             Button viewDataButton3 = new Button("Se data", new Icon(VaadinIcon.CHART));
             viewDataButton3.getElement().getStyle()
-                .set("border-radius", "8px")
-                .set("background", "white")
-                .set("border", "1px solid rgba(15,23,42,0.06)")
-                .set("padding", "6px 10px")
-                .set("font-size", "13px")
-                .set("margin-left", "100px");
+            .set("border-radius", "8px")
+            .set("background", "white")
+            .set("border", "1px solid rgba(15,23,42,0.06)")
+            .set("padding", "6px 10px")
+            .set("font-size", "13px")
+            .set("margin-left", "10px");
             Hr hr3 = new Hr();
+            viewDataButton3.addClickListener(event -> {
+                Dialog dataDialog = new Dialog();
+            });
+            Span s1 = new Span("(Morgensvar: 10.40) - (Aftensvar: 20.35)"); 
+            s1.getElement().getStyle()
+            .set("margin-left", "200px");
+            Span s2 = new Span("(Morgensvar: 09.30) - (Aftensvar: 21.15)");
+            s2.getElement().getStyle()
+            .set("margin-left", "200px");
+            Span s3 = new Span("(Morgensvar: 08.05) - (Aftensvar: 22.50)");
+            s3.getElement().getStyle()
+            .set("margin-left", "200px");
 
             Div entry1 = new Div();
-            entry1.add(new Span("Morgensvar - Registreret 10.40"), viewDataButton1, hr1);
+            entry1.getStyle().set("white-space", "pre");
+            entry1.add(new Span("Svar - Registreret: 04/12/2025"), s1, viewDataButton1, hr1);
 
             Div entry2 = new Div();
-            entry2.add(new Span("Morgensvar - Registreret 09.15"), viewDataButton2, hr2);
+            entry2.getStyle().set("white-space", "pre");
+            entry2.add(new Span("Svar - Registreret: 03/12/2025"), s2, viewDataButton2, hr2);
 
             Div entry3 = new Div();
-            entry3.add(new Span("Morgensvar - Registreret 08.30"), viewDataButton3, hr3);
+            entry3.getStyle().set("white-space", "pre");
+            entry3.add(new Span("Svar - Registreret: 02/12/2025"), s3, viewDataButton3, hr3);
 
             listLayout.add(entry1, entry2, entry3);
             dialog.add(morningHorizontal, listLayout);
@@ -217,98 +278,8 @@ public class CitizenView extends VerticalLayout {
             dialog.open();
         });
 
-        // Create the Div to see the latest evening aswers
-        Div latestEveningAnswersDiv = new Div();
-        latestEveningAnswersDiv.getStyle()
-        .set("padding", "20px")
-        .set("cursor", "pointer")
-        .set("background-color", "lightgray")
-        .set("margin-top", "1px")
-        .set("border-radius", "8px");
-        latestEveningAnswersDiv.setWidth("100%");
-        H3 latestEveningH3 = new H3();
-        latestEveningH3.getElement().setProperty("innerHTML", 
-    "<span style='color: purple;'>☾</span> Aftensvar");
-        Span registeredEvening = new Span("Registreret");
-        registeredEvening.getStyle()
-        .set("padding", "18px");
-        latestEveningAnswersDiv.add(
-            latestEveningH3,
-            registeredEvening
-        );
-
-        latestEveningAnswersDiv.addClickListener(e -> {
-            Dialog dialog = new Dialog();
-            Button eveningDialogButton = new Button("Luk", click -> dialog.close());
-            HorizontalLayout eveningHorizontal = new HorizontalLayout();
-            VerticalLayout leftSideEvening = new VerticalLayout();
-            H3 h3Morning = new H3("Aftensvarshistorik:");
-            h3Morning.getStyle().set("color", "darkblue");
-            leftSideEvening.setSpacing(false);
-            leftSideEvening.setPadding(false);
-            leftSideEvening.add(
-            h3Morning
-        );
-            eveningHorizontal.setPadding(true);
-            eveningHorizontal.setWidthFull();
-            eveningHorizontal.setJustifyContentMode(JustifyContentMode.BETWEEN);
-            eveningHorizontal.setAlignItems(Alignment.CENTER);
-            eveningHorizontal.add(leftSideEvening, eveningDialogButton);
-            eveningHorizontal.getStyle().set("margin-top", "-30px");
-            eveningDialogButton.getStyle()
-            .set("background-color","darkblue")
-            .set("color","white")
-            .set("cursor", "pointer");
-            dialog.setWidth("60%");
-            VerticalLayout listLayout = new VerticalLayout();
-            listLayout.setSpacing(true);
-            listLayout.setPadding(true);
-
-            Button viewDataButton1 = new Button("Se data", new Icon(VaadinIcon.CHART));
-            viewDataButton1.getElement().getStyle()
-            .set("border-radius", "8px")
-            .set("background", "white")
-            .set("border", "1px solid rgba(15,23,42,0.06)")
-            .set("padding", "6px 10px")
-            .set("font-size", "13px")
-            .set("margin-left", "100px");
-            Hr hr1 = new Hr();
-            Button viewDataButton2 = new Button("Se data", new Icon(VaadinIcon.CHART));
-            viewDataButton2.getElement().getStyle()
-            .set("border-radius", "8px")
-            .set("background", "white")
-            .set("border", "1px solid rgba(15,23,42,0.06)")
-            .set("padding", "6px 10px")
-            .set("font-size", "13px")
-            .set("margin-left", "100px");
-            Hr hr2 = new Hr();
-            Button viewDataButton3 = new Button("Se data", new Icon(VaadinIcon.CHART));
-            viewDataButton3.getElement().getStyle()
-            .set("border-radius", "8px")
-            .set("background", "white")
-            .set("border", "1px solid rgba(15,23,42,0.06)")
-            .set("padding", "6px 10px")
-            .set("font-size", "13px")
-            .set("margin-left", "100px");
-            Hr hr3 = new Hr();
-
-            Div entry1 = new Div();
-            entry1.add(new Span("Aftensvar - Registreret 20.40"), viewDataButton1, hr1);
-
-            Div entry2 = new Div();
-            entry2.add(new Span("Aftensvar - Registreret 21.15"), viewDataButton2, hr2);
-
-            Div entry3 = new Div();
-            entry3.add(new Span("Aftensvar - Registreret 22.30"), viewDataButton3, hr3);
-
-            listLayout.add(entry1, entry2, entry3);
-            dialog.add(eveningHorizontal, listLayout);
-            
-            dialog.open();
-        });
-
         // Place latest morning and latest evening answer side by side
-        HorizontalLayout sideBySideCards2 = new HorizontalLayout(latestMorningAnswersDiv, latestEveningAnswersDiv);
+        HorizontalLayout sideBySideCards2 = new HorizontalLayout(latestMorningAnswersDiv);
         sideBySideCards2.setWidthFull();
         sideBySideCards2.setSpacing(true);
 
@@ -317,6 +288,7 @@ public class CitizenView extends VerticalLayout {
         latestAnswersCard.getStyle()
         .set("margin-top", "20px")
         .set("display", "block")
+        .set("margin", "0 auto")
         .set("padding", "16px");
         H3 lastestAnswerH3 = new H3("📆︎ Seneste indtastninger");
         lastestAnswerH3.getStyle()
@@ -331,7 +303,7 @@ public class CitizenView extends VerticalLayout {
         .set("margin-bottom", "-10px")
         .set("font-weight", "bold")
         .set("display", "block");
-        latestAnswersCard.setWidthFull();
+        latestAnswersCard.setWidth("50%");
         latestAnswersCard.add(
             lastestAnswerH3, 
             lastestAnswerSpan1,
