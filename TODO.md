@@ -1,8 +1,10 @@
 1. MEDIUM: Inside the following file `src/main/java/com/example/application/database/PostgreSQLDatabaseControler.java`, Read every value in AnsweredSurveyEveningTableRow and convert it to answer<> and place it in the answers array.
 Needed for submitting surveys without error.
+While doing this, collumns need to be added to the AnsweredSurvey type.
 
 2. MEDIUM: In the same file as above: `src/main/java/com/example/application/database/PostgreSQLDatabaseControler.java`
 There is a function called CitizenRowToCitizen. Implement CitizenToCitizenRow.
+This may be easier to do after 1.
 
 3. EASY-MEDIUM: In `src/main/java/com/example/application/views/CitizenView.java` it interacts with the database in a very basic way. Fully integrate and use the database and remove all mock data!
 
