@@ -1,10 +1,10 @@
 package com.example.application.views;
 
 import com.example.application.UI;
-import com.example.model.AnswerPayload;
-import com.example.model.DynamicSurvey;
-import com.example.model.SurveyListener;
-import com.example.model.SurveyType;
+import com.example.application.model.AnswerPayload;
+import com.example.application.model.DynamicSurvey;
+import com.example.application.model.SurveyListener;
+import com.example.application.model.SurveyType;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H3;
@@ -68,8 +68,8 @@ public class Survey extends VerticalLayout {
         next.setHeight("110px");
         prev.setWidth("220px");
         prev.setHeight("110px");
-        prev.getStyle().set("background-color", "#262ecaff").set("color", "white");
-        next.getStyle().set("background-color", "#262ecaff").set("color", "white");
+        prev.getStyle().set("background-color", "darkblue").set("color", "white");
+        next.getStyle().set("background-color", "darkblue").set("color", "white");
         prev.getStyle().set("font-size", "30px");
         next.getStyle().set("font-size", "30px");
 

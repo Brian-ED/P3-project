@@ -1,14 +1,17 @@
 package com.example.application.views;
 
 import java.util.*;
+import com.vaadin.flow.spring.security.AuthenticationContext;
+import jakarta.annotation.security.PermitAll;
 
+import com.example.application.model.Citizen;
 import com.vaadin.flow.component.AbstractField;
-import com.example.model.Citizen;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -17,7 +20,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-
 import jakarta.annotation.security.RolesAllowed;
 
 @Route("dashboard")
@@ -344,21 +346,13 @@ advisorCombo.setWidth("200px");
         // Left: small app title
         Span appTitle = new Span("Velkommen, John Doe");
         appTitle.getStyle().set("font-weight", "700");
-        appTitle.getStyle().set("font-size", "16px");
+        appTitle.getStyle().set("font-size", "26px");
         appTitle.getStyle().set("color", "#072d85ff");
 
-        // Right: logout button
-        Button logout = new Button("Logout");
-        logout.getElement().getStyle().set("background", "#2219c3ff");
-        logout.getElement().getStyle().set("color", "white");
-        logout.getElement().getStyle().set("border-radius", "8px");
-        logout.getElement().getStyle().set("padding", "8px 14px");
+            top.add(appTitle);
+            top.expand(appTitle);
 
-        top.add(appTitle);
-        top.expand(appTitle);
-        top.add(logout);
-
-        return top;
+            return top;
     }
 
     private String getInitials(String name) {

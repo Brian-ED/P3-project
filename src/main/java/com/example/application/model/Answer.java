@@ -1,4 +1,4 @@
-package com.example.model;
+package com.example.application.model;
 
 public abstract class Answer<P extends AnswerPayload> {
     private final Class<P> payloadType;
