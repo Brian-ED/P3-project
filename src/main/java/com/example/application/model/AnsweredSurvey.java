@@ -16,11 +16,11 @@ public class AnsweredSurvey {
     public Answer<?>[] getAnswers() {
         return answers;
     }
-    
+
     public ZonedDateTime getWhenAnswered() {
         return whenAnswered;
     }
-    
+
     public SurveyType getType() {
         return surveyType;
     }
