@@ -14,19 +14,19 @@ public class YesOrNoElaborateComboboxAnswer extends Answer<YesOrNoElaborateCombo
     }
 
     @Column(nullable = false)
-    private Boolean value;
+    private Boolean yesNo;
 
     @Column(nullable = false)
     Short whichIsSelected;
 
     @Override
     public void answer(YesOrNoElaborateComboboxPayload p) {
-        this.value = p.yesNo();
+        this.yesNo = p.yesNo();
         this.whichIsSelected = p.whichIsSelected();
     }
 
 	@Override
 	public YesOrNoElaborateComboboxPayload toPayload() {
-        return new YesOrNoElaborateComboboxPayload(value, whichIsSelected);
+        return new YesOrNoElaborateComboboxPayload(yesNo, whichIsSelected);
 	}
 }

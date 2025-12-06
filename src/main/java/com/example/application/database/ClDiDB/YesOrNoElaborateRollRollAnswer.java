@@ -31,6 +31,6 @@ public class YesOrNoElaborateRollRollAnswer extends Answer<YesOrNoElaborateRollR
 
 	@Override
 	public YesOrNoElaborateRollRollPayload toPayload() {
-        return new YesOrNoElaborateRollRollPayload(yesNo, timestamp1, timestamp2);
+		return new YesOrNoElaborateRollRollPayload(yesNo, timestamp1, timestamp2);
 	}
 }

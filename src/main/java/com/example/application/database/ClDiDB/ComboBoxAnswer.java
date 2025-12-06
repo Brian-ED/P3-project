@@ -13,11 +13,6 @@ public class ComboBoxAnswer extends Answer<ComboBoxPayload> {
         super(ComboBoxPayload.class);
     }
 
-    public ComboBoxAnswer(ComboBoxPayload p) {
-        super(ComboBoxPayload.class);
-        answer(p);
-    }
-
     @Column(nullable = false)
     private Short whichIsSelected;
 
@@ -29,5 +24,5 @@ public class ComboBoxAnswer extends Answer<ComboBoxPayload> {
 	@Override
 	public ComboBoxPayload toPayload() {
         return new ComboBoxPayload(whichIsSelected);
-	}
+    }
 }
