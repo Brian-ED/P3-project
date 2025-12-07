@@ -169,7 +169,7 @@ export function createEffectivenessChart(containerId, data) {
             console.log('Canvas already exists');
         }
 
-        // Process the data if it's passed, otherwise use sample data
+        // Process the data if it's passed, otherwise use sample data 
         const chartData = data || {
             labels: ['17. okt.', '18. okt.'],
             effectiveness: [92, 92],
