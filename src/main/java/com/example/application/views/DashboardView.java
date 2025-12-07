@@ -1,14 +1,23 @@
 package com.example.application.views;
 
 import java.util.*;
+import com.vaadin.flow.spring.security.AuthenticationContext;
+import jakarta.annotation.security.PermitAll;
 
+import com.example.application.model.Citizen;
 import com.vaadin.flow.component.AbstractField;
+<<<<<<< HEAD
+import com.vaadin.flow.component.AttachEvent;
 import com.example.model.Citizen;
+=======
+>>>>>>> f300cb55001ab389a3e2b967e619941a033c2cad
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -17,7 +26,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-
 import jakarta.annotation.security.RolesAllowed;
 
 @Route("dashboard")
@@ -33,9 +41,10 @@ public class DashboardView extends VerticalLayout {
         setPadding(false);
         setSpacing(false);
         //Background of the entire dashboard
-        getElement().getStyle().set("background-color", "#f7f7f7ff");
+
+        getElement().getStyle().set("background-color", "var(--lumo-base-color)");
         getElement().getStyle().set("font-family", "Inter, Roboto, Arial, sans-serif");
-        getElement().getStyle().set("color", "#0467e7ff");
+        getElement().getStyle().set("color", "var(--lumo-primary-color)");
 
         //top margin
         HorizontalLayout topMargin = createTopMargin();
@@ -49,7 +58,7 @@ public class DashboardView extends VerticalLayout {
         content.setPadding(false);
         content.setSpacing(false);
         content.getStyle().set("padding", "0 40px 40px 40px");
-        content.getElement().getStyle().set("background-color", "#f7f7f7ff");
+        content.getElement().getStyle().set("background-color", "var(--lumo-base-color)");
 
         // Stats cards row
         HorizontalLayout statsRow = new HorizontalLayout();
@@ -69,12 +78,13 @@ public class DashboardView extends VerticalLayout {
         statsRow.setFlexGrow(1, card3);
 
         Div mainCard = new Div();
-        mainCard.getStyle().set("background", "white");
         mainCard.getStyle().set("border-radius", "12px");
         mainCard.getStyle().set("padding", "20px");
         mainCard.getStyle().set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)");
         mainCard.getStyle().set("margin-top", "18px");
         mainCard.getStyle().set("width", "100%");
+        mainCard.getStyle().set("background", "var(--lumo-base2-color)");
+        
 
         // Title row with icon + search and toggle
         HorizontalLayout mainHeaderRow = new HorizontalLayout();
@@ -93,7 +103,7 @@ public class DashboardView extends VerticalLayout {
         sectionTitle.getStyle().set("margin", "0");
 
         Span sectionSub = new Span("Administrer og overvåg borgernes søvndata");
-        sectionSub.getStyle().set("color", "#64748b");
+        sectionSub.getStyle().set("color", "var(--lumo-secondary-text-color)");
         sectionSub.getStyle().set("font-size", "13px");
 
         titleBlock.add(sectionTitle, sectionSub);
@@ -111,7 +121,7 @@ public class DashboardView extends VerticalLayout {
         // simple rounded look
         search.getElement().getStyle().set("border-radius", "8px");
         search.getElement().getStyle().set("border", "1px solid #e6eef8");
-        search.getElement().getStyle().set("background", "#fff");
+        search.getElement().getStyle().set("background", "var(--lumo-base2-color)");
 
         Checkbox toggleSwitch = new Checkbox("Vis kun mine borgere");
 
@@ -191,7 +201,10 @@ public class DashboardView extends VerticalLayout {
 
         content.add(statsRow, mainCard);
         add(content);
+
     }
+
+    
     private void refreshList() {
          listContainer.removeAll();
     for (Citizen c : citizens) {
@@ -200,7 +213,7 @@ public class DashboardView extends VerticalLayout {
 }
     private Div createStatCard(String highlightlabel, String value, String label) {
         Div card = new Div();
-        card.getStyle().set("background", "white");
+        card.getStyle().set("background", "var(--lumo-base2-color)");
         card.getStyle().set("border-radius", "12px");
         card.getStyle().set("padding", "18px");
         card.getStyle().set("width", "260px");
@@ -212,12 +225,12 @@ public class DashboardView extends VerticalLayout {
         Span hl = new Span(highlightlabel);
         hl.getStyle().set("font-size", "16px");
         hl.getStyle().set("font-weight", "600");
-        hl.getStyle().set("color", "#0f172a");
+        hl.getStyle().set("color", "var(--lumo-body-text-color)");
 
         Span v = new Span(value);
         v.getStyle().set("font-size", "28px");
         v.getStyle().set("font-weight", "700");
-        v.getStyle().set("color", "#0f172a");
+        v.getStyle().set("color", "var(--lumo-body-text-color)");
 
         Span l = new Span(label);
         l.getStyle().set("color", "#64748b");
@@ -235,7 +248,7 @@ public class DashboardView extends VerticalLayout {
         row.getStyle().set("padding", "12px");
         row.getStyle().set("border-radius", "10px");
         row.getStyle().set("margin-bottom", "8px");
-        row.getStyle().set("background", c.isHighlight() ? "#fffbeb" : "transparent"); // light highlight for moderate
+        row.getStyle().set("background", c.isHighlight() ? "var(--lumo-moderate-color)" : "transparent"); // light highlight for moderate
         row.getStyle().set("border", "1px solid rgba(15,23,42,0.03)");
 
         // Avatar circle with initials
@@ -246,7 +259,7 @@ public class DashboardView extends VerticalLayout {
         avatar.getStyle().set("display", "flex");
         avatar.getStyle().set("align-items", "center");
         avatar.getStyle().set("justify-content", "center");
-        avatar.getStyle().set("background", "#eef2ff");
+        avatar.getStyle().set("background", "var(--lumo-base-color");
         avatar.getStyle().set("color", "#1f2937");
         avatar.getStyle().set("font-weight", "600");
         avatar.getStyle().set("font-size", "14px");
@@ -262,7 +275,7 @@ public class DashboardView extends VerticalLayout {
         nameLabel.getStyle().set("font-size", "14px");
 
         Span sub = new Span("Sidste indtastning: " + c.getLastEntry());
-        sub.getStyle().set("color", "#64748b");
+        sub.getStyle().set("color", "var(--lumo-secondary-text-color)");
         sub.getStyle().set("font-size", "13px");
 
         info.add(nameLabel, sub);
@@ -280,12 +293,12 @@ public class DashboardView extends VerticalLayout {
         severityBadge.getStyle().set("font-weight", "600");
         // color based on severity
         if ("Moderat".equalsIgnoreCase(c.getSeverity())) {
-            severityBadge.getStyle().set("background", "#fff7ed");
+            severityBadge.getStyle().set("background", "var(--lumo-base2-color)");
             severityBadge.getStyle().set("color", "#92400e");
             severityBadge.getStyle().set("border", "1px solid rgba(245,158,11,0.12)");
         } else {
-            severityBadge.getStyle().set("background", "#eef2ff");
-            severityBadge.getStyle().set("color", "#0f172a");
+            severityBadge.getStyle().set("background", "var(--lumo-base2-color)");
+            severityBadge.getStyle().set("color", "var(--lumo-body-text-color)");
             severityBadge.getStyle().set("border", "1px solid rgba(99,102,241,0.08)");
         }
 
@@ -305,7 +318,7 @@ advisorCombo.setItems(
 advisorCombo.setValue(c.getAdvisor());
 
 // Styling (similar to your Span)
-advisorCombo.getStyle().set("color", "#64748b");
+advisorCombo.getStyle().set("color", "var(--lumo-secondary-text-color)");
 advisorCombo.getStyle().set("font-size", "13px");
 advisorCombo.getStyle().set("padding", "6px 8px");
 advisorCombo.getStyle().set("border-radius", "8px");
@@ -344,21 +357,13 @@ advisorCombo.setWidth("200px");
         // Left: small app title
         Span appTitle = new Span("Velkommen, John Doe");
         appTitle.getStyle().set("font-weight", "700");
-        appTitle.getStyle().set("font-size", "16px");
+        appTitle.getStyle().set("font-size", "26px");
         appTitle.getStyle().set("color", "#072d85ff");
 
-        // Right: logout button
-        Button logout = new Button("Logout");
-        logout.getElement().getStyle().set("background", "#2219c3ff");
-        logout.getElement().getStyle().set("color", "white");
-        logout.getElement().getStyle().set("border-radius", "8px");
-        logout.getElement().getStyle().set("padding", "8px 14px");
+            top.add(appTitle);
+            top.expand(appTitle);
 
-        top.add(appTitle);
-        top.expand(appTitle);
-        top.add(logout);
-
-        return top;
+            return top;
     }
 
     private String getInitials(String name) {

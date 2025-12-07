@@ -1,6 +1,6 @@
 package com.example.application;
 
-import com.example.application.model.Question;
+import com.example.model.Question;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -15,7 +15,7 @@ import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
 
-public class UI {
+public class QuestionUI {
 
     private static Component drawComboBox(Question question) {
         ComboBox<String> cb = new ComboBox<>(question.questionTitle); // label = question
@@ -34,7 +34,7 @@ public class UI {
         }
         return x;
     }
-    private static Component drawDuration(Question question) {
+    private static Component drawNumberField(Question question) {
         return new NumberField(question.questionTitle);
     }
     private static Component drawTextField(Question question) {
@@ -79,11 +79,12 @@ public class UI {
 
     public static Component drawUI(Question question) {
         return switch (question.type) {
-            case COMBOBOX   -> drawComboBox (question);
-            case TEXT_FIELD -> drawTextField(question);
-            case TIME_FIELD -> drawTimeField(question);
-            case YES_NO     -> drawYesNo    (question);
-    		case DURATION   -> drawDuration (question);
+            case CHECKBOX_GROUP   -> drawCheckboxGroup (question);
+            case COMBOBOX         -> drawComboBox      (question);
+            case NUMBER_FIELD     -> drawNumberField   (question);
+            case TEXT_FIELD       -> drawTextField     (question);
+            case TIME_FIELD       -> drawTimeField     (question);
+            case YES_NO           -> drawYesNo         (question);
         };
     }
 }

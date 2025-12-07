@@ -1,10 +1,19 @@
 package com.example.application.views;
 
-import com.example.application.UI;
+<<<<<<< HEAD
+import com.example.application.QuestionUI;
 import com.example.model.AnswerPayload;
 import com.example.model.DynamicSurvey;
+import com.example.model.Question;
 import com.example.model.SurveyListener;
 import com.example.model.SurveyType;
+=======
+import com.example.application.UI;
+import com.example.application.model.AnswerPayload;
+import com.example.application.model.DynamicSurvey;
+import com.example.application.model.SurveyListener;
+import com.example.application.model.SurveyType;
+>>>>>>> f300cb55001ab389a3e2b967e619941a033c2cad
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H3;
@@ -24,7 +33,7 @@ public class Survey extends VerticalLayout {
     class ThisListener implements SurveyListener {
         @Override
         public void currentQuestionChanged(int newIndex) {
-            showQuestion(UI.drawUI(survey.currentQuestion()));
+            showQuestion(QuestionUI.drawUI(survey.currentQuestion()));
         }
 
         @Override
@@ -68,8 +77,8 @@ public class Survey extends VerticalLayout {
         next.setHeight("110px");
         prev.setWidth("220px");
         prev.setHeight("110px");
-        prev.getStyle().set("background-color", "#262ecaff").set("color", "white");
-        next.getStyle().set("background-color", "#262ecaff").set("color", "white");
+        prev.getStyle().set("background-color", "darkblue").set("color", "white");
+        next.getStyle().set("background-color", "darkblue").set("color", "white");
         prev.getStyle().set("font-size", "30px");
         next.getStyle().set("font-size", "30px");
 
@@ -77,7 +86,7 @@ public class Survey extends VerticalLayout {
         add(h3, content, buttons);
 
         // 7) Show the first question
-		showQuestion(UI.drawUI(survey.currentQuestion()));
+		showQuestion(QuestionUI.drawUI(survey.currentQuestion()));
 
         // 8) Next / Previous button logic
         next.addClickListener(e -> survey.nextQuestion());

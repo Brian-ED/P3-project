@@ -1,5 +1,6 @@
-package com.example.model;
+package com.example.application.model;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,17 +18,16 @@ public class DynamicSurvey {
     }
 
     public static Question[] morningSurvey = new Question[] {
-        AskMoreIfYesQuestion("Tager du nogen gange sovemedicin eller melatonin piller",
+        AskMoreIfYesQuestion("Tager du nogen gange sovemedicin eller melatonin piller?",
             ComboBoxQuestion("Hvad tager du?", "Sovemedicin", "Melatonin")),
         ComboBoxQuestion("Hvad foretog du dig de sidste par timer inden du gik i seng?", "Ting", "Sager"),
         RollQuestion("I går gik jeg i seng klokken:"),
         RollQuestion("Jeg slukkede lyset klokken:"),
         RollQuestion("Efter jeg slukkede lyset, sov jeg ca. efter:"),
-        ComboBoxQuestion("Jeg vågnede cirka x gange i løbet af natten:",
-            "1", "2", "3"),
+        ComboBoxQuestion("Jeg vågnede cirka x gange i løbet af natten:", "1", "2", "3"),
         RollQuestion("Jeg var sammenlagt vågen i cirka x minutter i løbet af natten"),
         RollQuestion("I morges vågnede jeg klokken:"),
-        RollQuestion("Og jeg stod op klokken:")
+        RollQuestion("Jeg stod op klokken:")
     };
     public static Question[] eveningSurvey = new Question[] {
         AskMoreIfYesQuestion("Har du været fysisk aktiv i dag?",
@@ -44,7 +44,7 @@ public class DynamicSurvey {
             ComboBoxQuestion("Hvor mange genstande har du ca. drukket i løbet af dagen?",
                 "1", "2", "3")),
         AskMoreIfYesQuestion("Har du sovet i løbet af dagen?",
-            RollQuestion("Hvornår på dagen"))
+            RollQuestion("Hvornår på dagen?"))
     };
 
     public Integer currentQuestionIndex = 0;
@@ -111,6 +111,6 @@ public class DynamicSurvey {
             answers[i] = q.orElseThrow();
         }
 
-        return Optional.of(new AnsweredSurvey(answers, surveyType));
+        return Optional.of(new AnsweredSurvey(answers, surveyType, ZonedDateTime.now()));
     }
 }
