@@ -13,12 +13,10 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
@@ -29,6 +27,7 @@ import jakarta.annotation.security.RolesAllowed;
 @JavaScript("https://cdn.jsdelivr.net/npm/chart.js")
 @Route(value = "sleep-stats", layout = MainLayout.class)
 @PageTitle("Søvnstatistik")
+@RolesAllowed({"ADVISOR", "ADMIN"})
 @PermitAll
 public class SleepStats extends VerticalLayout {
 
@@ -390,25 +389,20 @@ public class SleepStats extends VerticalLayout {
     public static class SleepEntry {
         private LocalDate date;
         private double duration;
-        private String quality;
-        
 
         public SleepEntry() {}
 
-        public SleepEntry(LocalDate date, double duration, String quality) {
+        public SleepEntry(LocalDate date, double duration) {
             this.date = date;
             this.duration = duration;
-            this.quality = quality;
             
         }
 
         public LocalDate getDate() { return date; }
         public double getDuration() { return duration; }
-        public String getQuality() { return quality; }
-        
-
+    
         public void setDate(LocalDate date) { this.date = date; }
         public void setDuration(double duration) { this.duration = duration; }
-        public void setQuality(String quality) { this.quality = quality; }
+        
     }
 }
