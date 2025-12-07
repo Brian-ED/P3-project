@@ -1,8 +1,9 @@
 package com.example.application.views;
 
-import com.example.application.UI;
+import com.example.application.QuestionUI;
 import com.example.model.AnswerPayload;
 import com.example.model.DynamicSurvey;
+import com.example.model.Question;
 import com.example.model.SurveyListener;
 import com.example.model.SurveyType;
 import com.vaadin.flow.component.Component;
@@ -24,7 +25,7 @@ public class Survey extends VerticalLayout {
     class ThisListener implements SurveyListener {
         @Override
         public void currentQuestionChanged(int newIndex) {
-            showQuestion(UI.drawUI(survey.currentQuestion()));
+            showQuestion(QuestionUI.drawUI(survey.currentQuestion()));
         }
 
         @Override
@@ -77,7 +78,7 @@ public class Survey extends VerticalLayout {
         add(h3, content, buttons);
 
         // 7) Show the first question
-		showQuestion(UI.drawUI(survey.currentQuestion()));
+		showQuestion(QuestionUI.drawUI(survey.currentQuestion()));
 
         // 8) Next / Previous button logic
         next.addClickListener(e -> survey.nextQuestion());
