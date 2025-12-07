@@ -1,11 +1,19 @@
 package com.example.application.views;
 
+<<<<<<< HEAD
 import com.example.application.QuestionUI;
 import com.example.model.AnswerPayload;
 import com.example.model.DynamicSurvey;
 import com.example.model.Question;
 import com.example.model.SurveyListener;
 import com.example.model.SurveyType;
+=======
+import com.example.application.UI;
+import com.example.application.model.AnswerPayload;
+import com.example.application.model.DynamicSurvey;
+import com.example.application.model.SurveyListener;
+import com.example.application.model.SurveyType;
+>>>>>>> f300cb55001ab389a3e2b967e619941a033c2cad
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H3;

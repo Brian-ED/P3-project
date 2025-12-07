@@ -3,9 +3,14 @@ package com.example.application.views;
 import java.util.*;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import jakarta.annotation.security.PermitAll;
+
+import com.example.application.model.Citizen;
 import com.vaadin.flow.component.AbstractField;
+<<<<<<< HEAD
 import com.vaadin.flow.component.AttachEvent;
 import com.example.model.Citizen;
+=======
+>>>>>>> f300cb55001ab389a3e2b967e619941a033c2cad
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
