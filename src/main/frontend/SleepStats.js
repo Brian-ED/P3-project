@@ -127,7 +127,7 @@ export function createSleepChart(containerId) {
     initChart();
 }
 
-// Also try exposing it globally
+// Also try exposing it globally 
 window.createSleepChart = createSleepChart;
 console.log('createSleepChart exposed globally');
 

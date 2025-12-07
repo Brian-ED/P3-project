@@ -225,7 +225,7 @@ public class SleepStats extends VerticalLayout {
         table.add(createTableHeader("Morgensvar"));
         table.add(createTableHeader("Aftensvar"));
 
-        // Sample data rows
+        // Sample data rows 
         table.add(createTableCell("19/10/2025"));
         table.add(createTableCellWithButton("9:54"));
         table.add(createTableCellWithButton("22:31"));
