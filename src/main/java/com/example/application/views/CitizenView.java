@@ -48,12 +48,19 @@ public class CitizenView extends VerticalLayout {
     public CitizenView(Model model) {
         getElement().getStyle().set("background-color", "#f7f7f7ff");
         this.model = model;
-        // Setup user
-        Citizen citizen = model.getCitizen().orElse(model.initCitizen(SecurityUtils.getUsername())); // TODO handle this error case better. There should be an error screen since this shouldn't happen. It would happen if a advisor came into this site and somehow got access.
+
+    
+        Citizen citizen = model.getCitizen()
+                .orElse(model.initCitizen(SecurityUtils.getUsername())); 
         String Username = citizen.getFullName();
-        AnsweredSurvey[] pastSurveys = citizen.getSurveys(); // TODO @Jonas should figure out how to integrate this into this site and display all surveys, not just one.
-        AnsweredSurvey temporaryMorningSurvey = new AnsweredSurvey(new Answer<?>[0], SurveyType.morning, ZonedDateTime.now());
-        AnsweredSurvey temporaryEveningSurvey = new AnsweredSurvey(new Answer<?>[0], SurveyType.evening, ZonedDateTime.now());
+
+        AnsweredSurvey[] allSurveys = citizen.getSurveys();
+
+        AnsweredSurvey latestMorningSurvey = findLatestSurveyOfType(allSurveys, SurveyType.morning);
+        AnsweredSurvey latestEveningSurvey = findLatestSurveyOfType(allSurveys, SurveyType.evening);
+
+        AnsweredSurvey latestSurvey = getNewestSurvey(latestMorningSurvey, latestEveningSurvey);
+
 
         // Creates the header beam
         HorizontalLayout header = new HorizontalLayout();
@@ -182,8 +189,6 @@ public class CitizenView extends VerticalLayout {
             listLayout.setSpacing(true);
             listLayout.setPadding(true);
 
-            // HENT ALLE BESVAREDE SKEMAER FRA CITIZEN
-            AnsweredSurvey[] allSurveys = citizen.getSurveys();
 
             // Gruppér skemaer efter dato
             Map<LocalDate, List<AnsweredSurvey>> surveysByDate = new TreeMap<>(Collections.reverseOrder());
@@ -470,13 +475,24 @@ public class CitizenView extends VerticalLayout {
         .set("margin-bottom", "-35px");
         Span lastestAnswerSpan1 = new Span("Oversigt over dine seneste søvnregistreringer:");
         lastestAnswerSpan1.getStyle().set("padding", "20px").set("display", "block");
-        Span lastestAnswerSpan2 = new Span(temporaryMorningSurvey.whenAnswered.format(DateTimeFormatter.ofPattern("EEEE 'den' d. MMMM yyyy")));
+
+        // Brug det seneste rigtige skema fra databasen
+        String latestText;
+        if (latestSurvey != null) {
+            latestText = latestSurvey.getWhenAnswered()
+                    .format(DateTimeFormatter.ofPattern("EEEE 'den' d. MMMM yyyy"));
+        } else {
+            latestText = "Du har endnu ikke udfyldt et morgen- eller aftenskema.";
+        }
+
+        Span lastestAnswerSpan2 = new Span(latestText);
         lastestAnswerSpan2.getStyle()
-        .set("padding", "20px")
-        .set("margin-top", "0px")
-        .set("margin-bottom", "-10px")
-        .set("font-weight", "bold")
-        .set("display", "block");
+            .set("padding", "20px")
+            .set("margin-top", "0px")
+            .set("margin-bottom", "-10px")
+            .set("font-weight", "bold")
+            .set("display", "block");
+
         latestAnswersCard.setWidth("50%");
         latestAnswersCard.add(
             lastestAnswerH3,
@@ -562,6 +578,30 @@ public class CitizenView extends VerticalLayout {
         }
 
         return payload.toString();
+    }
+     // Finder seneste skema af en bestemt type (morgen / aften)
+    private AnsweredSurvey findLatestSurveyOfType(AnsweredSurvey[] surveys, SurveyType type) {
+        if (surveys == null) {
+            return null;
+        }
+
+        AnsweredSurvey latest = null;
+        for (AnsweredSurvey survey : surveys) {
+            if (survey == null) continue;
+            if (survey.getType() != type) continue;
+
+            if (latest == null || survey.getWhenAnswered().isAfter(latest.getWhenAnswered())) {
+                latest = survey;
+            }
+        }
+        return latest;
+    }
+
+    // Vælger den nyeste af to skemaer (kan være null)
+    private AnsweredSurvey getNewestSurvey(AnsweredSurvey s1, AnsweredSurvey s2) {
+        if (s1 == null) return s2;
+        if (s2 == null) return s1;
+        return s1.getWhenAnswered().isAfter(s2.getWhenAnswered()) ? s1 : s2;
     }
 
 }
