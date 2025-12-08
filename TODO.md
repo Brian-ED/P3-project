@@ -23,3 +23,5 @@ This may be easier to do after 1.
 10. BRIAN EASY "Hvor mange genstande har du ca. drukket i løbet af dagen?", "1", "2", "3"" is correct order, "when" first, then combobox. Some aren't, fix those.
 Can embed @Embedable classes instead of replication.
 drawUI needs to get listeners.
+
+11. EASY Finish all format functions in the classes inheriting from GenericQuestion.
