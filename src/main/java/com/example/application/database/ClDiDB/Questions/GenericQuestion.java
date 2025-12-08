@@ -31,5 +31,5 @@ public sealed abstract class GenericQuestion<A extends Answer<?>>
         return answer;
     };
 
-    abstract public String format();
+    abstract public String format(Boolean hasAnswered);
 }

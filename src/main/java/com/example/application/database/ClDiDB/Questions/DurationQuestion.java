@@ -7,7 +7,7 @@ public final class DurationQuestion extends GenericQuestion<DurationAnswer> {
         super(answer, title);
     }
 
-    public String format() {
+    public String format(Boolean hasAnswered) {
         return "";
         /* TODO */
     }

@@ -21,7 +21,7 @@ public final class ComboBoxQuestion extends GenericQuestion<ComboBoxAnswer> {
     @Embedded
     private final ComboBoxAnswer answer = new ComboBoxAnswer();
 
-    public String format() {
+    public String format(Boolean hasAnswered) {
         return "";
         /* TODO */
     }
