@@ -7,7 +7,7 @@ public final class YesOrNoQuestion extends GenericQuestion<YesOrNoAnswer> {
         super(answer, title);
     }
 
-    public String format() {
+    public String format(Boolean hasAnswered) {
         return "";
         /* TODO */
     }

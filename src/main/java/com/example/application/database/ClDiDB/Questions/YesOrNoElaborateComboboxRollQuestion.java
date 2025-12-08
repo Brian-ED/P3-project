@@ -27,7 +27,7 @@ public final class YesOrNoElaborateComboboxRollQuestion
         return q0Subs;
     }
 
-    public String format() {
+    public String format(Boolean hasAnswered) {
         return "";
         /* TODO */
     }

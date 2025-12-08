@@ -14,7 +14,7 @@ public final class YesOrNoElaborateRollQuestion extends GenericQuestion<YesOrNoE
         return q0;
     }
 
-    public String format() {
+    public String format(Boolean hasAnswered) {
         return "";
         /* TODO */
     }

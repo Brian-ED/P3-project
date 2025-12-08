@@ -20,7 +20,7 @@ public final class YesOrNoElaborateComboboxQuestion extends GenericQuestion<YesO
         return subs;
     }
 
-    public String format() {
+    public String format(Boolean hasAnswered) {
         return "";
         /* TODO */
     }

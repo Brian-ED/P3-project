@@ -7,7 +7,7 @@ public final class TextFieldQuestion extends GenericQuestion<TextFieldAnswer> {
         super(answer, title);
     }
 
-    public String format() {
+    public String format(Boolean hasAnswered) {
         return "";
         /* TODO */
     }

@@ -7,7 +7,7 @@ public final class RollQuestion extends GenericQuestion<RollAnswer> {
         super(answer, title);
     }
 
-    public String format() {
+    public String format(Boolean hasAnswered) {
         return "";
         /* TODO */
     }
