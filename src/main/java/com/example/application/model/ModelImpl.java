@@ -2,33 +2,33 @@ package com.example.application.model;
 
 import java.util.Optional;
 
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-@Service
-//@Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS) // Gives one instance per user session
+import com.example.application.database.ClDiDB.CitizenRow;
+import com.example.application.database.ClDiDB.Survey;
+import com.vaadin.flow.spring.annotation.VaadinSessionScope;
+
+
+@VaadinSessionScope
+@Component
 public class ModelImpl implements Model {
-
     private Optional<User> user = Optional.empty();
     private Optional<UserType> userType = Optional.empty();
     private final DatabaseControler database;
 
-    ModelImpl(DatabaseControler database) { // , String username ?
+    @Autowired
+    public ModelImpl(DatabaseControler database) { // , String username ?
         // Model.user = Optional.of(database.getUser(username));
-        this.userType = Optional.of(UserType.CITIZEN);
         this.database = database;
     }
 
-    public Citizen initCitizen(String UserName) {
+    public Citizen initAsCitizen(String username) {
         this.userType = Optional.of(UserType.CITIZEN);
-        Optional<Citizen> x = database.getCitizenByName(UserName);
-        Citizen citizen;
-        if (x.isEmpty()) {
-            citizen = new Citizen(UserName, null, new AnsweredSurvey[0], null);
-        } else {
-            citizen = x.orElseThrow();
-        }
+        Citizen citizen = database.getCitizenByName(username)
+                    .orElseThrow(() -> new IllegalStateException(
+                "Citizen does not exist — cannot auto-create here"
+            ));
         this.user = Optional.of(citizen);
         return citizen;
     }
@@ -52,19 +52,76 @@ public class ModelImpl implements Model {
         return Optional.of((Citizen)existingUser);
     }
 
-    public Optional<SleepAdvisor> getAdvisor() {
-        if (user.isEmpty()) {
-            return Optional.empty();
+    public SleepAdvisor getThisAdvisor(String username) {
+        if (!userType.isEmpty()) {
+            if (user.isEmpty()) {
+                throw new IllegalStateException("userType existed but User did not: " + userType.orElseThrow());
+            }
+            if (userType.orElseThrow() != UserType.ADVISOR || !(user.orElseThrow() instanceof SleepAdvisor)) {
+                throw new IllegalStateException("Tried initializing citizen as advisor");
+            }
+            return (SleepAdvisor)(user.orElseThrow());
         }
-        User existingUser = user.orElseThrow();
-        if (existingUser.getUserType() != UserType.ADVISOR) {
-            return Optional.empty();
-        };
-        return Optional.of((SleepAdvisor)existingUser);
+
+        SleepAdvisor advisor = database
+            .getAdvisorByName(username)
+            .orElseGet(() ->
+                database.newAdvisor(username)
+            );
+
+        this.userType = Optional.of(UserType.ADVISOR);
+        this.user = Optional.of(advisor);
+
+        return advisor;
     }
 
 
     public Optional<UserType> getUserType() {
       return userType;
     }
+
+    private class SaveSurveyListener implements SurveyListener {
+		@Override public void currentQuestionChanged(int newIndex) {}
+		@Override public void questionAnswered(int index, AnswerPayload payload) {}
+        private final DatabaseControler db;
+
+        public SaveSurveyListener(DatabaseControler db) {
+            this.db = db;
+        }
+
+        @Override
+		public void notifySubmitted(Survey survey) {
+            db.saveSurvey(survey);
+        }
+    }
+
+    public DynamicSurvey initDynamicSurvey(SurveyType type, CitizenRow owner) {
+        return new DynamicSurvey(type, owner) {{
+            addListener(new SaveSurveyListener(database));
+        }};
+    }
+
+    public Citizen getThisCitizen(String username) {
+        if (!userType.isEmpty()) {
+            if (user.isEmpty()) {
+                throw new IllegalStateException("userType existed but User did not: " + userType.orElseThrow());
+            }
+            if (userType.orElseThrow() != UserType.CITIZEN || !(user.orElseThrow() instanceof Citizen)) {
+                throw new IllegalStateException("Tried initializing advisor as citizen");
+            }
+            return (Citizen)(user.orElseThrow());
+        }
+
+        Citizen citizen = database
+            .getCitizenByName(username)
+            .orElseGet(() ->
+                database.newCitizen(username)
+            );
+
+        this.userType = Optional.of(UserType.CITIZEN);
+        this.user = Optional.of(citizen);
+
+        return citizen;
+    }
+
 }

@@ -1,13 +1,14 @@
-package com.example.application.database.ClDiDB;
+package com.example.application.database.ClDiDB.Answers;
 
 import java.time.ZonedDateTime;
 
-import com.example.application.model.Answer;
 import com.example.application.model.AnswerPayload.YesOrNoElaborateRollRollPayload;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 
-public class YesOrNoElaborateRollRollAnswer extends Answer<YesOrNoElaborateRollRollPayload> {
+@Embeddable
+public final class YesOrNoElaborateRollRollAnswer extends Answer<YesOrNoElaborateRollRollPayload> {
 
     public YesOrNoElaborateRollRollAnswer() {
         super(YesOrNoElaborateRollRollPayload.class);
@@ -17,20 +18,20 @@ public class YesOrNoElaborateRollRollAnswer extends Answer<YesOrNoElaborateRollR
     private Boolean yesNo;
 
     @Column(nullable = false)
-    ZonedDateTime timestamp1;
+    private ZonedDateTime timestamp1;
 
     @Column(nullable = false)
-    ZonedDateTime timestamp2;
-
-    @Override
-    public void answer(YesOrNoElaborateRollRollPayload p) {
-        this.yesNo = p.yesNo();
-        this.timestamp1 = p.timestamp1();
-        this.timestamp2 = p.timestamp2();
-    }
+    private ZonedDateTime timestamp2;
 
 	@Override
 	public YesOrNoElaborateRollRollPayload toPayload() {
 		return new YesOrNoElaborateRollRollPayload(yesNo, timestamp1, timestamp2);
+	}
+
+	@Override
+	protected void answerProto(YesOrNoElaborateRollRollPayload p) {
+        this.yesNo = p.yesNo();
+        this.timestamp1 = p.timestamp1();
+        this.timestamp2 = p.timestamp2();
 	}
 }

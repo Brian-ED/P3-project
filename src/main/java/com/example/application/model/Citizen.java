@@ -1,9 +1,15 @@
 package com.example.application.model;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+
+import com.example.application.database.ClDiDB.AdvisorRow;
+import com.example.application.database.ClDiDB.CitizenRow;
+import com.example.application.database.ClDiDB.SurveyEveningRow;
+import com.example.application.database.ClDiDB.SurveyMorningRow;
 
 // ChatGPT generated class
 class EventSource<T> {
@@ -30,14 +36,25 @@ class EventSource<T> {
 
 
 public class Citizen implements User {
-    public Citizen(String fullName, Long id, AnsweredSurvey[] answeredSurveys, Optional<SleepAdvisor> assignedAdvisor) {
-        this.fullName = fullName;
-        this.id = id;
+    public Citizen(CitizenRow citizenData) {
+        List<SurveyMorningRow> mornings = citizenData.getMorningSurveys();
+        List<SurveyEveningRow> evenings = citizenData.getEveningSurveys();
+        AnsweredSurvey[] answeredSurveys = new AnsweredSurvey[mornings.size()+evenings.size()];
+        for (int i = 0; i<mornings.size(); i++) {
+            SurveyMorningRow m = mornings.get(i);
+            answeredSurveys[i] = new AnsweredSurvey(m.getAnswers(), SurveyType.morning, m.getWhenAnswered());
+        }
+        for (int i = 0; i<evenings.size(); i++)  {
+            SurveyEveningRow e = evenings.get(i);
+            answeredSurveys[mornings.size() + i] = new AnsweredSurvey(e.getAnswers(), SurveyType.morning, e.getWhenAnswered());
+        }
+        this.fullName = citizenData.getFullName();
         this.answeredSurveys = answeredSurveys;
-        this.assignedAdvisor = assignedAdvisor;
+        this.assignedAdvisor = Optional.empty();
+        this.currentSurveyMorning = new DynamicSurvey(SurveyType.morning, citizenData);
+        this.currentSurveyEvening = new DynamicSurvey(SurveyType.evening, citizenData);
     }
 
-    public final Long id;
     private String fullName;
 
     @Override
@@ -45,8 +62,11 @@ public class Citizen implements User {
         return fullName;
     }
 
-    public final DynamicSurvey currentSurveyMorning = new DynamicSurvey(SurveyType.morning);
-    public final DynamicSurvey currentSurveyEvening = new DynamicSurvey(SurveyType.evening);
+    private final DynamicSurvey currentSurveyMorning;
+    private final DynamicSurvey currentSurveyEvening;
+    DynamicSurvey getCurrentSurveyMorning() {return currentSurveyMorning;}
+    DynamicSurvey getCurrentSurveyEvening() {return currentSurveyEvening;}
+
     private Optional<SleepAdvisor> assignedAdvisor;
     private AnsweredSurvey[] answeredSurveys;
 

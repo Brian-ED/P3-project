@@ -15,7 +15,7 @@ public class AdvisorRow {
     @Column(nullable = false)
     private Long id;
 
-    @Column(nullable = false, columnDefinition = "text")
+    @Column(nullable = false, columnDefinition = "text", unique = true)
     private String fullName;
     public String getFullName() {return fullName;};
     public void setFullName(String fullName) {this.fullName = fullName;};

@@ -1,4 +1,4 @@
-package com.example.application.database;
+package com.example.application.database.repositories;
 
 import java.util.List;
 import java.util.Optional;

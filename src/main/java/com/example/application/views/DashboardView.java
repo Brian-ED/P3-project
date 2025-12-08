@@ -1,23 +1,14 @@
 package com.example.application.views;
 
-import java.util.*;
-import com.vaadin.flow.spring.security.AuthenticationContext;
-import jakarta.annotation.security.PermitAll;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
-import com.example.application.model.Citizen;
-import com.vaadin.flow.component.AbstractField;
-<<<<<<< HEAD
-import com.vaadin.flow.component.AttachEvent;
-import com.example.model.Citizen;
-=======
->>>>>>> f300cb55001ab389a3e2b967e619941a033c2cad
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -26,6 +17,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+
 import jakarta.annotation.security.RolesAllowed;
 
 @Route("dashboard")

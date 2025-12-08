@@ -1,13 +1,12 @@
-package com.example.application.database.ClDiDB;
+package com.example.application.database.ClDiDB.Answers;
 
-import com.example.application.model.Answer;
 import com.example.application.model.AnswerPayload.DurationPayload;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
-public class DurationAnswer extends Answer<DurationPayload> {
+public final class DurationAnswer extends Answer<DurationPayload> {
 
     public DurationAnswer() {
         super(DurationPayload.class);
@@ -17,7 +16,7 @@ public class DurationAnswer extends Answer<DurationPayload> {
     private Integer minutes;
 
     @Override
-    public void answer(DurationPayload p) {
+    public void answerProto(DurationPayload p) {
         this.minutes = p.minutes();
     }
 

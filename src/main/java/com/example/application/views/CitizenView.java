@@ -1,7 +1,6 @@
 package com.example.application.views;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,16 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.example.application.model.Answer;
-import com.example.application.model.AnswerPayload;
-import com.example.application.model.AnswerPayload.ComboBoxPayload;
-import com.example.application.model.AnswerPayload.RollPayload;
-import com.example.application.model.AnswerPayload.YesOrNoElaborateComboboxPayload;
-import com.example.application.model.AnswerPayload.YesOrNoPayload;
+import com.example.application.database.ClDiDB.Questions.GenericQuestion;
 import com.example.application.model.AnsweredSurvey;
 import com.example.application.model.Citizen;
 import com.example.application.model.Model;
-import com.example.application.model.Question;
 import com.example.application.model.SurveyType;
 import com.example.application.security.SecurityUtils;
 import com.vaadin.flow.component.button.Button;
@@ -43,15 +36,14 @@ import jakarta.annotation.security.RolesAllowed;
 @PageTitle("Klient Dashboard")
 public class CitizenView extends VerticalLayout {
 
-    private final Model model;
+    private Model model;
 
     public CitizenView(Model model) {
         getElement().getStyle().set("background-color", "#f7f7f7ff");
         this.model = model;
+        // Setup user
+        Citizen citizen = model.getThisCitizen(SecurityUtils.getUsername());
 
-    
-        Citizen citizen = model.getCitizen()
-                .orElse(model.initCitizen(SecurityUtils.getUsername())); 
         String Username = citizen.getFullName();
 
         AnsweredSurvey[] allSurveys = citizen.getSurveys();
@@ -310,14 +302,14 @@ public class CitizenView extends VerticalLayout {
                         contentLayout.add(morningTitle);
 
                         // Vis alle svar fra morgenundersøgelsen
-                        Answer<?>[] morningAnswers = finalMorningSurvey.getAnswers();
+                        GenericQuestion<?>[] morningAnswers = finalMorningSurvey.getAnswers();
                         if (morningAnswers != null && morningAnswers.length > 0) {
-                            for (Answer<?> answer : morningAnswers) {
+                            for (GenericQuestion<?> answer : morningAnswers) {
                                 Div answerDiv = new Div();
-                                Span questionSpan = new Span(getQuestionText(answer) + ": ");
+                                Span questionSpan = new Span(answer.getMainQuestionTitle() + ": ");
                                 questionSpan.getStyle().set("font-weight", "bold");
 
-                                Span answerValueSpan = new Span(getAnswerValue(answer));
+                                Span answerValueSpan = new Span(answer.getMainQuestionTitle());
                                 answerValueSpan.getStyle().set("color", "#0066cc");
 
                                 answerDiv.add(questionSpan, answerValueSpan);
@@ -363,14 +355,14 @@ public class CitizenView extends VerticalLayout {
                         contentLayout.add(eveningTitle);
 
                         // Vis alle svar fra aftenundersøgelse
-                        Answer<?>[] eveningAnswers = finalEveningSurvey.getAnswers();
+                        GenericQuestion<?>[] eveningAnswers = finalEveningSurvey.getAnswers();
                         if (eveningAnswers != null && eveningAnswers.length > 0) {
-                            for (Answer<?> answer : eveningAnswers) {
+                            for (GenericQuestion<?> answer : eveningAnswers) {
                                 Div answerDiv = new Div();
-                                Span questionSpan = new Span(getQuestionText(answer) + ": ");
+                                Span questionSpan = new Span(answer.getMainQuestionTitle() + ": ");
                                 questionSpan.getStyle().set("font-weight", "bold");
 
-                                Span answerValueSpan = new Span(getAnswerValue(answer));
+                                Span answerValueSpan = new Span(answer.getMainQuestionTitle());
                                 answerValueSpan.getStyle().set("color", "#0066cc");
 
                                 answerDiv.add(questionSpan, answerValueSpan);
@@ -503,83 +495,7 @@ public class CitizenView extends VerticalLayout {
         latestAnswersCard.add(sideBySideCards2);
         add(latestAnswersCard);
     }
-    /**
-     * Henter spørgsmålsteksten fra et Answer objekt
-     * NOTE: Vi skal gætte at Answer har en reference til Question
-     * Hvis ikke, skal vi overveje en anden struktur
-     */
-    private String getQuestionText(Answer<?> answer) {
-        // Dette afhænger af hvordan Answer klasserne er implementeret
-        // Hvis Answer har et question felt:
-        try {
-            java.lang.reflect.Field questionField = answer.getClass().getDeclaredField("question");
-            questionField.setAccessible(true);
-            Question question = (Question) questionField.get(answer);
-            return question.questionTitle;
-        } catch (Exception e) {
-            // Reflection fejlede - Answer har måske ikke et question felt
-        }
-
-        // Alternativt - hvis Answer gemmer spørgsmåls-ID eller noget andet
-        return "Spørgsmål"; // Placeholder indtil vi ser Answer-implementationerne
-    }
-
-
-    //Henter og formaterer svaret fra et Answer objekt
-    private String getAnswerValue(Answer<?> answer) {
-        try {
-            // Brug reflection for at få payload fra Answer
-            // Dette afhænger af hvordan Answer klasserne gemmer data
-            java.lang.reflect.Method getPayloadMethod = answer.getClass().getMethod("getPayload");
-            AnswerPayload payload = (AnswerPayload) getPayloadMethod.invoke(answer);
-
-            if (payload != null) {
-                return formatAnswerPayload(payload);
-            }
-        } catch (Exception e) {
-            // Prøv en anden tilgang
-        }
-
-        return "Ikke besvaret";
-    }
-
-
-    //Formaterer AnswerPayload til en læsbar tekst
-    private String formatAnswerPayload(AnswerPayload payload) {
-        if (payload == null) {
-            return "Ikke besvaret";
-        }
-
-        // Behandl de forskellige typer payload
-        if (payload instanceof YesOrNoPayload yesNoPayload) {
-            return yesNoPayload.yesNo() ? "Ja" : "Nej";
-        }
-
-        if (payload instanceof YesOrNoElaborateComboboxPayload elaboratePayload) {
-            String base = elaboratePayload.yesNo() ? "Ja" : "Nej";
-            if (elaboratePayload.whichIsSelected() > 0) {
-                return base + " (" + elaboratePayload.whichIsSelected() + ")";
-            }
-            return base;
-        }
-
-        if (payload instanceof RollPayload rollPayload) {
-            // Konverter Instant til læselig tid
-            java.time.format.DateTimeFormatter formatter =
-                java.time.format.DateTimeFormatter.ofPattern("HH:mm")
-                    .withZone(java.time.ZoneId.systemDefault());
-            return formatter.format(rollPayload.timestamp());
-        }
-
-        if (payload instanceof ComboBoxPayload comboBoxPayload) {
-            // Her skal vi vide hvilke valgmuligheder der er
-            // Returner index eller værdi
-            return "Valg " + comboBoxPayload.whichIsSelected();
-        }
-
-        return payload.toString();
-    }
-     // Finder seneste skema af en bestemt type (morgen / aften)
+    // Finder seneste skema af en bestemt type (morgen / aften)
     private AnsweredSurvey findLatestSurveyOfType(AnsweredSurvey[] surveys, SurveyType type) {
         if (surveys == null) {
             return null;

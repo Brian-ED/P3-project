@@ -1,15 +1,14 @@
-package com.example.application.database.ClDiDB;
+package com.example.application.database.ClDiDB.Answers;
 
 import java.time.ZonedDateTime;
 
-import com.example.application.model.Answer;
 import com.example.application.model.AnswerPayload.RollPayload;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
-public class RollAnswer extends Answer<RollPayload> {
+public final class RollAnswer extends Answer<RollPayload> {
     public RollAnswer() {
         super(RollPayload.class);
     }
@@ -18,7 +17,7 @@ public class RollAnswer extends Answer<RollPayload> {
     private ZonedDateTime timestamp;
 
     @Override
-    public void answer(RollPayload p) {
+    public void answerProto(RollPayload p) {
         this.timestamp = p.timestamp();
     }
 

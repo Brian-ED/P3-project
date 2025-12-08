@@ -1,16 +1,15 @@
-package com.example.application.database.ClDiDB;
+package com.example.application.database.ClDiDB.Answers;
 
 
 import java.time.ZonedDateTime;
 
-import com.example.application.model.Answer;
 import com.example.application.model.AnswerPayload.YesOrNoElaborateRollComboboxPayload;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
-public class YesOrNoElaborateRollComboboxAnswer extends Answer<YesOrNoElaborateRollComboboxPayload> {
+public final class YesOrNoElaborateRollComboboxAnswer extends Answer<YesOrNoElaborateRollComboboxPayload> {
 
     public YesOrNoElaborateRollComboboxAnswer() {
         super(YesOrNoElaborateRollComboboxPayload.class);
@@ -20,13 +19,13 @@ public class YesOrNoElaborateRollComboboxAnswer extends Answer<YesOrNoElaborateR
     private Boolean value;
 
     @Column(nullable = false)
-    ZonedDateTime timestamp;
+    private ZonedDateTime timestamp;
 
     @Column(nullable = false)
-    Short whichIsSelected;
+    private Short whichIsSelected;
 
     @Override
-    public void answer(YesOrNoElaborateRollComboboxPayload p) {
+    public void answerProto(YesOrNoElaborateRollComboboxPayload p) {
         this.value = p.yesNo();
         this.timestamp = p.timestamp();
         this.whichIsSelected = p.whichIsSelected();

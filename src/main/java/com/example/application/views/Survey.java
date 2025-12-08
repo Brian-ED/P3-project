@@ -1,6 +1,7 @@
 package com.example.application.views;
 
-import com.example.application.QuestionUI;
+import com.example.application.UI;
+import com.example.application.database.ClDiDB.CitizenRow;
 import com.example.application.model.AnswerPayload;
 import com.example.application.model.DynamicSurvey;
 import com.example.application.model.SurveyListener;
@@ -24,13 +25,14 @@ public class Survey extends VerticalLayout {
     class ThisListener implements SurveyListener {
         @Override
         public void currentQuestionChanged(int newIndex) {
-            showQuestion(QuestionUI.drawUI(survey.currentQuestion()));
+            showQuestion(UI.drawUI(survey.currentQuestion()));
         }
 
         @Override
-        public void questionAnswered(int index, AnswerPayload payload) {
-            // TODO
-        }
+        public void questionAnswered(int index, AnswerPayload payload) {}
+
+		@Override
+		public void notifySubmitted(com.example.application.database.ClDiDB.Survey survey) {}
     }
 
     // Layout that will contain the current question UI
@@ -38,8 +40,10 @@ public class Survey extends VerticalLayout {
 
     public Survey() {
 
+        CitizenRow user = new CitizenRow() {{setFullName("Brian");}};
+
         // 1) Choose which survey to show
-        this.survey = new DynamicSurvey(SurveyType.morning);
+        this.survey = new DynamicSurvey(SurveyType.morning, user);
         SurveyListener listener = new ThisListener();
         survey.addListener(listener);
 
@@ -77,7 +81,7 @@ public class Survey extends VerticalLayout {
         add(h3, content, buttons);
 
         // 7) Show the first question
-		showQuestion(QuestionUI.drawUI(survey.currentQuestion()));
+		showQuestion(UI.drawUI(survey.currentQuestion()));
 
         // 8) Next / Previous button logic
         next.addClickListener(e -> survey.nextQuestion());

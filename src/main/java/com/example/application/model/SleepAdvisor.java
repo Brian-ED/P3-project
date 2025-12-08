@@ -2,11 +2,13 @@ package com.example.application.model;
 
 import java.util.Optional;
 
+import com.example.application.database.ClDiDB.AdvisorRow;
+
 public class SleepAdvisor implements User {
     private String fullName;
 
-    public SleepAdvisor(String fullName) {
-        this.fullName = fullName;
+    public SleepAdvisor(AdvisorRow row) {
+        this.fullName = row.getFullName();
     }
 
     @Override

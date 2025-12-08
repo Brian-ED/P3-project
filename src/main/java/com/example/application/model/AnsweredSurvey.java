@@ -2,18 +2,22 @@ package com.example.application.model;
 
 import java.time.ZonedDateTime;
 
-public class AnsweredSurvey {
-    public final SurveyType surveyType;
-    public final Answer<?>[] answers;
-    public final ZonedDateTime whenAnswered;
+import com.example.application.database.ClDiDB.Questions.GenericQuestion;
 
-    public AnsweredSurvey(Answer<?>[] answers, SurveyType surveyType, ZonedDateTime whenAnswered) {
+public class AnsweredSurvey {
+    private final SurveyType surveyType;
+    private final GenericQuestion<?>[] answers;
+    private final ZonedDateTime whenAnswered;
+
+    public SurveyType getSurveyType() {return surveyType;}
+
+    public AnsweredSurvey(GenericQuestion<?>[] answers, SurveyType surveyType, ZonedDateTime whenAnswered) {
         this.surveyType = surveyType;
         this.answers = answers;
         this.whenAnswered = whenAnswered;
     }
     // Getter-metoder som bruges i Citizenview
-    public Answer<?>[] getAnswers() {
+    public GenericQuestion<?>[] getAnswers() {
         return answers;
     }
 

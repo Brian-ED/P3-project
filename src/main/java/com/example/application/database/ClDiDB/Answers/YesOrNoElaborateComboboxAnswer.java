@@ -1,13 +1,12 @@
-package com.example.application.database.ClDiDB;
+package com.example.application.database.ClDiDB.Answers;
 
-import com.example.application.model.Answer;
 import com.example.application.model.AnswerPayload.YesOrNoElaborateComboboxPayload;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
-public class YesOrNoElaborateComboboxAnswer extends Answer<YesOrNoElaborateComboboxPayload> {
+public final class YesOrNoElaborateComboboxAnswer extends Answer<YesOrNoElaborateComboboxPayload> {
 
     public YesOrNoElaborateComboboxAnswer() {
         super(YesOrNoElaborateComboboxPayload.class);
@@ -17,10 +16,10 @@ public class YesOrNoElaborateComboboxAnswer extends Answer<YesOrNoElaborateCombo
     private Boolean yesNo;
 
     @Column(nullable = false)
-    Short whichIsSelected;
+    private Short whichIsSelected;
 
     @Override
-    public void answer(YesOrNoElaborateComboboxPayload p) {
+    public void answerProto(YesOrNoElaborateComboboxPayload p) {
         this.yesNo = p.yesNo();
         this.whichIsSelected = p.whichIsSelected();
     }
