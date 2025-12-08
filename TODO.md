@@ -2,7 +2,7 @@
 Needed for submitting surveys without error.
 While doing this, collumns need to be added to the AnsweredSurveyRow class.
 
-2. MEDIUM: In the same file as above: `src/main/java/com/example/application/database/PostgreSQLDatabaseControler.java`
+2. ✅ (Kinda, CitizenRowToCitizen was just removed) MEDIUM: In the same file as above: `src/main/java/com/example/application/database/PostgreSQLDatabaseControler.java`
 There is a function called CitizenRowToCitizen. Implement CitizenToCitizenRow.
 This may be easier to do after 1.
 
