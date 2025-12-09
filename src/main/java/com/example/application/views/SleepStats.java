@@ -52,16 +52,7 @@ public class SleepStats extends VerticalLayout {
         current.getStyle().set("font-weight", "600");
         crumbs.add(dashboard, sep2, current);
 
-        Button logout = new Button("Logout");
-        logout.getStyle()
-            .set("background", "#2219c3ff")
-            .set("color", "white")
-            .set("border-radius", "8px")
-            .set("padding", "8px 14px");
-
-
-
-        top.add(crumbs, logout);
+        top.add(crumbs);
         top.expand(crumbs);
 
         add(top);
