@@ -58,7 +58,7 @@ public class Citizen implements User {
         this.currentSurveyEvening = new DynamicSurvey(SurveyType.evening, citizenData);
     }
 
-   
+
     private String fullName;
     private Long id;
     private final DynamicSurvey currentSurveyMorning;

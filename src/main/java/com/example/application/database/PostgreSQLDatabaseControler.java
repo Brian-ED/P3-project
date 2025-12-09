@@ -108,7 +108,7 @@ public class PostgreSQLDatabaseControler implements DatabaseControler {
     public List<SleepAdvisor> getAllAdvisors() {
         List<AdvisorRow> rows = advisorsRepo.findAll();
         return rows.stream().map(SleepAdvisor::new).toList();
-    } 
+    }
     @Transactional
 public void saveCitizen(Citizen citizen) {
     // Get the CitizenRow from the database

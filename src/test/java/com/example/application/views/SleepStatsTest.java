@@ -18,5 +18,5 @@ class SleepStatsUnitTest {
     void test1plus1() {
         assertEquals(2, 1 + 1);
     }
-  
+
 }
