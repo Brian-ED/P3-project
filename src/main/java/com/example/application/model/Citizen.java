@@ -1,5 +1,7 @@
 package com.example.application.model;
 
+import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +15,6 @@ import com.example.application.database.ClDiDB.SurveyMorningRow;
 
 // ChatGPT generated class
 class EventSource<T> {
-
     public static class Token {}
     private final Map<Token, Function<T,Void>> listeners = new HashMap<>();
 
@@ -36,6 +37,7 @@ class EventSource<T> {
 
 
 public class Citizen implements User {
+    private final CitizenRow row;
     public Citizen(CitizenRow citizenData) {
         List<SurveyMorningRow> mornings = citizenData.getMorningSurveys();
         List<SurveyEveningRow> evenings = citizenData.getEveningSurveys();
@@ -48,6 +50,7 @@ public class Citizen implements User {
             SurveyEveningRow e = evenings.get(i);
             answeredSurveys[mornings.size() + i] = new AnsweredSurvey(e.getAnswers(), SurveyType.morning, e.getWhenAnswered());
         }
+        this.row = citizenData;
         this.fullName = citizenData.getFullName();
         this.answeredSurveys = answeredSurveys;
         this.assignedAdvisor = Optional.empty();
@@ -55,13 +58,9 @@ public class Citizen implements User {
         this.currentSurveyEvening = new DynamicSurvey(SurveyType.evening, citizenData);
     }
 
+   
     private String fullName;
-
-    @Override
-    public String getFullName() {
-        return fullName;
-    }
-
+    private Long id;
     private final DynamicSurvey currentSurveyMorning;
     private final DynamicSurvey currentSurveyEvening;
     DynamicSurvey getCurrentSurveyMorning() {return currentSurveyMorning;}
@@ -91,5 +90,49 @@ public class Citizen implements User {
     public AnsweredSurvey[] getSurveys() {
         return this.answeredSurveys;
     };
+
+
+public String getLastEntry() {
+    if (answeredSurveys == null || answeredSurveys.length == 0) {
+        return "Ingen indtastninger";
+    }
+
+    return Arrays.stream(answeredSurveys)
+                 .map(AnsweredSurvey::getWhenAnswered) // ZonedDateTime
+                 .max(ZonedDateTime::compareTo)        // Compare ZonedDateTime
+                 .map(ZonedDateTime::toString)         // Convert to string
+                 .orElse("Ingen indtastninger");
+}
+
+
+@Override
+public String getFullName() {
+        return fullName;
+}
+
+public String getSeverity() {
+    // Placeholder logic; you can replace with actual logic based on surveys
+    return "Ukendt"; // or "Moderat"
+}
+
+public String getAdvisor() {
+    return assignedAdvisor.map(SleepAdvisor::getFullName).orElse("");
+}
+
+public void setAdvisor(SleepAdvisor advisor) {
+    this.assignedAdvisor = Optional.ofNullable(advisor);
+}
+
+public boolean isHighlight() {
+    return "Moderat".equalsIgnoreCase(getSeverity());
+}
+
+public Long getId() {
+    return id;
+}
+
+public CitizenRow getRow() {
+    return this.row; // row is the CitizenRow you store internally
+}
 
 }

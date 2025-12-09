@@ -1,9 +1,16 @@
 package com.example.application.views;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import com.postgresqlSwitcher;
+import com.example.application.database.PostgreSQLDatabaseControler;
+import com.example.application.database.ClDiDB.AdvisorRow;
+import com.example.application.database.ClDiDB.CitizenRow;
+import com.example.application.model.Citizen;
+import com.example.application.model.SleepAdvisor;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -25,10 +32,13 @@ import jakarta.annotation.security.RolesAllowed;
 @RolesAllowed({"ADVISOR", "ADMIN"})
 public class DashboardView extends VerticalLayout {
 
-    private List<Citizen> citizens = new ArrayList<>();
+    private List<com.example.application.model.Citizen> citizens = new ArrayList<>();
+    
     private VerticalLayout listContainer;
+    private final PostgreSQLDatabaseControler db;
+    public DashboardView(PostgreSQLDatabaseControler db) {
+        this.db = db;
 
-    public DashboardView() {
         setSizeFull();
         setPadding(false);
         setSpacing(false);
@@ -144,7 +154,7 @@ public class DashboardView extends VerticalLayout {
             switch (selected) {
 
                 case "Navn":
-                    citizens.sort(Comparator.comparing(Citizen::getName));
+                    citizens.sort(Comparator.comparing(Citizen::getFullName));
                     break;
 
                 case "Sidste indtastning":
@@ -178,13 +188,35 @@ public class DashboardView extends VerticalLayout {
         listContainer.setSpacing(false);
         listContainer.setWidthFull();
 
-        // Add citizens (sample rows) — replicate the visual style from screenshot
-        citizens.add(new Citizen("Parsa Gholami", "Ingen indtastninger", "Ukendt", false));
-        citizens.add(new Citizen("Alexander Ølholm", "2025-10-19", "Moderat", true));
-        citizens.add(new Citizen("Patrick Kure", "2025-10-20", "Ukendt", false));
-        citizens.add(new Citizen("Brian Ellingsgaard", "2025-10-19", "Ukendt", false));
-        citizens.add(new Citizen("Jonas", "2025-10-18", "Ukendt", false));
-        citizens.add(new Citizen("John Doe", "-", "Ukendt", false));
+       List<com.example.application.model.Citizen> dbCitizens = Arrays.asList(db.searchCitizensByName(""));
+        SleepAdvisor advisor1 = new SleepAdvisor(new AdvisorRow());
+advisor1.getRow().setFullName("Søvnrådgiver Anna");
+
+SleepAdvisor advisor2 = new SleepAdvisor(new AdvisorRow());
+advisor2.getRow().setFullName("Søvnrådgiver Peter");
+
+// Example citizens
+Citizen citizen1 = new Citizen(new CitizenRow());
+citizen1.getRow().setFullName("Emma Jensen");
+citizen1.setAdvisor(advisor1);
+
+Citizen citizen2 = new Citizen(new CitizenRow());
+citizen2.getRow().setFullName("Lars Hansen");
+citizen2.setAdvisor(advisor2);
+
+Citizen citizen3 = new Citizen(new CitizenRow());
+citizen3.getRow().setFullName("Maja Sørensen");
+citizen3.setAdvisor(advisor1);
+
+// Add to your citizens list
+citizens.add(citizen1);
+citizens.add(citizen2);
+citizens.add(citizen3);
+
+// Refresh UI
+refreshList();
+      
+       citizens.addAll(dbCitizens);
 
         refreshList();
 
@@ -255,14 +287,21 @@ public class DashboardView extends VerticalLayout {
         avatar.getStyle().set("color", "#1f2937");
         avatar.getStyle().set("font-weight", "600");
         avatar.getStyle().set("font-size", "14px");
-        avatar.add(new Span(getInitials(c.getName())));
+        Span initials = new Span(getInitials(c.getFullName()));
+        avatar.add(initials);
 
         // Info block
         VerticalLayout info = new VerticalLayout();
         info.setPadding(false);
         info.setSpacing(false);
 
-        Span nameLabel = new Span(c.getName());
+        Span idLabel = new Span("ID: " + c.getId());
+        idLabel.getStyle().set("font-size", "12px").set("color", "var(--lumo-secondary-text-color)");
+
+        Span lastSurveyLabel = new Span("Sidste indtastning: " + c.getLastEntry());
+        lastSurveyLabel.getStyle().set("font-size", "13px").set("color", "var(--lumo-secondary-text-color)");
+
+        Span nameLabel = new Span(c.getFullName());
         nameLabel.getStyle().set("font-weight", "600");
         nameLabel.getStyle().set("font-size", "14px");
 
@@ -270,7 +309,7 @@ public class DashboardView extends VerticalLayout {
         sub.getStyle().set("color", "var(--lumo-secondary-text-color)");
         sub.getStyle().set("font-size", "13px");
 
-        info.add(nameLabel, sub);
+        info.add(nameLabel, idLabel, lastSurveyLabel, sub);
         info.getStyle().set("margin-left", "12px");
 
         // Right-side actions: severity badge, advisor label (placeholder), sort icon, view data button
@@ -298,13 +337,10 @@ public class DashboardView extends VerticalLayout {
 advisorCombo.setPlaceholder("Vælg søvnrådgiver");
 
 // Options in the dropdown
-advisorCombo.setItems(
-        "Ingen søvnrådgiver",
-        "Anna Hansen",
-        "Peter Nielsen",
-        "Maria Jensen",
-        "John Doe"
-);
+List<SleepAdvisor> advisors = db.getAllAdvisors(); // We’ll add this method
+List<String> advisorNames = advisors.stream().map(SleepAdvisor::getFullName).toList();
+advisorCombo.setItems(advisorNames);
+advisorCombo.setValue(c.getAdvisor());
 
 // Default selection
 advisorCombo.setValue(c.getAdvisor());
@@ -319,9 +355,15 @@ advisorCombo.getStyle().set("background", "transparent");
 advisorCombo.setWidth("200px");
 
     advisorCombo.addValueChangeListener(event -> {
-        String selected = event.getValue();
+      String selected = event.getValue();
         if (selected != null) {
-            c.setAdvisor(selected); 
+        db.getAdvisorByName(selected).ifPresent(advisor -> {
+            c.setAdvisor(advisor);  // sets Optional<SleepAdvisor>
+            db.getCitizenByName(c.getFullName()).ifPresent(citizen -> {
+                citizen.setAdvisor(advisor);
+                db.saveCitizen(citizen);
+                });
+            });
         }
     });
         Button viewData = new Button("Se data", new Icon(VaadinIcon.CHART));
@@ -367,31 +409,4 @@ advisorCombo.setWidth("200px");
             return ("" + parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
         }
     }
-
-    static class Citizen {
-        private final String name;
-        private final String lastEntry;
-        private final String severity;
-        private final boolean highlight;
-
-        private String advisor;
-
-        Citizen(String name, String lastEntry, String severity, boolean highlight) {
-            this.name = name;
-            this.lastEntry = lastEntry;
-            this.severity = severity;
-            this.highlight = highlight;
-            this.advisor = "Ingen søvnrådgiver"; 
-        }
-        
-        public String getName() { return name; }
-        public String getLastEntry() { return lastEntry; }
-        public String getSeverity() { return severity; }
-        public boolean isHighlight() { return highlight; }
-
-        public String getAdvisor() { return advisor; }
-
-        public void setAdvisor(String advisor) { this.advisor = advisor; }
-    }
-
 }

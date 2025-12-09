@@ -23,6 +23,7 @@ import jakarta.transaction.Transactional;
 
 @Service
 @RestController
+
 public class PostgreSQLDatabaseControler implements DatabaseControler {
 
     private final AnsweredSurveyMorningRepository morningRepo;
@@ -71,6 +72,7 @@ public class PostgreSQLDatabaseControler implements DatabaseControler {
         row.setFullName(username);
         citizensRepo.save(row);
         return new Citizen(row);
+
 	}
 
 	@Override
@@ -102,4 +104,23 @@ public class PostgreSQLDatabaseControler implements DatabaseControler {
         advisorsRepo.save(row);
         return new SleepAdvisor(row);
 	}
+    @Transactional
+    public List<SleepAdvisor> getAllAdvisors() {
+        List<AdvisorRow> rows = advisorsRepo.findAll();
+        return rows.stream().map(SleepAdvisor::new).toList();
+    } 
+    @Transactional
+public void saveCitizen(Citizen citizen) {
+    // Get the CitizenRow from the database
+    CitizenRow row = citizensRepo.findOneByFullName(citizen.getFullName())
+                                 .orElseThrow();
+
+    // Assign the advisor if present
+    citizen.getAssignedAdvisor().ifPresent(advisor -> row.setAssignedAdvisor(advisor.getRow()));
+
+    // Save the updated row
+    citizensRepo.saveAndFlush(row);
+}
+
+
 }
