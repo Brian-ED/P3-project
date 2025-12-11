@@ -16,6 +16,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.component.datepicker.DatePicker;
 
 import jakarta.annotation.security.PermitAll;
@@ -28,7 +29,7 @@ import jakarta.annotation.security.RolesAllowed;
 @Route(value = "sleep-stats", layout = MainLayout.class)
 @PageTitle("Søvnstatistik")
 @RolesAllowed({"ADVISOR", "ADMIN"})
-@PermitAll
+@AnonymousAllowed
 public class SleepStats extends VerticalLayout {
 
     private final Grid<SleepEntry> grid = new Grid<>(SleepEntry.class, false);
