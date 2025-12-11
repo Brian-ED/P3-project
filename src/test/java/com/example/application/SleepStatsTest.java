@@ -39,11 +39,17 @@ public class SleepStatsTest {
         @Bean
         @Primary
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-            .csrf(csrf -> csrf.disable())
-            .anonymous(anonymous -> anonymous.principal("testuser")); // Provide a test user
-        return http.build();
+          http
+                .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/login", "/logout").permitAll()
+                    .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                    .loginPage("/login")
+                    .permitAll()
+                )
+                .csrf(csrf -> csrf.disable()); // Disable CSRF for easier testing
+            return http.build();
         }
     }
 
@@ -62,6 +68,28 @@ public class SleepStatsTest {
             playwright.close();
         }
     }
+
+   // Helper method to log in
+private void login(Page page, String username, String password) {
+    page.navigate("http://localhost:" + port + "/login");
+    
+    // Wait for login form to load
+    page.waitForSelector("vaadin-login-form", new Page.WaitForSelectorOptions().setTimeout(10000));
+    
+    // Wait for the form to be fully rendered
+    page.waitForTimeout(500);
+    
+    page.keyboard().type(username);
+    // Tab to password field
+    page.keyboard().press("Tab");
+    page.keyboard().type(password);
+    
+    // Submit (Enter or Tab to button then Enter)
+    page.keyboard().press("Enter");
+    
+    // Wait for navigation after login
+    page.waitForTimeout(1000);
+}
 
     @Test
     public void testLoginPageLoads() {
@@ -135,7 +163,8 @@ public void testSurveyAnswerDialog() {
     Page page = context.newPage();
     
     try {
-      
+        // Login first
+        login(page, "admin", "admin");
 
         // Navigate to sleep stats page
         page.navigate("http://localhost:" + port + "/sleep-stats");
@@ -173,6 +202,9 @@ public void testDateFilter() {
     Page page = context.newPage();
     
     try {
+        // Login first
+        login(page, "admin", "admin");
+
         page.navigate("http://localhost:" + port + "/sleep-stats");
         
         // Wait for the filter button to be visible
@@ -202,6 +234,9 @@ public void testStatCardsVisible() {
     Page page = context.newPage();
     
     try {
+        // Login first
+        login(page, "admin", "admin");
+        
         page.navigate("http://localhost:" + port + "/sleep-stats");
         
         // Wait for the first stat card to load
