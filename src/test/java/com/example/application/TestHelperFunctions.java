@@ -64,7 +64,7 @@ public abstract class TestHelperFunctions {
         }
     }
 
-    // Helper method available to all subclasses
+    // Helper method to perform login
     protected void login(Page page, String username, String password) {
         page.navigate("http://localhost:" + port + "/login");
         page.waitForSelector("vaadin-login-form", new Page.WaitForSelectorOptions().setTimeout(10000));

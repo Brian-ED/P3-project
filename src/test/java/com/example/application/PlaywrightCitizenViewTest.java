@@ -12,7 +12,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 public class PlaywrightCitizenViewTest extends TestHelperFunctions {
 
     @Test
-public void testCitizenViewHeaderVisible() {
+    public void testCitizenViewHeaderVisible() {
     BrowserContext context = browser.newContext();
     Page page = context.newPage();
     
@@ -74,7 +74,7 @@ public void testFillSurveyButtonsVisible() {
         // Wait for page to load
         page.waitForSelector("text=Morgensvar", new Page.WaitForSelectorOptions().setTimeout(10000));
 
-        // Verify "Udfyld aftensvar" buttons are visible (there should be two)
+        // Verify "Udfyld aftensvar" buttons are visible (There are two for some reason? test just checks that there is one)
         assertThat(page.getByText("Udfyld aftensvar").first()).isVisible();
         
     } finally {

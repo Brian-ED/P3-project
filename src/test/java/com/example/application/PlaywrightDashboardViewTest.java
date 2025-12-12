@@ -4,14 +4,13 @@ import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.Page;
 import org.junit.jupiter.api.Test;
 
-
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 
 public class PlaywrightDashboardViewTest extends TestHelperFunctions {
 
     @Test
-public void testDashboardStatsCardsVisible() {
+    public void testDashboardStatsCardsVisible() {
     BrowserContext context = browser.newContext();
     Page page = context.newPage();
     
