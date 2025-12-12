@@ -90,7 +90,7 @@ public class CitizenView extends VerticalLayout {
         morningH2.getStyle().set("padding", "20px");
         Span morningSpan = new Span("Udfyld dit morgenskema om nattens søvn");
         morningSpan.getStyle().set("padding", "20px");
-        Button morningButton = new Button("Udfyld aftensvar");
+        Button morningButton = new Button("Udfyld morgensvar");
         morningButton.setWidthFull();
         morningButton.getStyle()
         .set("background-color", "darkblue")
@@ -98,6 +98,7 @@ public class CitizenView extends VerticalLayout {
         .set("padding", "20px")
         .set("margin-top", "20px")
         .set("cursor", "pointer");
+        morningButton.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate("survey/morning")));
         morningCard.setWidth("100%");
         morningCard.add(
             morningH2,
@@ -125,6 +126,7 @@ public class CitizenView extends VerticalLayout {
         .set("padding", "20px")
         .set("margin-top", "20px")
         .set("cursor", "pointer");
+        eveningButton.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate("survey/evening")));
         eveningCard.setWidth("100%");
         eveningCard.add(
             eveningH2,
@@ -519,5 +521,6 @@ public class CitizenView extends VerticalLayout {
         if (s2 == null) return s1;
         return s1.getWhenAnswered().isAfter(s2.getWhenAnswered()) ? s1 : s2;
     }
+    
 
 }
