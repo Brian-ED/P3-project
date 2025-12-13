@@ -22,8 +22,22 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
+import com.example.application.database.ClDiDB.Questions.FineRollQuestion;
+import java.time.Duration;
 
 public class UI {
+
+    private static TimePicker rollTimePicker(String label) {
+        TimePicker tp = new TimePicker(label);
+        tp.setStep(Duration.ofHours(1));   // roll/clock time: 1-hour increments
+        return tp;
+    }
+
+    private static TimePicker rollTimePicker5(String label) {
+        TimePicker tp = new TimePicker(label);
+        tp.setStep(Duration.ofMinutes(5)); // duration: 5-minute increments
+        return tp;
+    }
     private static Component drawYesNo(YesOrNoElaborateComboboxQuestion question) {
 
         // Title
@@ -235,17 +249,42 @@ public class UI {
     }
 
     public static Component drawUI(GenericQuestion<?> question) {
-        return switch (question) {
-            case ComboBoxQuestion x -> new ComboBox<String>(x.getMainQuestionTitle()) {{setItems(x.getComboboxQuestionOptions());}}; // label = question
-            case YesOrNoElaborateRollRollQuestion x -> drawYesNo(x);
-            case YesOrNoElaborateRollQuestion x -> drawYesNo(x);
-            case YesOrNoElaborateComboboxRollQuestion x -> drawYesNo(x);
-            case YesOrNoElaborateRollComboboxQuestion x -> drawYesNo(x);
-            case YesOrNoElaborateComboboxQuestion x -> drawYesNo(x);
-            case RollQuestion x -> new TimePicker(x.getMainQuestionTitle());
-            case DurationQuestion x -> null;
-            case TextFieldQuestion x -> new TextField(x.getMainQuestionTitle());
-            case YesOrNoQuestion x -> drawYesNo(x);
-        };
-    }
+    return switch (question) {
+        case ComboBoxQuestion x ->
+                new ComboBox<String>(x.getMainQuestionTitle()) {{
+                    setItems(x.getComboboxQuestionOptions());
+                }};
+
+        case YesOrNoElaborateRollRollQuestion x -> drawYesNo(x);
+        case YesOrNoElaborateRollQuestion x -> drawYesNo(x);
+        case YesOrNoElaborateComboboxRollQuestion x -> drawYesNo(x);
+        case YesOrNoElaborateRollComboboxQuestion x -> drawYesNo(x);
+        case YesOrNoElaborateComboboxQuestion x -> drawYesNo(x);
+
+        // Wakeup etc. = coarse (1 hour)
+        case RollQuestion x -> {
+            TimePicker tp = new TimePicker(x.getMainQuestionTitle());
+            tp.setStep(Duration.ofHours(1));
+            yield tp;
+        }
+
+        // Bedtime + lights off = fine (5 minutes)
+        case FineRollQuestion x -> {
+            TimePicker tp = new TimePicker(x.getMainQuestionTitle());
+            tp.setStep(Duration.ofMinutes(5));
+            yield tp;
+        }
+
+        // Duration questions = fine (5 minutes) AND no more null => no blank page
+        case DurationQuestion x -> {
+            TimePicker tp = new TimePicker(x.getMainQuestionTitle());
+            tp.setStep(Duration.ofMinutes(5));
+            yield tp;
+        }
+
+        case TextFieldQuestion x -> new TextField(x.getMainQuestionTitle());
+        case YesOrNoQuestion x -> drawYesNo(x);
+    };
+}
+
 }
