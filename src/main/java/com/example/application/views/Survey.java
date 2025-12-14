@@ -55,6 +55,7 @@ public class Survey extends VerticalLayout implements BeforeEnterObserver {
         content.setAlignItems(FlexComponent.Alignment.END);
         content.setWidth("60%");
         content.setPadding(true);
+        content.getStyle().set("overflow", "visible");
 
         HorizontalLayout buttons = new HorizontalLayout(prev, next);
         buttons.setWidthFull();
@@ -81,6 +82,7 @@ public class Survey extends VerticalLayout implements BeforeEnterObserver {
         content.removeAll();                        // remove old question UI
         content.add(qComponent);                    // show it
         content.setAlignSelf(FlexComponent.Alignment.START, qComponent);
+        content.getStyle().set("overflow", "visible");
     }
 
 

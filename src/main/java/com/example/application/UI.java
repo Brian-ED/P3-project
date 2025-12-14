@@ -1,7 +1,7 @@
 package com.example.application;
 
 import com.example.application.database.ClDiDB.Questions.ComboBoxQuestion;
-import com.example.application.database.ClDiDB.Questions.DurationQuestion;
+import com.example.application.database.ClDiDB.Questions.RollQuestionShort;
 import com.example.application.database.ClDiDB.Questions.GenericQuestion;
 import com.example.application.database.ClDiDB.Questions.RollQuestion;
 import com.example.application.database.ClDiDB.Questions.TextFieldQuestion;
@@ -22,8 +22,11 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
-import com.example.application.database.ClDiDB.Questions.FineRollQuestion;
+import com.example.application.database.ClDiDB.Questions.RollQuestion15;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class UI {
 
@@ -269,17 +272,31 @@ public class UI {
         }
 
         // Bedtime + lights off = fine (5 minutes)
-        case FineRollQuestion x -> {
+       case RollQuestion15 x -> {
             TimePicker tp = new TimePicker(x.getMainQuestionTitle());
-            tp.setStep(Duration.ofMinutes(5));
+            tp.setStep(Duration.ofMinutes(15));
+            tp.setAutoOpen(true);            // clicking the field opens the list
+            tp.setClearButtonVisible(true);
             yield tp;
         }
 
+
+
         // Duration questions = fine (5 minutes) AND no more null => no blank page
-        case DurationQuestion x -> {
-            TimePicker tp = new TimePicker(x.getMainQuestionTitle());
-            tp.setStep(Duration.ofMinutes(5));
-            yield tp;
+        case RollQuestionShort x -> {
+            ComboBox<Integer> cb = new ComboBox<>(x.getMainQuestionTitle());
+
+            List<Integer> values = new ArrayList<>();
+            for (int i = 0; i <= 250; i += 5) {
+                values.add(i);
+            }
+
+            cb.setItems(values);
+            cb.setItemLabelGenerator(i -> i + " min");
+            cb.setPlaceholder("Vælg antal minutter");
+            cb.setClearButtonVisible(true);
+
+            yield cb;
         }
 
         case TextFieldQuestion x -> new TextField(x.getMainQuestionTitle());
