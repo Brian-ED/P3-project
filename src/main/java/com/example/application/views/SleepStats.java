@@ -81,12 +81,12 @@ public class SleepStats extends VerticalLayout {
         HorizontalLayout statsRow = new HorizontalLayout();
         statsRow.setWidthFull();
         statsRow.setSpacing(true);
-        statsRow.add(createStatCard("TIB - Tid i seng", " 9t 15m"),
-                     createStatCard("TST - Total Søvntid", " 8t 1m"),
-                     createStatCard("søvneffektivitet", " 90%"),
-                     createStatCard("SOL - Indsovningstid", " 15m"),
-                     createStatCard("WASO - Opvågninger" , " 40m"),
-                     createStatCard("Morgenfølelse", " 4.0/5")
+        statsRow.add(createStatCard("TIB - Tid i seng", " "+ "9t 15m"),
+                     createStatCard("TST - Total Søvntid", " "+ "8t 1m"),
+                     createStatCard("søvneffektivitet", " "+ (Math.round((0.9)*100))+ "%"),
+                     createStatCard("SOL - Indsovningstid", " "+ "15m"),
+                     createStatCard("WASO - Opvågninger" , " "+ "40m"),
+                     createStatCard("Morgenfølelse", " "+ "4.0"+"/5")
                     );
 
         add(statsRow);
