@@ -11,8 +11,10 @@ public final class DurationAnswer extends Answer<DurationPayload> {
     public DurationAnswer() {
         super(DurationPayload.class);
     }
-
-    @Column(nullable = false)
+    public double getAnswerInHours() {
+       return minutes != null ? minutes / 60.0 : 0.0; // convert minutes to hours, handle null safely
+    }
+       @Column(nullable = false)
     private Integer minutes;
 
     @Override

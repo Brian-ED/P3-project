@@ -37,7 +37,9 @@ import jakarta.annotation.security.RolesAllowed;
 
 
 public class DashboardView extends VerticalLayout {
-
+    private Span totalCitizensValue;
+    private Span myCitizensValue;
+    private Span activeTodayValue;
     private String username;
     private Model model;
     private List<com.example.application.model.Citizen> citizens = new ArrayList<>();
@@ -81,9 +83,18 @@ public class DashboardView extends VerticalLayout {
         statsRow.setAlignItems(Alignment.START);
         statsRow.setJustifyContentMode(JustifyContentMode.CENTER);
 
-        Component card1 = createStatCard("Totale borgere" ,"6", "Registrerede brugere");
-        Component card2 = createStatCard("Mine borgere" ,"0", "Tildelte borgere");
-        Component card3 = createStatCard("Aktive i dag" ,"0", "Nye indtastninger");
+        totalCitizensValue = new Span("0");
+        totalCitizensValue.getStyle().set("font-size", "28px").set("font-weight", "700").set("color", "var(--lumo-body-text-color)");
+
+        myCitizensValue = new Span("0");
+        myCitizensValue.getStyle().set("font-size", "28px").set("font-weight", "700").set("color", "var(--lumo-body-text-color)");
+
+        activeTodayValue = new Span("0");
+        activeTodayValue.getStyle().set("font-size", "28px").set("font-weight", "700").set("color", "var(--lumo-body-text-color)");
+
+        Component card1 = createStatCard("Totale borgere", totalCitizensValue, "Registrerede brugere");
+        Component card2 = createStatCard("Mine borgere", myCitizensValue, "Tildelte borgere");
+        Component card3 = createStatCard("Aktive i dag", activeTodayValue, "Nye indtastninger");
 
         statsRow.add(card1,card2,card3);
 
@@ -145,13 +156,16 @@ public class DashboardView extends VerticalLayout {
         toggleSwitch.getElement().getThemeList().add("toggle");
 
         // Optional: handle value change
-        toggleSwitch.addValueChangeListener(event -> {
-            if (event.getValue()) {
-                System.out.println("Toggle ON");
-            } else {
-                System.out.println("Toggle OFF");
-            }
-        });
+      toggleSwitch.addValueChangeListener(event -> {
+    if (event.getValue()) {
+        // Toggle ON: show only citizens assigned to me
+        refreshList(filterMyCitizens());
+    } else {
+        // Toggle OFF: show all citizens
+        refreshList(citizens);
+    }
+     updateStats();
+    });
 
         ComboBox<String> sortBox = new ComboBox<>();
         sortBox.setPlaceholder("Sorter efter");
@@ -159,7 +173,22 @@ public class DashboardView extends VerticalLayout {
         sortBox.setWidth("180px");
 
         searchAndToggle.add(search, sortBox, toggleSwitch);
+search.addValueChangeListener(event -> {
+    String filter = event.getValue().trim().toLowerCase();
 
+    // If empty, show all citizens
+    if (filter.isEmpty()) {
+        refreshList(citizens);
+        return;
+    }
+
+    // Filter citizens by name
+    List<Citizen> filtered = citizens.stream()
+        .filter(c -> c.getFullName().toLowerCase().contains(filter))
+        .toList();
+
+    refreshList(filtered);
+});
         sortBox.addValueChangeListener(
         (com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent<ComboBox<String>, String> e) -> {
             String selected = e.getValue();
@@ -223,7 +252,7 @@ citizens.add(citizen3);
        citizens.addAll(dbCitizens);
 
         refreshList();
-
+        updateStats();
 
         mainCard.add(mainHeaderRow, listContainer);
 
@@ -232,41 +261,70 @@ citizens.add(citizen3);
 
     }
 
+private void updateStats() {
+    // Total citizens
+    totalCitizensValue.setText(String.valueOf(citizens.size()));
 
+    // My citizens
+    int myCount = filterMyCitizens().size();
+    myCitizensValue.setText(String.valueOf(myCount));
+
+    // Active today
+    String today = java.time.LocalDate.now().toString(); // "YYYY-MM-DD"
+    long activeToday = citizens.stream()
+                               .filter(c -> today.equals(c.getLastEntry()))
+                               .count();
+    activeTodayValue.setText(String.valueOf(activeToday));
+}
+    private SleepAdvisor getCurrentAdvisor() {
+    List<SleepAdvisor> advisors = db.getAllAdvisors();
+    return advisors.stream()
+                   .filter(a -> a.getFullName().equals(username))
+                   .findFirst()
+                   .orElse(null);
+}
+
+private List<Citizen> filterMyCitizens() {
+    SleepAdvisor currentAdvisor = getCurrentAdvisor();
+    if (currentAdvisor == null) return new ArrayList<>();
+    return citizens.stream()
+                   .filter(c -> c.getAdvisor() != null && c.getAdvisor().equals(currentAdvisor))
+                   .toList();
+}
     private void refreshList() {
-         listContainer.removeAll();
-    for (Citizen c : citizens) {
-        listContainer.add(createCitizenRow(c)); // pass the full object
+    refreshList(citizens);
+    }
+
+     private void refreshList(List<Citizen> list) {
+    listContainer.removeAll();
+    for (Citizen c : list) {
+        listContainer.add(createCitizenRow(c));
     }
 }
-    private Div createStatCard(String highlightlabel, String value, String label) {
-        Div card = new Div();
-        card.getStyle().set("background", "var(--lumo-base2-color)");
-        card.getStyle().set("border-radius", "12px");
-        card.getStyle().set("padding", "18px");
-        card.getStyle().set("width", "260px");
-        card.getStyle().set("box-shadow", "0 1px 6px rgba(15,23,42,0.04)");
-        card.getStyle().set("display", "flex");
-        card.getStyle().set("flex-direction", "column");
-        card.getStyle().set("gap", "8px");
+    private Div createStatCard(String highlightLabel, Span valueSpan, String label) {
+    Div card = new Div();
+    card.getStyle().set("background", "var(--lumo-base2-color)");
+    card.getStyle().set("border-radius", "12px");
+    card.getStyle().set("padding", "18px");
+    card.getStyle().set("width", "260px");
+    card.getStyle().set("box-shadow", "0 1px 6px rgba(15,23,42,0.04)");
+    card.getStyle().set("display", "flex");
+    card.getStyle().set("flex-direction", "column");
+    card.getStyle().set("gap", "8px");
 
-        Span hl = new Span(highlightlabel);
-        hl.getStyle().set("font-size", "16px");
-        hl.getStyle().set("font-weight", "600");
-        hl.getStyle().set("color", "var(--lumo-body-text-color)");
+    Span hl = new Span(highlightLabel);
+    hl.getStyle().set("font-size", "16px");
+    hl.getStyle().set("font-weight", "600");
+    hl.getStyle().set("color", "var(--lumo-body-text-color)");
 
-        Span v = new Span(value);
-        v.getStyle().set("font-size", "28px");
-        v.getStyle().set("font-weight", "700");
-        v.getStyle().set("color", "var(--lumo-body-text-color)");
+    Span l = new Span(label);
+    l.getStyle().set("color", "#64748b");
+    l.getStyle().set("font-size", "13px");
 
-        Span l = new Span(label);
-        l.getStyle().set("color", "#64748b");
-        l.getStyle().set("font-size", "13px");
+    card.add(hl, valueSpan, l);
+    return card;
+}
 
-        card.add(hl, v, l);
-        return card;
-    }
 
     private HorizontalLayout createCitizenRow(Citizen c) {
         HorizontalLayout row = new HorizontalLayout();
@@ -377,7 +435,7 @@ advisorCombo.setWidth("200px");
         viewData.getElement().getStyle().set("padding", "6px 10px");
         viewData.getElement().getStyle().set("font-size", "13px");
         viewData.addClickListener(e -> 
-        viewData.getUI().ifPresent(ui -> ui.navigate("sleep-stats")));
+        viewData.getUI().ifPresent(ui -> ui.navigate("sleep-stats/" + c.getId())));
         rightActions.add(severityBadge, advisorCombo, viewData);
 
         // Expand info to use remaining space

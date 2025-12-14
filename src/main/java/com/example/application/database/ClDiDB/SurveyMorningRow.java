@@ -43,7 +43,9 @@ public final class SurveyMorningRow implements Survey {
     private ZonedDateTime whenAnswered;
     public ZonedDateTime getWhenAnswered() {return whenAnswered;};
     public void setWhenAnswered(ZonedDateTime whenAnswered) {this.whenAnswered = whenAnswered;};
-
+    public DurationAnswer getAnswer4Value() {
+    return internelAnswer4;
+}
     //---------
     // Answers:
     @Embedded private YesOrNoElaborateComboboxAnswer internelAnswer0 = new YesOrNoElaborateComboboxAnswer(); @Transient final private YesOrNoElaborateComboboxQuestion answer0 = new YesOrNoElaborateComboboxQuestion("Tager du nogen gange sovemedicin eller melatonin piller?"     , "Hvad tager du?", new String[]{"Sovemedicin", "Melatonin"}, internelAnswer0); public YesOrNoElaborateComboboxQuestion getAnswer0() {return answer0;}

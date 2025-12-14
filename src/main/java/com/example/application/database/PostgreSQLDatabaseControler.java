@@ -1,5 +1,7 @@
 package com.example.application.database;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,6 +20,7 @@ import com.example.application.database.repositories.CitizenRepository;
 import com.example.application.model.Citizen;
 import com.example.application.model.DatabaseControler;
 import com.example.application.model.SleepAdvisor;
+import com.example.application.views.SleepStats.SleepEntry;
 
 import jakarta.transaction.Transactional;
 
@@ -42,6 +45,40 @@ public class PostgreSQLDatabaseControler implements DatabaseControler {
         this.citizensRepo = citizensRepo;
         this.advisorsRepo = advisorsRepo;
     }
+@Transactional
+public Optional<Citizen> getCitizenById(Long id) {
+    Optional<CitizenRow> maybeRow = citizensRepo.findById(id);
+    return maybeRow.map(Citizen::new);
+}
+
+@Transactional
+public List<SleepEntry> getSleepEntriesForCitizen(Citizen citizen) {
+    List<SleepEntry> entries = new ArrayList<>();
+
+    // Morning surveys
+    morningRepo.findByOwner(citizen.getRow()).forEach(m ->
+    entries.add(new SleepEntry(
+        m.getWhenAnswered().toLocalDate(),
+        m.getAnswer4Value().getAnswerInHours()
+    ))
+);
+
+
+    // Evening surveys (if needed)
+    eveningRepo.findByOwner(citizen.getRow()).forEach(e ->
+        entries.add(new SleepEntry(
+            e.getWhenAnswered().toLocalDate(),
+            0.0 // or another relevant field if available
+        ))
+    );
+
+    entries.sort((a, b) -> a.getDate().compareTo(b.getDate()));
+
+    return entries;
+}
+
+
+
 
     @Override
     @Transactional
