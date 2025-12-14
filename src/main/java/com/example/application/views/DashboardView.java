@@ -11,6 +11,10 @@ import com.example.application.database.ClDiDB.AdvisorRow;
 import com.example.application.database.ClDiDB.CitizenRow;
 import com.example.application.model.Citizen;
 import com.example.application.model.SleepAdvisor;
+import com.example.application.model.AnsweredSurvey;
+import com.example.application.model.Model;
+import com.example.application.model.SurveyType;
+import com.example.application.security.SecurityUtils;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -30,15 +34,21 @@ import jakarta.annotation.security.RolesAllowed;
 @Route("dashboard")
 @PageTitle("Søvnrådgiver Dashboard")
 @RolesAllowed({"ADVISOR", "ADMIN"})
+
+
 public class DashboardView extends VerticalLayout {
 
+    private String username;
+    private Model model;
     private List<com.example.application.model.Citizen> citizens = new ArrayList<>();
     
     private VerticalLayout listContainer;
     private final PostgreSQLDatabaseControler db;
-    public DashboardView(PostgreSQLDatabaseControler db) {
+    public DashboardView(PostgreSQLDatabaseControler db, Model model) {
+        Citizen citizen = model.getThisCitizen(SecurityUtils.getUsername());
+        this.username = citizen != null ? citizen.getFullName() : "Bruger";
+        this.model = model;
         this.db = db;
-
         setSizeFull();
         setPadding(false);
         setSpacing(false);
@@ -372,7 +382,8 @@ advisorCombo.setWidth("200px");
         viewData.getElement().getStyle().set("border", "1px solid rgba(15,23,42,0.06)");
         viewData.getElement().getStyle().set("padding", "6px 10px");
         viewData.getElement().getStyle().set("font-size", "13px");
-
+        viewData.addClickListener(e -> 
+        viewData.getUI().ifPresent(ui -> ui.navigate("sleep-stats")));
         rightActions.add(severityBadge, advisorCombo, viewData);
 
         // Expand info to use remaining space
@@ -387,9 +398,9 @@ advisorCombo.setWidth("200px");
         HorizontalLayout top = new HorizontalLayout();
         top.setWidthFull();
         top.setAlignItems(Alignment.CENTER);
-
+        // Setup user
         // Left: small app title
-        Span appTitle = new Span("Velkommen, John Doe");
+        Span appTitle = new Span("Velkommen,"+ username);
         appTitle.getStyle().set("font-weight", "700");
         appTitle.getStyle().set("font-size", "26px");
         appTitle.getStyle().set("color", "#072d85ff");
