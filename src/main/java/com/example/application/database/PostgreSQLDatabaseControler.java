@@ -108,19 +108,18 @@ public class PostgreSQLDatabaseControler implements DatabaseControler {
     public List<SleepAdvisor> getAllAdvisors() {
         List<AdvisorRow> rows = advisorsRepo.findAll();
         return rows.stream().map(SleepAdvisor::new).toList();
-    } 
+    }
     @Transactional
-public void saveCitizen(Citizen citizen) {
-    // Get the CitizenRow from the database
-    CitizenRow row = citizensRepo.findOneByFullName(citizen.getFullName())
-                                 .orElseThrow();
 
-    // Assign the advisor if present
-    citizen.getAssignedAdvisor().ifPresent(advisor -> row.setAssignedAdvisor(advisor.getRow()));
+    public void saveCitizen(Citizen citizen) {
+        // Get the CitizenRow from the database
+        CitizenRow row = citizensRepo.findOneByFullName(citizen.getFullName())
+                                    .orElseThrow();
 
-    // Save the updated row
-    citizensRepo.saveAndFlush(row);
-}
+        // Assign the advisor if present
+        citizen.getAssignedAdvisor().ifPresent(advisor -> row.setAssignedAdvisor(advisor.getRow()));
 
-
+        // Save the updated row
+        citizensRepo.saveAndFlush(row);
+    }
 }

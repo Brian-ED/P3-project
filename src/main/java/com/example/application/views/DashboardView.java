@@ -41,7 +41,7 @@ public class DashboardView extends VerticalLayout {
     private String username;
     private Model model;
     private List<com.example.application.model.Citizen> citizens = new ArrayList<>();
-    
+
     private VerticalLayout listContainer;
     private final PostgreSQLDatabaseControler db;
     public DashboardView(PostgreSQLDatabaseControler db, Model model) {
@@ -96,7 +96,7 @@ public class DashboardView extends VerticalLayout {
         mainCard.getStyle().set("margin-top", "18px");
         mainCard.getStyle().set("width", "100%");
         mainCard.getStyle().set("background", "var(--lumo-base2-color)");
-        
+
 
         // Title row with icon + search and toggle
         HorizontalLayout mainHeaderRow = new HorizontalLayout();
@@ -155,7 +155,7 @@ public class DashboardView extends VerticalLayout {
         sortBox.setWidth("180px");
 
         searchAndToggle.add(search, sortBox, toggleSwitch);
-        
+
         sortBox.addValueChangeListener(
         (com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent<ComboBox<String>, String> e) -> {
             String selected = e.getValue();
@@ -225,7 +225,7 @@ citizens.add(citizen3);
 
 // Refresh UI
 refreshList();
-      
+
        citizens.addAll(dbCitizens);
 
         refreshList();
@@ -238,7 +238,7 @@ refreshList();
 
     }
 
-    
+
     private void refreshList() {
          listContainer.removeAll();
     for (Citizen c : citizens) {

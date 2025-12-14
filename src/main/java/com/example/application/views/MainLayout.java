@@ -26,7 +26,7 @@ import jakarta.annotation.security.PermitAll;
 @PermitAll
 @AnonymousAllowed
 public class MainLayout extends AppLayout implements AfterNavigationObserver {
-    
+
     private final AuthenticationContext authenticationContext;
     private H1 viewTitle;
 
@@ -49,7 +49,7 @@ ui.getElement().getStyle().set("--lumo-moderate-color", "#fffbeb");
     private void addHeaderContent(){
         viewTitle = new H1();
         viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE, LumoUtility.Margin.Left.XLARGE);
-        
+
         Button logout = createLogout();
 
         Button toggleTheme = modeDarkLight();
@@ -66,13 +66,13 @@ ui.getElement().getStyle().set("--lumo-moderate-color", "#fffbeb");
     private Button createLogout() {
                 var logout = new Button("Logout", VaadinIcon.POWER_OFF.create());
                 logout.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-                logout.addClickListener(e -> authenticationContext.logout()); 
+                logout.addClickListener(e -> authenticationContext.logout());
             logout.getElement().getStyle().set("background", "darkblue");
             logout.getElement().getStyle().set("color", "white");
             logout.getElement().getStyle().set("border-radius", "8px");
             logout.getElement().getStyle().set("padding", "8px 14px");
             logout.getElement().getStyle().set("margin-right", "30px");
-            
+
             return logout;
     }
 
@@ -160,7 +160,7 @@ private void enableAmoledBlack(UI ui) {
 
             --lumo-moderate-color": "#ff7b00ff");
         }
-    
+
         /* Force ALL text white */
         [theme~="dark"] * {
             color: white !important;

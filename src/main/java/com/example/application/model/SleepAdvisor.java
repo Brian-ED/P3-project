@@ -13,7 +13,7 @@ public class SleepAdvisor implements User {
         this.row = row;
     }
 
-    
+
 
     @Override
     public String getFullName() {

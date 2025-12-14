@@ -97,3 +97,10 @@ index.html
 .s.PGSQL.5432
 logfile
 .tmp
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
