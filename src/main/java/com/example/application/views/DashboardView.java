@@ -49,6 +49,8 @@ public class DashboardView extends VerticalLayout {
         this.username = citizen != null ? citizen.getFullName() : "Bruger";
         this.model = model;
         this.db = db;
+
+        
         setSizeFull();
         setPadding(false);
         setSpacing(false);
@@ -88,6 +90,8 @@ public class DashboardView extends VerticalLayout {
         statsRow.setFlexGrow(1, card1);
         statsRow.setFlexGrow(1, card2);
         statsRow.setFlexGrow(1, card3);
+
+
 
         Div mainCard = new Div();
         mainCard.getStyle().set("border-radius", "12px");
@@ -206,25 +210,15 @@ SleepAdvisor advisor2 = new SleepAdvisor(new AdvisorRow());
 advisor2.getRow().setFullName("Søvnrådgiver Peter");
 
 // Example citizens
-Citizen citizen1 = new Citizen(new CitizenRow());
-citizen1.getRow().setFullName("Emma Jensen");
-citizen1.setAdvisor(advisor1);
-
-Citizen citizen2 = new Citizen(new CitizenRow());
-citizen2.getRow().setFullName("Lars Hansen");
-citizen2.setAdvisor(advisor2);
-
-Citizen citizen3 = new Citizen(new CitizenRow());
-citizen3.getRow().setFullName("Maja Sørensen");
-citizen3.setAdvisor(advisor1);
+Citizen citizen1 = mockCitizen(1, "Emma Jensen", "Moderat", "2025-12-14", advisor1);
+Citizen citizen2 = mockCitizen(2, "Lars Hansen", "Ukendt", "2025-12-13", advisor2);
+Citizen citizen3 = mockCitizen(3, "Maja Sørensen", "Moderat", "2025-12-12", advisor1);
 
 // Add to your citizens list
 citizens.add(citizen1);
 citizens.add(citizen2);
 citizens.add(citizen3);
-
 // Refresh UI
-refreshList();
 
        citizens.addAll(dbCitizens);
 
@@ -319,7 +313,7 @@ refreshList();
         sub.getStyle().set("color", "var(--lumo-secondary-text-color)");
         sub.getStyle().set("font-size", "13px");
 
-        info.add(nameLabel, idLabel, lastSurveyLabel, sub);
+        info.add(nameLabel, idLabel, lastSurveyLabel);
         info.getStyle().set("margin-left", "12px");
 
         // Right-side actions: severity badge, advisor label (placeholder), sort icon, view data button
@@ -394,6 +388,30 @@ advisorCombo.setWidth("200px");
         return row;
     }
 
+private Citizen mockCitizen(int id, String name, String severity, String lastEntry, SleepAdvisor advisor) {
+    CitizenRow row = new CitizenRow();
+    row.setFullName(name); // You can only set full name in CitizenRow
+    
+    Citizen c = new Citizen(row);
+    
+    // Set the ID (your Citizen class has a private Long id that you can access via reflection or constructor)
+    try {
+        java.lang.reflect.Field field = Citizen.class.getDeclaredField("id");
+        field.setAccessible(true);
+        field.set(c, (long) id);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    // Set advisor
+    c.setAdvisor(advisor);
+
+    // Severity and lastEntry are computed dynamically in your current Citizen class
+    // For mocking, you can extend Citizen or override getSeverity/getLastEntry if needed
+    return c;
+}
+
+
     private HorizontalLayout createTopMargin() {
         HorizontalLayout top = new HorizontalLayout();
         top.setWidthFull();
@@ -420,4 +438,5 @@ advisorCombo.setWidth("200px");
             return ("" + parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
         }
     }
+    
 }
