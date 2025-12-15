@@ -3,10 +3,12 @@ package com.example.application.views;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.example.application.database.PostgreSQLDatabaseControler;
 import com.example.application.model.Citizen;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -20,7 +22,6 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.flow.component.datepicker.DatePicker;
 
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
@@ -34,7 +35,7 @@ import jakarta.annotation.security.RolesAllowed;
 @RolesAllowed({"ADVISOR", "ADMIN"})
 @PermitAll
 public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
-    private Long citizenId;
+    private UUID citizenId;
     private Citizen currentCitizen;
     private final PostgreSQLDatabaseControler db; // inject via constructor
 
@@ -193,28 +194,29 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
         refreshGrid();
     }
 
-        public void beforeEnter(BeforeEnterEvent event) {
-        String idParam = event.getRouteParameters().get("citizenId").orElse(null);
-        if (idParam != null) {
-            try {
-                citizenId = Long.valueOf(idParam);
-                currentCitizen = db.getCitizenById(citizenId).orElse(null);
-                if (currentCitizen != null) {
+    public void beforeEnter(BeforeEnterEvent event) {
+        event.getRouteParameters().get("citizenId")
+            .ifPresent(idParam -> {
+                try {
+
+                    // get UUID, may error
+                    citizenId = UUID.fromString(idParam);
+
                     // Update UI for this citizen
-                    loadCitizenData(currentCitizen);
-                } else {
-                    // Optionally show a notification: citizen not found
+                    db.getCitizenById(citizenId)
+                        .ifPresent(currentCitizen -> loadCitizenData(currentCitizen));
+
+                } catch (IllegalArgumentException e) {
+                    // Handle invalid ID format
                 }
-            } catch (NumberFormatException e) {
-                // Handle invalid ID format
             }
-        }
+        );
     }
 
-        private void loadCitizenData(Citizen citizen) {
-            entries.clear(); entries.addAll(db.getSleepEntriesForCitizen(citizen));
-            refreshGrid();
-        }
+    private void loadCitizenData(Citizen citizen) {
+        entries.clear(); entries.addAll(db.getSleepEntriesForCitizen(citizen));
+        refreshGrid();
+    }
      private Div createSurveyAnswersBox() {
         Div box = new Div();
         box.setWidth("90%");

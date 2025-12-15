@@ -1,6 +1,7 @@
 package com.example.application.database.ClDiDB;
 
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 import com.example.application.database.ClDiDB.Answers.YesOrNoElaborateComboboxRollAnswer;
 import com.example.application.database.ClDiDB.Answers.YesOrNoElaborateRollAnswer;
@@ -17,7 +18,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -29,9 +29,8 @@ import jakarta.persistence.Transient;
 public final class SurveyEveningRow implements Survey {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(nullable = false)
-    private Long id;
+    @GeneratedValue
+    private UUID id;
 
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false)

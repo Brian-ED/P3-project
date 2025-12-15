@@ -1,9 +1,9 @@
 package com.example.application.database;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,7 +46,7 @@ public class PostgreSQLDatabaseControler implements DatabaseControler {
         this.advisorsRepo = advisorsRepo;
     }
 @Transactional
-public Optional<Citizen> getCitizenById(Long id) {
+public Optional<Citizen> getCitizenById(UUID id) {
     Optional<CitizenRow> maybeRow = citizensRepo.findById(id);
     return maybeRow.map(Citizen::new);
 }

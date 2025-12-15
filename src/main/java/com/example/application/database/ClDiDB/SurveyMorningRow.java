@@ -1,16 +1,17 @@
 package com.example.application.database.ClDiDB;
 
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 import com.example.application.database.ClDiDB.Answers.ComboBoxAnswer;
 import com.example.application.database.ClDiDB.Answers.DurationAnswer;
 import com.example.application.database.ClDiDB.Answers.RollAnswer;
 import com.example.application.database.ClDiDB.Answers.YesOrNoElaborateComboboxAnswer;
 import com.example.application.database.ClDiDB.Questions.ComboBoxQuestion;
-import com.example.application.database.ClDiDB.Questions.RollQuestionShort;
 import com.example.application.database.ClDiDB.Questions.GenericQuestion;
 import com.example.application.database.ClDiDB.Questions.RollQuestion;
 import com.example.application.database.ClDiDB.Questions.RollQuestion15;
+import com.example.application.database.ClDiDB.Questions.RollQuestionShort;
 import com.example.application.database.ClDiDB.Questions.YesOrNoElaborateComboboxQuestion;
 import com.example.application.model.SurveyType;
 
@@ -18,7 +19,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -29,9 +29,8 @@ import jakarta.persistence.Transient;
 @Table
 public final class SurveyMorningRow implements Survey {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(nullable = false)
-    private Long id;
+    @GeneratedValue
+    private UUID id;
 
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false)
