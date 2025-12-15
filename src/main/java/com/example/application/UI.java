@@ -22,7 +22,6 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
-import com.example.application.database.ClDiDB.Questions.RollQuestion15;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,15 +29,11 @@ import java.util.List;
 
 public class UI {
 
+
     private static TimePicker rollTimePicker(String label) {
         TimePicker tp = new TimePicker(label);
-        tp.setStep(Duration.ofHours(1));   // roll/clock time: 1-hour increments
-        return tp;
-    }
-
-    private static TimePicker rollTimePicker5(String label) {
-        TimePicker tp = new TimePicker(label);
-        tp.setStep(Duration.ofMinutes(5)); // duration: 5-minute increments
+        tp.setStep(java.time.Duration.ofMinutes(15)); // your new default
+        tp.setAutoOpen(true); // optional but nice
         return tp;
     }
     private static Component drawYesNo(YesOrNoElaborateComboboxQuestion question) {
@@ -78,6 +73,7 @@ public class UI {
 
 
 
+
     private static Component drawYesNo(YesOrNoElaborateComboboxRollQuestion question) {
 
         // Title
@@ -105,12 +101,14 @@ public class UI {
             container.add(yesNo);
 
             // If they answered "Ja", add the extra questions underneath
-            if ("Ja".equals(e.getValue())) {
-                container.add(
-                    new ComboBox<String>(question.getComboboxQuestionTitle()) {{setItems(question.getComboboxQuestionOptions());}},
-                    new TimePicker(question.getRollQuestionTitle())
-                );
-            }
+           if ("Ja".equals(e.getValue())) {
+            container.add(
+                new ComboBox<String>(question.getComboboxQuestionTitle()) {{
+                    setItems(question.getComboboxQuestionOptions());
+                }},
+                rollTimePicker(question.getRollQuestionTitle())
+            );
+        }
         });
 
         return container;
@@ -265,16 +263,12 @@ public class UI {
         case YesOrNoElaborateComboboxQuestion x -> drawYesNo(x);
 
         // Wakeup etc. = coarse (1 hour)
-        case RollQuestion x -> {
-            TimePicker tp = new TimePicker(x.getMainQuestionTitle());
-            tp.setStep(Duration.ofHours(1));
-            yield tp;
-        }
 
         // Bedtime + lights off = fine (5 minutes)
-       case RollQuestion15 x -> {
+       case RollQuestion x -> {
             TimePicker tp = new TimePicker(x.getMainQuestionTitle());
             tp.setStep(Duration.ofMinutes(15));
+            tp.setPlaceholder("Vælg tidspunkt");
             tp.setAutoOpen(true);            // clicking the field opens the list
             tp.setClearButtonVisible(true);
             yield tp;
