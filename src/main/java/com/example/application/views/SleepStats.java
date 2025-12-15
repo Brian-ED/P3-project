@@ -26,7 +26,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import jakarta.annotation.security.PermitAll;
-import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 
 
@@ -54,8 +53,8 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
         4.0
     );
     private Div createSurveyAnswersBox() {
-    return createSurveyAnswersBox(UUID.randomUUID()); // calls main method with dummy UUID
-}
+        return createSurveyAnswersBox(UUID.randomUUID()); // calls main method with dummy UUID
+    }
 
     public SleepStats(PostgreSQLDatabaseControler db) {
         this.db = db;
