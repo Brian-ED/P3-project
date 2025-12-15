@@ -103,7 +103,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
         });
         controls.add(startDate, endDate, filterButton);
         add(controls);
-        
+
 
         // Stats cards
         HorizontalLayout statsRow = new HorizontalLayout();
@@ -272,7 +272,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
 
         public static final DateTimeFormatter DATE_TIME =
                 DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-    }  
+    }
 
     public class SleepSurveyAnswer {
         private LocalDate date;
@@ -313,7 +313,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
         this.currentCitizen = citizen;
 
         // Load sleep entries for grid
-        entries.clear(); 
+        entries.clear();
         entries.addAll(db.getSleepEntriesForCitizen(citizen));
         refreshGrid();
 
@@ -411,7 +411,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
             .set("color", "#475569");
         return cell;
     }
-    
+
     private Span createTableCell(LocalDate date) {
         return createTableCell(date.format(Formatters.DATE_DK));
     }
