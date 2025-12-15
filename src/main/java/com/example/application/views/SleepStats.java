@@ -1,9 +1,12 @@
 package com.example.application.views;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.time.Duration;
 
 import com.example.application.database.PostgreSQLDatabaseControler;
 import com.example.application.model.Citizen;
@@ -41,6 +44,19 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
 
     private final Grid<SleepEntry> grid = new Grid<>(SleepEntry.class, false);
     private final List<SleepEntry> entries = new ArrayList<>();
+    // Mock stats for initial display
+    private SleepStatsData stats = new SleepStatsData(
+        Duration.ofMinutes(555),
+        Duration.ofMinutes(481),
+        0.90,
+        Duration.ofMinutes(15),
+        Duration.ofMinutes(40),
+        4.0
+    );
+    private Div createSurveyAnswersBox() {
+    return createSurveyAnswersBox(UUID.randomUUID()); // calls main method with dummy UUID
+}
+
     public SleepStats(PostgreSQLDatabaseControler db) {
         this.db = db;
         setSizeFull();
@@ -88,21 +104,24 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
         });
         controls.add(startDate, endDate, filterButton);
         add(controls);
-
+        
 
         // Stats cards
         HorizontalLayout statsRow = new HorizontalLayout();
         statsRow.setWidthFull();
         statsRow.setSpacing(true);
-        statsRow.add(createStatCard("TIB - Tid i seng", " "+ "9t 15m"),
-                     createStatCard("TST - Total Søvntid", " "+ "8t 1m"),
-                     createStatCard("søvneffektivitet", " "+ (Math.round((0.9)*100))+ "%"),
-                     createStatCard("SOL - Indsovningstid", " "+ "15m"),
-                     createStatCard("WASO - Opvågninger" , " "+ "40m"),
-                     createStatCard("Morgenfølelse", " "+ "4.0"+"/5")
-                    );
+
+        statsRow.add(
+            createStatCard("TIB - Tid i seng", formatDuration(stats.getTib())),
+            createStatCard("TST - Total Søvntid", formatDuration(stats.getTst())),
+            createStatCard("Søvneffektivitet", formatPercentage(stats.getSleepEfficiency())),
+            createStatCard("SOL - Indsovningstid", formatDuration(stats.getSol())),
+            createStatCard("WASO - Opvågninger", formatDuration(stats.getWaso())),
+            createStatCard("Morgenfølelse", formatRating(stats.getMorningFeeling()))
+        );
 
         add(statsRow);
+
 
 
 
@@ -185,13 +204,91 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
             .set("display", "flex")
             .set("justify-content", "center")
             .set("margin-top", "20px");
-
-        // Sleep Survey Answers Box
         Div surveyBox = createSurveyAnswersBox();
+        // Sleep Survey Answers Box
         surveyWrapper.add(surveyBox);
         add(surveyWrapper);
 
         refreshGrid();
+    }
+
+    public class SleepStatsData {
+        private Duration tib;   // Time in Bed
+        private Duration tst;   // Total Sleep Time
+        private double sleepEfficiency;
+        private Duration sol;   // Sleep Onset Latency
+        private Duration waso;  // Wake After Sleep Onset
+        private double morningFeeling;
+
+        // Constructor
+        public SleepStatsData(Duration tib, Duration tst, double sleepEfficiency,
+                            Duration sol, Duration waso, double morningFeeling) {
+            this.tib = tib;
+            this.tst = tst;
+            this.sleepEfficiency = sleepEfficiency;
+            this.sol = sol;
+            this.waso = waso;
+            this.morningFeeling = morningFeeling;
+        }
+
+        // Getters
+        public Duration getTib() { return tib; }
+        public Duration getTst() { return tst; }
+        public double getSleepEfficiency() { return sleepEfficiency; }
+        public Duration getSol() { return sol; }
+        public Duration getWaso() { return waso; }
+        public double getMorningFeeling() { return morningFeeling; }
+    }
+
+
+
+
+    private String formatDuration(Duration d) {
+    long hours = d.toHours();
+    long minutes = d.minusHours(hours).toMinutes();
+    return hours > 0
+            ? hours + "t " + minutes + "m"
+            : minutes + "m";
+    }
+
+    private String formatPercentage(double value) {
+        return Math.round(value * 100) + "%";
+    }
+
+    private String formatRating(double rating) {
+        return String.format("%.1f/5", rating);
+    }
+
+
+
+    public final class Formatters {
+
+        private Formatters() {}
+
+        public static final DateTimeFormatter DATE_DK =
+                DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        public static final DateTimeFormatter TIME =
+                DateTimeFormatter.ofPattern("HH:mm");
+
+        public static final DateTimeFormatter DATE_TIME =
+                DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    }  
+
+    public class SleepSurveyAnswer {
+        private LocalDate date;
+        private LocalTime morningTime;
+        private LocalTime eveningTime;
+
+        public SleepSurveyAnswer(LocalDate date, LocalTime morningTime, LocalTime eveningTime) {
+        this.date = date;
+        this.morningTime = morningTime;
+        this.eveningTime = eveningTime;
+    }
+
+        public LocalDate getDate() { return date; }
+        public LocalTime getMorningTime() { return morningTime; }
+        public LocalTime getEveningTime() { return eveningTime; }
     }
 
     public void beforeEnter(BeforeEnterEvent event) {
@@ -214,10 +311,39 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
     }
 
     private void loadCitizenData(Citizen citizen) {
-        entries.clear(); entries.addAll(db.getSleepEntriesForCitizen(citizen));
+        this.currentCitizen = citizen;
+
+        // Load sleep entries for grid
+        entries.clear(); 
+        entries.addAll(db.getSleepEntriesForCitizen(citizen));
         refreshGrid();
+
+        // Load dynamic stats from DB
+        //SleepStatsData stats = db.getSleepStatsForCitizen(citizen.getId());
+
+        // Update the stats row
+        HorizontalLayout statsRow = new HorizontalLayout();
+        statsRow.setWidthFull();
+        statsRow.setSpacing(true);
+
+        statsRow.add(
+            createStatCard("TIB - Tid i seng", formatDuration(stats.getTib())),
+            createStatCard("TST - Total Søvntid", formatDuration(stats.getTst())),
+            createStatCard("Søvneffektivitet", formatPercentage(stats.getSleepEfficiency())),
+            createStatCard("SOL - Indsovningstid", formatDuration(stats.getSol())),
+            createStatCard("WASO - Opvågninger", formatDuration(stats.getWaso())),
+            createStatCard("Morgenfølelse", formatRating(stats.getMorningFeeling()))
+        );
+
+        addComponentAtIndex(1, statsRow); // Insert below breadcrumbs
+
+        // Load survey answers dynamically
+        Div surveyBox = createSurveyAnswersBox(currentCitizen.getId());
+
+        addComponentAtIndex(3, surveyBox); // Adjust index based on your layout
     }
-     private Div createSurveyAnswersBox() {
+
+    private Div createSurveyAnswersBox(UUID citizenId) {
         Div box = new Div();
         box.setWidth("90%");
         box.setHeight("400px");
@@ -251,55 +377,26 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
         table.add(createTableHeader("Morgensvar"));
         table.add(createTableHeader("Aftensvar"));
 
-        // Sample data rows
-        table.add(createTableCell("19/10/2025"));
-        table.add(createTableCellWithButton("9:54"));
-        table.add(createTableCellWithButton("22:31"));
+        // --- MOCK DATA ---
+        List<SleepSurveyAnswer> answers = List.of(
+            new SleepSurveyAnswer(LocalDate.of(2025, 10, 19), LocalTime.of(9, 54), LocalTime.of(22, 31)),
+            new SleepSurveyAnswer(LocalDate.of(2025, 10, 20), LocalTime.of(9, 50), LocalTime.of(22, 25)),
+            new SleepSurveyAnswer(LocalDate.of(2025, 10, 21), LocalTime.of(9, 45), LocalTime.of(22, 20)),
+            new SleepSurveyAnswer(LocalDate.of(2025, 10, 22), LocalTime.of(9, 55), LocalTime.of(22, 30)),
+            new SleepSurveyAnswer(LocalDate.of(2025, 10, 23), LocalTime.of(9, 50), LocalTime.of(22, 15))
+        );
+        // --- END MOCK DATA ---
 
-        table.add(createTableCell("20/10/2025"));
-        table.add(createTableCellWithButton("9:11"));
-        table.add(createTableCellWithButton("22:28"));
-
-        table.add(createTableCell("21/10/2025"));
-        table.add(createTableCellWithButton("9:32"));
-        table.add(createTableCellWithButton("22:53"));
-
-          table.add(createTableCell("21/10/2025"));
-        table.add(createTableCellWithButton("9:32"));
-        table.add(createTableCellWithButton("22:53"));
-
-          table.add(createTableCell("21/10/2025"));
-        table.add(createTableCellWithButton("9:32"));
-        table.add(createTableCellWithButton("22:53"));
-
-          table.add(createTableCell("21/10/2025"));
-        table.add(createTableCellWithButton("9:32"));
-        table.add(createTableCellWithButton("22:53"));
-
-          table.add(createTableCell("21/10/2025"));
-        table.add(createTableCellWithButton("9:32"));
-        table.add(createTableCellWithButton("22:53"));
-
-          table.add(createTableCell("21/10/2025"));
-        table.add(createTableCellWithButton("9:32"));
-        table.add(createTableCellWithButton("22:53"));
-
-          table.add(createTableCell("21/10/2025"));
-        table.add(createTableCellWithButton("9:32"));
-        table.add(createTableCellWithButton("22:53"));
-
-          table.add(createTableCell("21/10/2025"));
-        table.add(createTableCellWithButton("9:32"));
-        table.add(createTableCellWithButton("22:53"));
-
-          table.add(createTableCell("21/10/2025"));
-        table.add(createTableCellWithButton("9:32"));
-        table.add(createTableCellWithButton("22:53"));
-
+        for (SleepSurveyAnswer answer : answers) {
+            table.add(createTableCell(answer.getDate()));
+            table.add(createTableCellWithButton(answer.getMorningTime()));
+            table.add(createTableCellWithButton(answer.getEveningTime()));
+        }
 
         box.add(table);
         return box;
     }
+
 
     private Span createTableHeader(String text) {
         Span header = new Span(text);
@@ -315,15 +412,19 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
             .set("color", "#475569");
         return cell;
     }
+    
+    private Span createTableCell(LocalDate date) {
+        return createTableCell(date.format(Formatters.DATE_DK));
+    }
 
-    private HorizontalLayout createTableCellWithButton(String time) {
+    private HorizontalLayout createTableCellWithButton(LocalTime time) {
         HorizontalLayout cell = new HorizontalLayout();
         cell.setSpacing(true);
         cell.getStyle()
             .set("align-items", "center")
             .set("gap", "8px");
 
-        Span timeText = new Span(time);
+        Span timeText = new Span(time.format(Formatters.TIME));
         timeText.getStyle().set("color", "#475569");
 
         Button viewButton = new Button("Se svar");
@@ -336,21 +437,22 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
             .set("font-size", "12px")
             .set("cursor", "pointer");
 
-        viewButton.addClickListener(e -> {
-            // Handle view button click - show survey details dialog
-            showSurveyDetails(time);
-        });
+        viewButton.addClickListener(e -> showSurveyDetails(time));
 
         cell.add(timeText, viewButton);
         return cell;
     }
 
-    private void showSurveyDetails(String time) {
+    private void showSurveyDetails(LocalTime time) {
         Dialog dialog = new Dialog();
-        dialog.setHeaderTitle("Søvnundersøgelse Svar - " + time);
+
+        String formattedTime = time.format(Formatters.TIME);
+        dialog.setHeaderTitle("Søvnundersøgelse Svar - " + formattedTime);
 
         VerticalLayout content = new VerticalLayout();
-        content.add(new Span("Survey details for " + time + " will be displayed here."));
+        content.add(new Span(
+            "Survey details for " + formattedTime + " will be displayed here."
+        ));
 
         dialog.add(content);
 
@@ -359,6 +461,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
 
         dialog.open();
     }
+
 
     private void applyDateFilter(LocalDate start, LocalDate end) {
         if (start == null || end == null) {
