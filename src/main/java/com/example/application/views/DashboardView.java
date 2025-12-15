@@ -425,7 +425,7 @@ private List<Citizen> filterMyCitizens() {
             severityBadge.getStyle().set("border", "1px solid rgba(99,102,241,0.08)");
         }
 
- ComboBox<String> advisorCombo = new ComboBox<>();
+ComboBox<String> advisorCombo = new ComboBox<>();
 advisorCombo.setPlaceholder("Vælg søvnrådgiver");
 
 // Options in the dropdown
