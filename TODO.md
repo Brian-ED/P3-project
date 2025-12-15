@@ -27,3 +27,10 @@ drawUI needs to get listeners.
 11. ✅ EASY Finish all format functions in the classes inheriting from GenericQuestion.
 
 12. EASY Rename example/application folder to something proper. I don't know what the restrictions are for what we can do. Also rename Answers/ and Questions/ to answers/ and questions/. Folders aren't supposed to start with an uppercase letter. Should also remove CiDiDB/ folder and move all files outside into database/. Also rename my-app/ to something better in the frontend files.
+
+13. EASY reimplement `String getSeverity()` in Citizen to not need to save a severity, and instead generate it based on survey data.
+```
+public String getSeverity() {
+    return row.getSeverity();
+}
+```
