@@ -1,6 +1,6 @@
 package com.example.application.views;
 
-enum Severity {
+public enum Severity {
     unknown,  // ukendt,
     moderate, // moderat,
     good,     // gott,
