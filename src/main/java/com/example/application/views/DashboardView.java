@@ -43,7 +43,7 @@ public class DashboardView extends VerticalLayout {
     private VerticalLayout listContainer;
     private final PostgreSQLDatabaseControler db;
     public DashboardView(PostgreSQLDatabaseControler db, Model model) {
-        SleepAdvisor citizen = model.getThisAdvisor(SecurityUtils.getUsername());
+        Citizen citizen = model.getThisCitizen(SecurityUtils.getUsername());
         this.username = citizen != null ? citizen.getFullName() : "Bruger";
         this.model = model;
         this.db = db;
