@@ -6,13 +6,16 @@ import java.util.UUID;
 import com.example.application.database.ClDiDB.Answers.ComboBoxAnswer;
 import com.example.application.database.ClDiDB.Answers.DurationAnswer;
 import com.example.application.database.ClDiDB.Answers.RollAnswer;
+import com.example.application.database.ClDiDB.Answers.TextFieldAnswer;
 import com.example.application.database.ClDiDB.Answers.YesOrNoElaborateComboboxAnswer;
 import com.example.application.database.ClDiDB.Questions.ComboBoxQuestion;
 import com.example.application.database.ClDiDB.Questions.GenericQuestion;
 import com.example.application.database.ClDiDB.Questions.RollQuestion;
+import com.example.application.database.ClDiDB.Questions.TextFieldQuestion;
 import com.example.application.database.ClDiDB.Questions.RollQuestionShort;
 import com.example.application.database.ClDiDB.Questions.YesOrNoElaborateComboboxQuestion;
 import com.example.application.model.SurveyType;
+import com.vaadin.flow.component.textfield.TextField;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -47,7 +50,7 @@ public final class SurveyMorningRow implements Survey {
     //---------
     // Answers:
     @Embedded private YesOrNoElaborateComboboxAnswer internelAnswer0 = new YesOrNoElaborateComboboxAnswer(); @Transient final private YesOrNoElaborateComboboxQuestion answer0 = new YesOrNoElaborateComboboxQuestion("Tager du nogen gange sovemedicin eller melatonin piller?"     , "Hvad tager du?", new String[]{"Sovemedicin", "Melatonin"}, internelAnswer0); public YesOrNoElaborateComboboxQuestion getAnswer0() {return answer0;}
-    @Embedded private ComboBoxAnswer                 internelAnswer1 = new ComboBoxAnswer                (); @Transient final private ComboBoxQuestion                 answer1 = new ComboBoxQuestion                ("Hvad foretog du dig de sidste par timer inden du gik i seng?" , new String[]{"Ting", "Sager"}                                 , internelAnswer1); public ComboBoxQuestion                 getAnswer1() {return answer1;}
+    @Embedded private TextFieldAnswer                 internelAnswer1 = new TextFieldAnswer                (); @Transient final private TextFieldQuestion                 answer1 = new TextFieldQuestion                ("Hvad foretog du dig de sidste par timer inden du gik i seng?"                               , internelAnswer1); public TextFieldQuestion                 getAnswer1() {return answer1;}
     @Embedded private RollAnswer                     internelAnswer2 = new RollAnswer                    (); @Transient final private RollQuestion                 answer2 = new RollQuestion                ("I går gik jeg i seng klokken:"                                                                                                , internelAnswer2); public RollQuestion                 getAnswer2() {return answer2;}
     @Embedded private RollAnswer                     internelAnswer3 = new RollAnswer                    (); @Transient final private RollQuestion                     answer3 = new RollQuestion                    ("Jeg slukkede lyset klokken:"                                                                                                  , internelAnswer3); public RollQuestion                     getAnswer3() {return answer3;}
     @Embedded private DurationAnswer                 internelAnswer4 = new DurationAnswer                (); @Transient final private RollQuestionShort                 answer4 = new RollQuestionShort                ("Efter jeg slukkede lyset, sov jeg ca. efter:"                                                                                 , internelAnswer4); public RollQuestionShort                 getAnswer4() {return answer4;}

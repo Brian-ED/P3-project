@@ -20,6 +20,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import java.time.Duration;
@@ -293,7 +294,26 @@ public class UI {
             yield cb;
         }
 
-        case TextFieldQuestion x -> new TextField(x.getMainQuestionTitle());
+        case TextFieldQuestion x -> {
+            TextArea ta = new TextArea(x.getMainQuestionTitle());
+            ta.setWidth("600px");          // pick a size you like
+            ta.setMinHeight("150px");      // "big field"
+            ta.setMaxHeight("600px");      // optional
+            ta.setClearButtonVisible(true);
+
+            // This makes it expand downwards while typing:
+            ta.setHeight("auto");
+            ta.getStyle().set("overflow", "hidden");
+            ta.getElement().executeJs("""
+                const ta = this.inputElement;
+                const resize = () => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; };
+                ta.addEventListener('input', resize);
+                resize();
+            """);
+
+            yield ta;
+        }
+
         case YesOrNoQuestion x -> drawYesNo(x);
     };
 }
