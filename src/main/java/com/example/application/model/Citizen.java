@@ -51,6 +51,7 @@ public class Citizen implements User {
             answeredSurveys[mornings.size() + i] = new AnsweredSurvey(e.getAnswers(), SurveyType.morning, e.getWhenAnswered());
         }
         this.row = citizenData;
+        this.id = citizenData.getId();
         this.fullName = citizenData.getFullName();
         this.answeredSurveys = answeredSurveys;
         this.assignedAdvisor = Optional.empty();
@@ -94,7 +95,7 @@ public class Citizen implements User {
 
 public String getLastEntry() {
     if (answeredSurveys == null || answeredSurveys.length == 0) {
-        return "Ingen indtastninger";
+        return row.getLastEntry();
     }
 
     return Arrays.stream(answeredSurveys)
@@ -111,8 +112,7 @@ public String getFullName() {
 }
 
 public String getSeverity() {
-    // Placeholder logic; you can replace with actual logic based on surveys
-    return "Ukendt"; // or "Moderat"
+    return row.getSeverity();
 }
 
 public String getAdvisor() {

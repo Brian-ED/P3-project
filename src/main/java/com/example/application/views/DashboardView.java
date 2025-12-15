@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-
+import java.util.UUID;
 import com.example.application.database.PostgreSQLDatabaseControler;
 import com.example.application.database.ClDiDB.AdvisorRow;
+import com.example.application.database.ClDiDB.CitizenRow;
 import com.example.application.model.Citizen;
 import com.example.application.model.Model;
 import com.example.application.model.SleepAdvisor;
@@ -233,15 +234,21 @@ advisor1.getRow().setFullName("Søvnrådgiver Anna");
 SleepAdvisor advisor2 = new SleepAdvisor(new AdvisorRow());
 advisor2.getRow().setFullName("Søvnrådgiver Peter");
 
-// Example citizens
-Citizen citizen1 = mockCitizen("Emma Jensen", advisor1);
-Citizen citizen2 = mockCitizen("Lars Hansen", advisor2);
-Citizen citizen3 = mockCitizen("Maja Sørensen", advisor1);
+citizens.add(
+    mockCitizen(UUID.fromString("00000000-0000-0000-0000-000000000001"),
+                "Emma Jensen", "Moderat", "2025-12-14", advisor1)
+);
+citizens.add(
+    mockCitizen(UUID.fromString("00000000-0000-0000-0000-000000000002"),
+                "Lars Hansen", "Ukendt", "2025-12-13", advisor2)
+);
+citizens.add(
+    mockCitizen(UUID.fromString("00000000-0000-0000-0000-000000000003"),
+                "Maja Sørensen", "Moderat", "2025-12-12", advisor1)
+);
 
-// Add to your citizens list
-citizens.add(citizen1);
-citizens.add(citizen2);
-citizens.add(citizen3);
+
+
 // Refresh UI
 
        citizens.addAll(dbCitizens);
@@ -255,7 +262,35 @@ citizens.add(citizen3);
         add(content);
 
     }
+private Citizen mockCitizen(
+        UUID fakeId,
+        String name,
+        String severity,
+        String lastEntry,
+        SleepAdvisor advisor
+) {
+    CitizenRow row = new CitizenRow();
+    row.setFullName(name);
+    row.setSeverity(severity);
+    row.setLastEntry(lastEntry);
 
+    Citizen citizen = new Citizen(row);
+
+    // Set UUID correctly
+    try {
+        var field = Citizen.class.getDeclaredField("id");
+        field.setAccessible(true);
+        field.set(citizen, fakeId);
+    } catch (Exception e) {
+        throw new RuntimeException(e);
+    }
+
+    citizen.setAdvisor(advisor);
+    return citizen;
+}
+
+
+    
 private void updateStats() {
     // Total citizens
     totalCitizensValue.setText(String.valueOf(citizens.size()));
@@ -441,11 +476,8 @@ advisorCombo.setWidth("200px");
         return row;
     }
 
-private Citizen mockCitizen(String name, SleepAdvisor advisor) {
-    Citizen c = model.getThisCitizen(name);
-    c.setAdvisor(advisor);
-    return c;
-}
+
+
 
 
     private HorizontalLayout createTopMargin() {
