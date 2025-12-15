@@ -4,17 +4,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 
-import com.postgresqlSwitcher;
 import com.example.application.database.PostgreSQLDatabaseControler;
 import com.example.application.database.ClDiDB.AdvisorRow;
-import com.example.application.database.ClDiDB.CitizenRow;
 import com.example.application.model.Citizen;
-import com.example.application.model.SleepAdvisor;
-import com.example.application.model.AnsweredSurvey;
 import com.example.application.model.Model;
-import com.example.application.model.SurveyType;
+import com.example.application.model.SleepAdvisor;
 import com.example.application.security.SecurityUtils;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
@@ -48,12 +43,11 @@ public class DashboardView extends VerticalLayout {
     private VerticalLayout listContainer;
     private final PostgreSQLDatabaseControler db;
     public DashboardView(PostgreSQLDatabaseControler db, Model model) {
-        Citizen citizen = model.getThisCitizen(SecurityUtils.getUsername());
+        SleepAdvisor citizen = model.getThisAdvisor(SecurityUtils.getUsername());
         this.username = citizen != null ? citizen.getFullName() : "Bruger";
         this.model = model;
         this.db = db;
 
-        
         setSizeFull();
         setPadding(false);
         setSpacing(false);
@@ -240,9 +234,9 @@ SleepAdvisor advisor2 = new SleepAdvisor(new AdvisorRow());
 advisor2.getRow().setFullName("Søvnrådgiver Peter");
 
 // Example citizens
-Citizen citizen1 = mockCitizen("Emma Jensen", "Moderat", "2025-12-14", advisor1);
-Citizen citizen2 = mockCitizen("Lars Hansen", "Ukendt", "2025-12-13", advisor2);
-Citizen citizen3 = mockCitizen("Maja Sørensen", "Moderat", "2025-12-12", advisor1);
+Citizen citizen1 = mockCitizen("Emma Jensen", advisor1);
+Citizen citizen2 = mockCitizen("Lars Hansen", advisor2);
+Citizen citizen3 = mockCitizen("Maja Sørensen", advisor1);
 
 // Add to your citizens list
 citizens.add(citizen1);
@@ -335,7 +329,7 @@ private List<Citizen> filterMyCitizens() {
         row.getStyle().set("padding", "12px");
         row.getStyle().set("border-radius", "10px");
         row.getStyle().set("margin-bottom", "8px");
-        row.getStyle().set("background", c.isHighlight() ? "var(--lumo-moderate-color)" : "transparent"); // light highlight for moderate
+        row.getStyle().set("background",  "Moderat".equalsIgnoreCase(c.getSeverity()) ? "var(--lumo-moderate-color)" : "transparent"); // light highlight for moderate
         row.getStyle().set("border", "1px solid rgba(15,23,42,0.03)");
 
         // Avatar circle with initials
@@ -447,17 +441,9 @@ advisorCombo.setWidth("200px");
         return row;
     }
 
-private Citizen mockCitizen(String name, String severity, String lastEntry, SleepAdvisor advisor) {
-    CitizenRow row = new CitizenRow();
-    row.setFullName(name); // You can only set full name in CitizenRow
-
-    Citizen c = new Citizen(row);
-
-    // Set advisor
+private Citizen mockCitizen(String name, SleepAdvisor advisor) {
+    Citizen c = model.getThisCitizen(name);
     c.setAdvisor(advisor);
-
-    // Severity and lastEntry are computed dynamically in your current Citizen class
-    // For mocking, you can extend Citizen or override getSeverity/getLastEntry if needed
     return c;
 }
 

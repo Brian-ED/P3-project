@@ -123,10 +123,6 @@ public void setAdvisor(SleepAdvisor advisor) {
     this.assignedAdvisor = Optional.ofNullable(advisor);
 }
 
-public boolean isHighlight() {
-    return "Moderat".equalsIgnoreCase(getSeverity());
-}
-
 public UUID getId() {
     return id;
 }
