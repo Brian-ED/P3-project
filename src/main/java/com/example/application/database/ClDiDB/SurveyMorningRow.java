@@ -1,15 +1,16 @@
 package com.example.application.database.ClDiDB;
 
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 import com.example.application.database.ClDiDB.Answers.ComboBoxAnswer;
 import com.example.application.database.ClDiDB.Answers.DurationAnswer;
 import com.example.application.database.ClDiDB.Answers.RollAnswer;
 import com.example.application.database.ClDiDB.Answers.YesOrNoElaborateComboboxAnswer;
 import com.example.application.database.ClDiDB.Questions.ComboBoxQuestion;
-import com.example.application.database.ClDiDB.Questions.RollQuestionShort;
 import com.example.application.database.ClDiDB.Questions.GenericQuestion;
 import com.example.application.database.ClDiDB.Questions.RollQuestion;
+import com.example.application.database.ClDiDB.Questions.RollQuestionShort;
 import com.example.application.database.ClDiDB.Questions.YesOrNoElaborateComboboxQuestion;
 import com.example.application.model.SurveyType;
 
@@ -17,7 +18,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -28,9 +28,8 @@ import jakarta.persistence.Transient;
 @Table
 public final class SurveyMorningRow implements Survey {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(nullable = false)
-    private Long id;
+    @GeneratedValue
+    private UUID id;
 
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false)
@@ -42,7 +41,9 @@ public final class SurveyMorningRow implements Survey {
     private ZonedDateTime whenAnswered;
     public ZonedDateTime getWhenAnswered() {return whenAnswered;};
     public void setWhenAnswered(ZonedDateTime whenAnswered) {this.whenAnswered = whenAnswered;};
-
+    public DurationAnswer getAnswer4Value() {
+    return internelAnswer4;
+}
     //---------
     // Answers:
     @Embedded private YesOrNoElaborateComboboxAnswer internelAnswer0 = new YesOrNoElaborateComboboxAnswer(); @Transient final private YesOrNoElaborateComboboxQuestion answer0 = new YesOrNoElaborateComboboxQuestion("Tager du nogen gange sovemedicin eller melatonin piller?"     , "Hvad tager du?", new String[]{"Sovemedicin", "Melatonin"}, internelAnswer0); public YesOrNoElaborateComboboxQuestion getAnswer0() {return answer0;}

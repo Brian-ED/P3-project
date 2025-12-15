@@ -3,8 +3,12 @@ package com.example.application.views;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
+import com.example.application.database.PostgreSQLDatabaseControler;
+import com.example.application.model.Citizen;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -13,10 +17,11 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.flow.component.datepicker.DatePicker;
 
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
@@ -25,16 +30,24 @@ import jakarta.annotation.security.RolesAllowed;
 
 @JsModule("./SleepStats.js")
 @JavaScript("https://cdn.jsdelivr.net/npm/chart.js")
-@Route(value = "sleep-stats", layout = MainLayout.class)
+@Route(value = "sleep-stats/:citizenId", layout = MainLayout.class)
 @PageTitle("Søvnstatistik")
 @RolesAllowed({"ADVISOR", "ADMIN"})
 @PermitAll
-public class SleepStats extends VerticalLayout {
+public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
+    private UUID citizenId;
+    private Citizen currentCitizen;
+    private final PostgreSQLDatabaseControler db; // inject via constructor
 
     private final Grid<SleepEntry> grid = new Grid<>(SleepEntry.class, false);
     private final List<SleepEntry> entries = new ArrayList<>();
+    public SleepStats(PostgreSQLDatabaseControler db) {
+        this.db = db;
+        setSizeFull();
+        setPadding(true);
+        setSpacing(true);
+        getElement().getStyle().set("background-color", "#f7f7f7ff");
 
-    public SleepStats() {
         setSizeFull();
         setPadding(true);
         setSpacing(true);
@@ -81,12 +94,12 @@ public class SleepStats extends VerticalLayout {
         HorizontalLayout statsRow = new HorizontalLayout();
         statsRow.setWidthFull();
         statsRow.setSpacing(true);
-        statsRow.add(createStatCard("TIB - Tid i seng", " 9t 15m"),
-                     createStatCard("TST - Total Søvntid", " 8t 1m"),
-                     createStatCard("søvneffektivitet", " 90%"),
-                     createStatCard("SOL - Indsovningstid", " 15m"),
-                     createStatCard("WASO - Opvågninger" , " 40m"),
-                     createStatCard("Morgenfølelse", " 4.0/5")
+        statsRow.add(createStatCard("TIB - Tid i seng", " "+ "9t 15m"),
+                     createStatCard("TST - Total Søvntid", " "+ "8t 1m"),
+                     createStatCard("søvneffektivitet", " "+ (Math.round((0.9)*100))+ "%"),
+                     createStatCard("SOL - Indsovningstid", " "+ "15m"),
+                     createStatCard("WASO - Opvågninger" , " "+ "40m"),
+                     createStatCard("Morgenfølelse", " "+ "4.0"+"/5")
                     );
 
         add(statsRow);
@@ -181,6 +194,29 @@ public class SleepStats extends VerticalLayout {
         refreshGrid();
     }
 
+    public void beforeEnter(BeforeEnterEvent event) {
+        event.getRouteParameters().get("citizenId")
+            .ifPresent(idParam -> {
+                try {
+
+                    // get UUID, may error
+                    citizenId = UUID.fromString(idParam);
+
+                    // Update UI for this citizen
+                    db.getCitizenById(citizenId)
+                        .ifPresent(currentCitizen -> loadCitizenData(currentCitizen));
+
+                } catch (IllegalArgumentException e) {
+                    // Handle invalid ID format
+                }
+            }
+        );
+    }
+
+    private void loadCitizenData(Citizen citizen) {
+        entries.clear(); entries.addAll(db.getSleepEntriesForCitizen(citizen));
+        refreshGrid();
+    }
      private Div createSurveyAnswersBox() {
         Div box = new Div();
         box.setWidth("90%");

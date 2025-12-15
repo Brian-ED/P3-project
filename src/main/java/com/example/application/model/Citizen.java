@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 
-import com.example.application.database.ClDiDB.AdvisorRow;
 import com.example.application.database.ClDiDB.CitizenRow;
 import com.example.application.database.ClDiDB.SurveyEveningRow;
 import com.example.application.database.ClDiDB.SurveyMorningRow;
@@ -60,7 +60,7 @@ public class Citizen implements User {
 
 
     private String fullName;
-    private Long id;
+    private UUID id;
     private final DynamicSurvey currentSurveyMorning;
     private final DynamicSurvey currentSurveyEvening;
     DynamicSurvey getCurrentSurveyMorning() {return currentSurveyMorning;}
@@ -123,11 +123,7 @@ public void setAdvisor(SleepAdvisor advisor) {
     this.assignedAdvisor = Optional.ofNullable(advisor);
 }
 
-public boolean isHighlight() {
-    return "Moderat".equalsIgnoreCase(getSeverity());
-}
-
-public Long getId() {
+public UUID getId() {
     return id;
 }
 
