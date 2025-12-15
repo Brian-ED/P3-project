@@ -11,7 +11,7 @@ public sealed abstract class GenericQuestion<A extends Answer<?>>
         YesOrNoElaborateComboboxQuestion,
         ComboBoxQuestion,
         RollQuestion,
-        DurationQuestion,
+        RollQuestionShort,
         TextFieldQuestion,
         YesOrNoQuestion {
 

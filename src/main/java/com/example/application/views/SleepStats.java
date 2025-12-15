@@ -3,8 +3,12 @@ package com.example.application.views;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
+import com.example.application.database.PostgreSQLDatabaseControler;
+import com.example.application.model.Citizen;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -13,10 +17,11 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.flow.component.datepicker.DatePicker;
 
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
@@ -25,16 +30,24 @@ import jakarta.annotation.security.RolesAllowed;
 
 @JsModule("./SleepStats.js")
 @JavaScript("https://cdn.jsdelivr.net/npm/chart.js")
-@Route(value = "sleep-stats", layout = MainLayout.class)
+@Route(value = "sleep-stats/:citizenId", layout = MainLayout.class)
 @PageTitle("Søvnstatistik")
 @RolesAllowed({"ADVISOR", "ADMIN"})
 @PermitAll
-public class SleepStats extends VerticalLayout {
+public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
+    private UUID citizenId;
+    private Citizen currentCitizen;
+    private final PostgreSQLDatabaseControler db; // inject via constructor
 
     private final Grid<SleepEntry> grid = new Grid<>(SleepEntry.class, false);
     private final List<SleepEntry> entries = new ArrayList<>();
+    public SleepStats(PostgreSQLDatabaseControler db) {
+        this.db = db;
+        setSizeFull();
+        setPadding(true);
+        setSpacing(true);
+        getElement().getStyle().set("background-color", "#f7f7f7ff");
 
-    public SleepStats() {
         setSizeFull();
         setPadding(true);
         setSpacing(true);
@@ -52,16 +65,7 @@ public class SleepStats extends VerticalLayout {
         current.getStyle().set("font-weight", "600");
         crumbs.add(dashboard, sep2, current);
 
-        Button logout = new Button("Logout");
-        logout.getStyle()
-            .set("background", "#2219c3ff")
-            .set("color", "white")
-            .set("border-radius", "8px")
-            .set("padding", "8px 14px");
-
-
-
-        top.add(crumbs, logout);
+        top.add(crumbs);
         top.expand(crumbs);
 
         add(top);
@@ -90,18 +94,18 @@ public class SleepStats extends VerticalLayout {
         HorizontalLayout statsRow = new HorizontalLayout();
         statsRow.setWidthFull();
         statsRow.setSpacing(true);
-        statsRow.add(createStatCard("TIB - Tid i seng", " 9t 15m"),
-                     createStatCard("TST - Total Søvntid", " 8t 1m"),
-                     createStatCard("søvneffektivitet", " 90%"),
-                     createStatCard("SOL - Indsovningstid", " 15m"),
-                     createStatCard("WASO - Opvågninger" , " 40m"),
-                     createStatCard("Morgenfølelse", " 4.0/5")
+        statsRow.add(createStatCard("TIB - Tid i seng", " "+ "9t 15m"),
+                     createStatCard("TST - Total Søvntid", " "+ "8t 1m"),
+                     createStatCard("søvneffektivitet", " "+ (Math.round((0.9)*100))+ "%"),
+                     createStatCard("SOL - Indsovningstid", " "+ "15m"),
+                     createStatCard("WASO - Opvågninger" , " "+ "40m"),
+                     createStatCard("Morgenfølelse", " "+ "4.0"+"/5")
                     );
-                     
+
         add(statsRow);
 
 
-        
+
 
         // Create a wrapper for centering the sleep chart
         Div sleepChartWrapper = new Div();
@@ -124,7 +128,7 @@ public class SleepStats extends VerticalLayout {
 
         sleepChartWrapper.add(chartContainer);
         add(sleepChartWrapper);
-        
+
         addAttachListener(event -> {
             getUI().ifPresent(ui -> {
                 ui.getPage().executeJs(
@@ -139,7 +143,7 @@ public class SleepStats extends VerticalLayout {
                 );
             });
         });
-         
+
 
 
 
@@ -189,7 +193,30 @@ public class SleepStats extends VerticalLayout {
 
         refreshGrid();
     }
-    
+
+    public void beforeEnter(BeforeEnterEvent event) {
+        event.getRouteParameters().get("citizenId")
+            .ifPresent(idParam -> {
+                try {
+
+                    // get UUID, may error
+                    citizenId = UUID.fromString(idParam);
+
+                    // Update UI for this citizen
+                    db.getCitizenById(citizenId)
+                        .ifPresent(currentCitizen -> loadCitizenData(currentCitizen));
+
+                } catch (IllegalArgumentException e) {
+                    // Handle invalid ID format
+                }
+            }
+        );
+    }
+
+    private void loadCitizenData(Citizen citizen) {
+        entries.clear(); entries.addAll(db.getSleepEntriesForCitizen(citizen));
+        refreshGrid();
+    }
      private Div createSurveyAnswersBox() {
         Div box = new Div();
         box.setWidth("90%");
@@ -224,7 +251,7 @@ public class SleepStats extends VerticalLayout {
         table.add(createTableHeader("Morgensvar"));
         table.add(createTableHeader("Aftensvar"));
 
-        // Sample data rows 
+        // Sample data rows
         table.add(createTableCell("19/10/2025"));
         table.add(createTableCellWithButton("9:54"));
         table.add(createTableCellWithButton("22:31"));
@@ -288,17 +315,17 @@ public class SleepStats extends VerticalLayout {
             .set("color", "#475569");
         return cell;
     }
-    
+
     private HorizontalLayout createTableCellWithButton(String time) {
         HorizontalLayout cell = new HorizontalLayout();
         cell.setSpacing(true);
         cell.getStyle()
             .set("align-items", "center")
             .set("gap", "8px");
-        
+
         Span timeText = new Span(time);
         timeText.getStyle().set("color", "#475569");
-        
+
         Button viewButton = new Button("Se svar");
         viewButton.getStyle()
             .set("background", "#f1f5f9")
@@ -308,48 +335,48 @@ public class SleepStats extends VerticalLayout {
             .set("padding", "2px 8px")
             .set("font-size", "12px")
             .set("cursor", "pointer");
-        
+
         viewButton.addClickListener(e -> {
             // Handle view button click - show survey details dialog
             showSurveyDetails(time);
         });
-        
+
         cell.add(timeText, viewButton);
         return cell;
     }
-    
+
     private void showSurveyDetails(String time) {
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Søvnundersøgelse Svar - " + time);
-        
+
         VerticalLayout content = new VerticalLayout();
         content.add(new Span("Survey details for " + time + " will be displayed here."));
-        
+
         dialog.add(content);
-        
+
         Button closeButton = new Button("Luk", e -> dialog.close());
         dialog.getFooter().add(closeButton);
-        
+
         dialog.open();
     }
-    
+
     private void applyDateFilter(LocalDate start, LocalDate end) {
         if (start == null || end == null) {
             refreshGrid();
             return;
         }
-        
+
         if (start.isAfter(end)) {
             // Optionally show an error notification
             refreshGrid();
             return;
         }
-        
+
         List<SleepEntry> filtered = new ArrayList<>();
         for (SleepEntry entry : entries) {
             LocalDate entryDate = entry.getDate();
-            if (entryDate != null && 
-                !entryDate.isBefore(start) && 
+            if (entryDate != null &&
+                !entryDate.isBefore(start) &&
                 !entryDate.isAfter(end)) {
                 filtered.add(entry);
             }
@@ -384,7 +411,7 @@ public class SleepStats extends VerticalLayout {
         return card;
     }
 
-    
+
 
     public static class SleepEntry {
         private LocalDate date;
@@ -395,14 +422,14 @@ public class SleepStats extends VerticalLayout {
         public SleepEntry(LocalDate date, double duration) {
             this.date = date;
             this.duration = duration;
-            
+
         }
 
         public LocalDate getDate() { return date; }
         public double getDuration() { return duration; }
-    
+
         public void setDate(LocalDate date) { this.date = date; }
         public void setDuration(double duration) { this.duration = duration; }
-        
+
     }
 }

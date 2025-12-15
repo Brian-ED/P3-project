@@ -1,7 +1,7 @@
 package com.example.application;
 
 import com.example.application.database.ClDiDB.Questions.ComboBoxQuestion;
-import com.example.application.database.ClDiDB.Questions.DurationQuestion;
+import com.example.application.database.ClDiDB.Questions.RollQuestionShort;
 import com.example.application.database.ClDiDB.Questions.GenericQuestion;
 import com.example.application.database.ClDiDB.Questions.RollQuestion;
 import com.example.application.database.ClDiDB.Questions.TextFieldQuestion;
@@ -22,8 +22,20 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class UI {
+
+
+    private static TimePicker rollTimePicker(String label) {
+        TimePicker tp = new TimePicker(label);
+        tp.setStep(java.time.Duration.ofMinutes(15)); // your new default
+        tp.setAutoOpen(true); // optional but nice
+        return tp;
+    }
     private static Component drawYesNo(YesOrNoElaborateComboboxQuestion question) {
 
         // Title
@@ -61,6 +73,7 @@ public class UI {
 
 
 
+
     private static Component drawYesNo(YesOrNoElaborateComboboxRollQuestion question) {
 
         // Title
@@ -88,12 +101,14 @@ public class UI {
             container.add(yesNo);
 
             // If they answered "Ja", add the extra questions underneath
-            if ("Ja".equals(e.getValue())) {
-                container.add(
-                    new ComboBox<String>(question.getComboboxQuestionTitle()) {{setItems(question.getComboboxQuestionOptions());}},
-                    new TimePicker(question.getRollQuestionTitle())
-                );
-            }
+           if ("Ja".equals(e.getValue())) {
+            container.add(
+                new ComboBox<String>(question.getComboboxQuestionTitle()) {{
+                    setItems(question.getComboboxQuestionOptions());
+                }},
+                rollTimePicker(question.getRollQuestionTitle())
+            );
+        }
         });
 
         return container;
@@ -235,17 +250,52 @@ public class UI {
     }
 
     public static Component drawUI(GenericQuestion<?> question) {
-        return switch (question) {
-            case ComboBoxQuestion x -> new ComboBox<String>(x.getMainQuestionTitle()) {{setItems(x.getComboboxQuestionOptions());}}; // label = question
-            case YesOrNoElaborateRollRollQuestion x -> drawYesNo(x);
-            case YesOrNoElaborateRollQuestion x -> drawYesNo(x);
-            case YesOrNoElaborateComboboxRollQuestion x -> drawYesNo(x);
-            case YesOrNoElaborateRollComboboxQuestion x -> drawYesNo(x);
-            case YesOrNoElaborateComboboxQuestion x -> drawYesNo(x);
-            case RollQuestion x -> new TimePicker(x.getMainQuestionTitle());
-            case DurationQuestion x -> null;
-            case TextFieldQuestion x -> new TextField(x.getMainQuestionTitle());
-            case YesOrNoQuestion x -> drawYesNo(x);
-        };
-    }
+    return switch (question) {
+        case ComboBoxQuestion x ->
+                new ComboBox<String>(x.getMainQuestionTitle()) {{
+                    setItems(x.getComboboxQuestionOptions());
+                }};
+
+        case YesOrNoElaborateRollRollQuestion x -> drawYesNo(x);
+        case YesOrNoElaborateRollQuestion x -> drawYesNo(x);
+        case YesOrNoElaborateComboboxRollQuestion x -> drawYesNo(x);
+        case YesOrNoElaborateRollComboboxQuestion x -> drawYesNo(x);
+        case YesOrNoElaborateComboboxQuestion x -> drawYesNo(x);
+
+        // Wakeup etc. = coarse (1 hour)
+
+        // Bedtime + lights off = fine (5 minutes)
+       case RollQuestion x -> {
+            TimePicker tp = new TimePicker(x.getMainQuestionTitle());
+            tp.setStep(Duration.ofMinutes(15));
+            tp.setPlaceholder("Vælg tidspunkt");
+            tp.setAutoOpen(true);            // clicking the field opens the list
+            tp.setClearButtonVisible(true);
+            yield tp;
+        }
+
+
+
+        // Duration questions = fine (5 minutes) AND no more null => no blank page
+        case RollQuestionShort x -> {
+            ComboBox<Integer> cb = new ComboBox<>(x.getMainQuestionTitle());
+
+            List<Integer> values = new ArrayList<>();
+            for (int i = 0; i <= 250; i += 5) {
+                values.add(i);
+            }
+
+            cb.setItems(values);
+            cb.setItemLabelGenerator(i -> i + " min");
+            cb.setPlaceholder("Vælg antal minutter");
+            cb.setClearButtonVisible(true);
+
+            yield cb;
+        }
+
+        case TextFieldQuestion x -> new TextField(x.getMainQuestionTitle());
+        case YesOrNoQuestion x -> drawYesNo(x);
+    };
+}
+
 }

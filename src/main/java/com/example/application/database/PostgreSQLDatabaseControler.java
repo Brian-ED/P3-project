@@ -1,7 +1,9 @@
 package com.example.application.database;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,11 +20,13 @@ import com.example.application.database.repositories.CitizenRepository;
 import com.example.application.model.Citizen;
 import com.example.application.model.DatabaseControler;
 import com.example.application.model.SleepAdvisor;
+import com.example.application.views.SleepStats.SleepEntry;
 
 import jakarta.transaction.Transactional;
 
 @Service
 @RestController
+
 public class PostgreSQLDatabaseControler implements DatabaseControler {
 
     private final AnsweredSurveyMorningRepository morningRepo;
@@ -41,6 +45,40 @@ public class PostgreSQLDatabaseControler implements DatabaseControler {
         this.citizensRepo = citizensRepo;
         this.advisorsRepo = advisorsRepo;
     }
+@Transactional
+public Optional<Citizen> getCitizenById(UUID id) {
+    Optional<CitizenRow> maybeRow = citizensRepo.findById(id);
+    return maybeRow.map(Citizen::new);
+}
+
+@Transactional
+public List<SleepEntry> getSleepEntriesForCitizen(Citizen citizen) {
+    List<SleepEntry> entries = new ArrayList<>();
+
+    // Morning surveys
+    morningRepo.findByOwner(citizen.getRow()).forEach(m ->
+    entries.add(new SleepEntry(
+        m.getWhenAnswered().toLocalDate(),
+        m.getAnswer4Value().getAnswerInHours()
+    ))
+);
+
+
+    // Evening surveys (if needed)
+    eveningRepo.findByOwner(citizen.getRow()).forEach(e ->
+        entries.add(new SleepEntry(
+            e.getWhenAnswered().toLocalDate(),
+            0.0 // or another relevant field if available
+        ))
+    );
+
+    entries.sort((a, b) -> a.getDate().compareTo(b.getDate()));
+
+    return entries;
+}
+
+
+
 
     @Override
     @Transactional
@@ -71,6 +109,7 @@ public class PostgreSQLDatabaseControler implements DatabaseControler {
         row.setFullName(username);
         citizensRepo.save(row);
         return new Citizen(row);
+
 	}
 
 	@Override
@@ -102,4 +141,22 @@ public class PostgreSQLDatabaseControler implements DatabaseControler {
         advisorsRepo.save(row);
         return new SleepAdvisor(row);
 	}
+    @Transactional
+    public List<SleepAdvisor> getAllAdvisors() {
+        List<AdvisorRow> rows = advisorsRepo.findAll();
+        return rows.stream().map(SleepAdvisor::new).toList();
+    }
+    @Transactional
+
+    public void saveCitizen(Citizen citizen) {
+        // Get the CitizenRow from the database
+        CitizenRow row = citizensRepo.findOneByFullName(citizen.getFullName())
+                                    .orElseThrow();
+
+        // Assign the advisor if present
+        citizen.getAssignedAdvisor().ifPresent(advisor -> row.setAssignedAdvisor(advisor.getRow()));
+
+        // Save the updated row
+        citizensRepo.saveAndFlush(row);
+    }
 }

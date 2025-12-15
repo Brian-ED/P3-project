@@ -1,9 +1,17 @@
 package com.example.application.views;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-
+import java.util.UUID;
+import com.example.application.database.PostgreSQLDatabaseControler;
+import com.example.application.database.ClDiDB.AdvisorRow;
+import com.example.application.database.ClDiDB.CitizenRow;
+import com.example.application.model.Citizen;
+import com.example.application.model.Model;
+import com.example.application.model.SleepAdvisor;
+import com.example.application.security.SecurityUtils;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -23,12 +31,24 @@ import jakarta.annotation.security.RolesAllowed;
 @Route("dashboard")
 @PageTitle("Søvnrådgiver Dashboard")
 @RolesAllowed({"ADVISOR", "ADMIN"})
+
+
 public class DashboardView extends VerticalLayout {
+    private Span totalCitizensValue;
+    private Span myCitizensValue;
+    private Span activeTodayValue;
+    private String username;
+    private Model model;
+    private List<com.example.application.model.Citizen> citizens = new ArrayList<>();
 
-    private List<Citizen> citizens = new ArrayList<>();
     private VerticalLayout listContainer;
+    private final PostgreSQLDatabaseControler db;
+    public DashboardView(PostgreSQLDatabaseControler db, Model model) {
+        Citizen citizen = model.getThisCitizen(SecurityUtils.getUsername());
+        this.username = citizen != null ? citizen.getFullName() : "Bruger";
+        this.model = model;
+        this.db = db;
 
-    public DashboardView() {
         setSizeFull();
         setPadding(false);
         setSpacing(false);
@@ -59,15 +79,26 @@ public class DashboardView extends VerticalLayout {
         statsRow.setAlignItems(Alignment.START);
         statsRow.setJustifyContentMode(JustifyContentMode.CENTER);
 
-        Component card1 = createStatCard("Totale borgere" ,"6", "Registrerede brugere");
-        Component card2 = createStatCard("Mine borgere" ,"0", "Tildelte borgere");
-        Component card3 = createStatCard("Aktive i dag" ,"0", "Nye indtastninger");
+        totalCitizensValue = new Span("0");
+        totalCitizensValue.getStyle().set("font-size", "28px").set("font-weight", "700").set("color", "var(--lumo-body-text-color)");
+
+        myCitizensValue = new Span("0");
+        myCitizensValue.getStyle().set("font-size", "28px").set("font-weight", "700").set("color", "var(--lumo-body-text-color)");
+
+        activeTodayValue = new Span("0");
+        activeTodayValue.getStyle().set("font-size", "28px").set("font-weight", "700").set("color", "var(--lumo-body-text-color)");
+
+        Component card1 = createStatCard("Totale borgere", totalCitizensValue, "Registrerede brugere");
+        Component card2 = createStatCard("Mine borgere", myCitizensValue, "Tildelte borgere");
+        Component card3 = createStatCard("Aktive i dag", activeTodayValue, "Nye indtastninger");
 
         statsRow.add(card1,card2,card3);
 
         statsRow.setFlexGrow(1, card1);
         statsRow.setFlexGrow(1, card2);
         statsRow.setFlexGrow(1, card3);
+
+
 
         Div mainCard = new Div();
         mainCard.getStyle().set("border-radius", "12px");
@@ -76,7 +107,7 @@ public class DashboardView extends VerticalLayout {
         mainCard.getStyle().set("margin-top", "18px");
         mainCard.getStyle().set("width", "100%");
         mainCard.getStyle().set("background", "var(--lumo-base2-color)");
-        
+
 
         // Title row with icon + search and toggle
         HorizontalLayout mainHeaderRow = new HorizontalLayout();
@@ -121,13 +152,16 @@ public class DashboardView extends VerticalLayout {
         toggleSwitch.getElement().getThemeList().add("toggle");
 
         // Optional: handle value change
-        toggleSwitch.addValueChangeListener(event -> {
-            if (event.getValue()) {
-                System.out.println("Toggle ON");
-            } else {
-                System.out.println("Toggle OFF");
-            }
-        });
+      toggleSwitch.addValueChangeListener(event -> {
+    if (event.getValue()) {
+        // Toggle ON: show only citizens assigned to me
+        refreshList(filterMyCitizens());
+    } else {
+        // Toggle OFF: show all citizens
+        refreshList(citizens);
+    }
+     updateStats();
+    });
 
         ComboBox<String> sortBox = new ComboBox<>();
         sortBox.setPlaceholder("Sorter efter");
@@ -135,7 +169,22 @@ public class DashboardView extends VerticalLayout {
         sortBox.setWidth("180px");
 
         searchAndToggle.add(search, sortBox, toggleSwitch);
-        
+search.addValueChangeListener(event -> {
+    String filter = event.getValue().trim().toLowerCase();
+
+    // If empty, show all citizens
+    if (filter.isEmpty()) {
+        refreshList(citizens);
+        return;
+    }
+
+    // Filter citizens by name
+    List<Citizen> filtered = citizens.stream()
+        .filter(c -> c.getFullName().toLowerCase().contains(filter))
+        .toList();
+
+    refreshList(filtered);
+});
         sortBox.addValueChangeListener(
         (com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent<ComboBox<String>, String> e) -> {
             String selected = e.getValue();
@@ -144,7 +193,7 @@ public class DashboardView extends VerticalLayout {
             switch (selected) {
 
                 case "Navn":
-                    citizens.sort(Comparator.comparing(Citizen::getName));
+                    citizens.sort(Comparator.comparing(Citizen::getFullName));
                     break;
 
                 case "Sidste indtastning":
@@ -178,16 +227,34 @@ public class DashboardView extends VerticalLayout {
         listContainer.setSpacing(false);
         listContainer.setWidthFull();
 
-        // Add citizens (sample rows) — replicate the visual style from screenshot
-        citizens.add(new Citizen("Parsa Gholami", "Ingen indtastninger", "Ukendt", false));
-        citizens.add(new Citizen("Alexander Ølholm", "2025-10-19", "Moderat", true));
-        citizens.add(new Citizen("Patrick Kure", "2025-10-20", "Ukendt", false));
-        citizens.add(new Citizen("Brian Ellingsgaard", "2025-10-19", "Ukendt", false));
-        citizens.add(new Citizen("Jonas", "2025-10-18", "Ukendt", false));
-        citizens.add(new Citizen("John Doe", "-", "Ukendt", false));
+       List<com.example.application.model.Citizen> dbCitizens = Arrays.asList(db.searchCitizensByName(""));
+        SleepAdvisor advisor1 = new SleepAdvisor(new AdvisorRow());
+advisor1.getRow().setFullName("Søvnrådgiver Anna");
+
+SleepAdvisor advisor2 = new SleepAdvisor(new AdvisorRow());
+advisor2.getRow().setFullName("Søvnrådgiver Peter");
+
+citizens.add(
+    mockCitizen(UUID.fromString("00000000-0000-0000-0000-000000000001"),
+                "Emma Jensen", "Moderat", "2025-12-14", advisor1)
+);
+citizens.add(
+    mockCitizen(UUID.fromString("00000000-0000-0000-0000-000000000002"),
+                "Lars Hansen", "Ukendt", "2025-12-13", advisor2)
+);
+citizens.add(
+    mockCitizen(UUID.fromString("00000000-0000-0000-0000-000000000003"),
+                "Maja Sørensen", "Moderat", "2025-12-12", advisor1)
+);
+
+
+
+// Refresh UI
+
+       citizens.addAll(dbCitizens);
 
         refreshList();
-
+        updateStats();
 
         mainCard.add(mainHeaderRow, listContainer);
 
@@ -195,42 +262,99 @@ public class DashboardView extends VerticalLayout {
         add(content);
 
     }
+private Citizen mockCitizen(
+        UUID fakeId,
+        String name,
+        String severity,
+        String lastEntry,
+        SleepAdvisor advisor
+) {
+    CitizenRow row = new CitizenRow();
+    row.setFullName(name);
+    row.setSeverity(severity);
+    row.setLastEntry(lastEntry);
+
+    Citizen citizen = new Citizen(row);
+
+    // Set UUID correctly
+    try {
+        var field = Citizen.class.getDeclaredField("id");
+        field.setAccessible(true);
+        field.set(citizen, fakeId);
+    } catch (Exception e) {
+        throw new RuntimeException(e);
+    }
+
+    citizen.setAdvisor(advisor);
+    return citizen;
+}
+
 
     
+private void updateStats() {
+    // Total citizens
+    totalCitizensValue.setText(String.valueOf(citizens.size()));
+
+    // My citizens
+    int myCount = filterMyCitizens().size();
+    myCitizensValue.setText(String.valueOf(myCount));
+
+    // Active today
+    String today = java.time.LocalDate.now().toString(); // "YYYY-MM-DD"
+    long activeToday = citizens.stream()
+                               .filter(c -> today.equals(c.getLastEntry()))
+                               .count();
+    activeTodayValue.setText(String.valueOf(activeToday));
+}
+    private SleepAdvisor getCurrentAdvisor() {
+    List<SleepAdvisor> advisors = db.getAllAdvisors();
+    return advisors.stream()
+                   .filter(a -> a.getFullName().equals(username))
+                   .findFirst()
+                   .orElse(null);
+}
+
+private List<Citizen> filterMyCitizens() {
+    SleepAdvisor currentAdvisor = getCurrentAdvisor();
+    if (currentAdvisor == null) return new ArrayList<>();
+    return citizens.stream()
+                   .filter(c -> c.getAdvisor() != null && c.getAdvisor().equals(currentAdvisor))
+                   .toList();
+}
     private void refreshList() {
-         listContainer.removeAll();
-    for (Citizen c : citizens) {
-        listContainer.add(createCitizenRow(c)); // pass the full object
+    refreshList(citizens);
+    }
+
+     private void refreshList(List<Citizen> list) {
+    listContainer.removeAll();
+    for (Citizen c : list) {
+        listContainer.add(createCitizenRow(c));
     }
 }
-    private Div createStatCard(String highlightlabel, String value, String label) {
-        Div card = new Div();
-        card.getStyle().set("background", "var(--lumo-base2-color)");
-        card.getStyle().set("border-radius", "12px");
-        card.getStyle().set("padding", "18px");
-        card.getStyle().set("width", "260px");
-        card.getStyle().set("box-shadow", "0 1px 6px rgba(15,23,42,0.04)");
-        card.getStyle().set("display", "flex");
-        card.getStyle().set("flex-direction", "column");
-        card.getStyle().set("gap", "8px");
+    private Div createStatCard(String highlightLabel, Span valueSpan, String label) {
+    Div card = new Div();
+    card.getStyle().set("background", "var(--lumo-base2-color)");
+    card.getStyle().set("border-radius", "12px");
+    card.getStyle().set("padding", "18px");
+    card.getStyle().set("width", "260px");
+    card.getStyle().set("box-shadow", "0 1px 6px rgba(15,23,42,0.04)");
+    card.getStyle().set("display", "flex");
+    card.getStyle().set("flex-direction", "column");
+    card.getStyle().set("gap", "8px");
 
-        Span hl = new Span(highlightlabel);
-        hl.getStyle().set("font-size", "16px");
-        hl.getStyle().set("font-weight", "600");
-        hl.getStyle().set("color", "var(--lumo-body-text-color)");
+    Span hl = new Span(highlightLabel);
+    hl.getStyle().set("font-size", "16px");
+    hl.getStyle().set("font-weight", "600");
+    hl.getStyle().set("color", "var(--lumo-body-text-color)");
 
-        Span v = new Span(value);
-        v.getStyle().set("font-size", "28px");
-        v.getStyle().set("font-weight", "700");
-        v.getStyle().set("color", "var(--lumo-body-text-color)");
+    Span l = new Span(label);
+    l.getStyle().set("color", "#64748b");
+    l.getStyle().set("font-size", "13px");
 
-        Span l = new Span(label);
-        l.getStyle().set("color", "#64748b");
-        l.getStyle().set("font-size", "13px");
+    card.add(hl, valueSpan, l);
+    return card;
+}
 
-        card.add(hl, v, l);
-        return card;
-    }
 
     private HorizontalLayout createCitizenRow(Citizen c) {
         HorizontalLayout row = new HorizontalLayout();
@@ -240,7 +364,7 @@ public class DashboardView extends VerticalLayout {
         row.getStyle().set("padding", "12px");
         row.getStyle().set("border-radius", "10px");
         row.getStyle().set("margin-bottom", "8px");
-        row.getStyle().set("background", c.isHighlight() ? "var(--lumo-moderate-color)" : "transparent"); // light highlight for moderate
+        row.getStyle().set("background",  "Moderat".equalsIgnoreCase(c.getSeverity()) ? "var(--lumo-moderate-color)" : "transparent"); // light highlight for moderate
         row.getStyle().set("border", "1px solid rgba(15,23,42,0.03)");
 
         // Avatar circle with initials
@@ -255,14 +379,21 @@ public class DashboardView extends VerticalLayout {
         avatar.getStyle().set("color", "#1f2937");
         avatar.getStyle().set("font-weight", "600");
         avatar.getStyle().set("font-size", "14px");
-        avatar.add(new Span(getInitials(c.getName())));
+        Span initials = new Span(getInitials(c.getFullName()));
+        avatar.add(initials);
 
         // Info block
         VerticalLayout info = new VerticalLayout();
         info.setPadding(false);
         info.setSpacing(false);
 
-        Span nameLabel = new Span(c.getName());
+        Span idLabel = new Span("ID: " + c.getId());
+        idLabel.getStyle().set("font-size", "12px").set("color", "var(--lumo-secondary-text-color)");
+
+        Span lastSurveyLabel = new Span("Sidste indtastning: " + c.getLastEntry());
+        lastSurveyLabel.getStyle().set("font-size", "13px").set("color", "var(--lumo-secondary-text-color)");
+
+        Span nameLabel = new Span(c.getFullName());
         nameLabel.getStyle().set("font-weight", "600");
         nameLabel.getStyle().set("font-size", "14px");
 
@@ -270,7 +401,7 @@ public class DashboardView extends VerticalLayout {
         sub.getStyle().set("color", "var(--lumo-secondary-text-color)");
         sub.getStyle().set("font-size", "13px");
 
-        info.add(nameLabel, sub);
+        info.add(nameLabel, idLabel, lastSurveyLabel);
         info.getStyle().set("margin-left", "12px");
 
         // Right-side actions: severity badge, advisor label (placeholder), sort icon, view data button
@@ -298,13 +429,10 @@ public class DashboardView extends VerticalLayout {
 advisorCombo.setPlaceholder("Vælg søvnrådgiver");
 
 // Options in the dropdown
-advisorCombo.setItems(
-        "Ingen søvnrådgiver",
-        "Anna Hansen",
-        "Peter Nielsen",
-        "Maria Jensen",
-        "John Doe"
-);
+List<SleepAdvisor> advisors = db.getAllAdvisors(); // We’ll add this method
+List<String> advisorNames = advisors.stream().map(SleepAdvisor::getFullName).toList();
+advisorCombo.setItems(advisorNames);
+advisorCombo.setValue(c.getAdvisor());
 
 // Default selection
 advisorCombo.setValue(c.getAdvisor());
@@ -319,9 +447,15 @@ advisorCombo.getStyle().set("background", "transparent");
 advisorCombo.setWidth("200px");
 
     advisorCombo.addValueChangeListener(event -> {
-        String selected = event.getValue();
+      String selected = event.getValue();
         if (selected != null) {
-            c.setAdvisor(selected); 
+        db.getAdvisorByName(selected).ifPresent(advisor -> {
+            c.setAdvisor(advisor);  // sets Optional<SleepAdvisor>
+            db.getCitizenByName(c.getFullName()).ifPresent(citizen -> {
+                citizen.setAdvisor(advisor);
+                db.saveCitizen(citizen);
+                });
+            });
         }
     });
         Button viewData = new Button("Se data", new Icon(VaadinIcon.CHART));
@@ -330,7 +464,8 @@ advisorCombo.setWidth("200px");
         viewData.getElement().getStyle().set("border", "1px solid rgba(15,23,42,0.06)");
         viewData.getElement().getStyle().set("padding", "6px 10px");
         viewData.getElement().getStyle().set("font-size", "13px");
-
+        viewData.addClickListener(e -> 
+        viewData.getUI().ifPresent(ui -> ui.navigate("sleep-stats/" + c.getId())));
         rightActions.add(severityBadge, advisorCombo, viewData);
 
         // Expand info to use remaining space
@@ -341,13 +476,17 @@ advisorCombo.setWidth("200px");
         return row;
     }
 
+
+
+
+
     private HorizontalLayout createTopMargin() {
         HorizontalLayout top = new HorizontalLayout();
         top.setWidthFull();
         top.setAlignItems(Alignment.CENTER);
-
+        // Setup user
         // Left: small app title
-        Span appTitle = new Span("Velkommen, John Doe");
+        Span appTitle = new Span("Velkommen,"+ username);
         appTitle.getStyle().set("font-weight", "700");
         appTitle.getStyle().set("font-size", "26px");
         appTitle.getStyle().set("color", "#072d85ff");
@@ -367,31 +506,5 @@ advisorCombo.setWidth("200px");
             return ("" + parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
         }
     }
-
-    static class Citizen {
-        private final String name;
-        private final String lastEntry;
-        private final String severity;
-        private final boolean highlight;
-
-        private String advisor;
-
-        Citizen(String name, String lastEntry, String severity, boolean highlight) {
-            this.name = name;
-            this.lastEntry = lastEntry;
-            this.severity = severity;
-            this.highlight = highlight;
-            this.advisor = "Ingen søvnrådgiver"; 
-        }
-        
-        public String getName() { return name; }
-        public String getLastEntry() { return lastEntry; }
-        public String getSeverity() { return severity; }
-        public boolean isHighlight() { return highlight; }
-
-        public String getAdvisor() { return advisor; }
-
-        public void setAdvisor(String advisor) { this.advisor = advisor; }
-    }
-
+    
 }
