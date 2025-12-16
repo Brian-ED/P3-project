@@ -49,7 +49,7 @@ import jakarta.annotation.security.RolesAllowed;
 @PermitAll
 public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
     private UUID citizenId;
-    private Citizen currentCitizen;
+    private Citizen selectedCitizen;
 
     private Model model;
 
@@ -117,8 +117,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
         controls.add(startDate, endDate, filterButton);
         add(controls);
 
-        DateTimeFormatter format = DateTimeFormatter.ofPattern("HH.mm");
-        AnsweredSurvey[] surveys = { new AnsweredMorningSurvey(UUID.randomUUID(), new GenericQuestion[0], ZonedDateTime.now()) };
+        AnsweredSurvey[] surveys = selectedCitizen.getSurveys();
         final String timeInBed;
         Optional<Integer> maybeMinutesInBedAccumulator = Optional.empty();
 
@@ -324,10 +323,10 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
         private LocalTime eveningTime;
 
         public SleepSurveyAnswer(LocalDate date, LocalTime morningTime, LocalTime eveningTime) {
-        this.date = date;
-        this.morningTime = morningTime;
-        this.eveningTime = eveningTime;
-    }
+            this.date = date;
+            this.morningTime = morningTime;
+            this.eveningTime = eveningTime;
+        }
 
         public LocalDate getDate() { return date; }
         public LocalTime getMorningTime() { return morningTime; }
@@ -343,7 +342,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
                     citizenId = UUID.fromString(idParam);
 
                     // Get citizen, may error
-                    this.currentCitizen = model.getCitizenWithID(citizenId).orElseThrow();
+                    this.selectedCitizen = model.getCitizenWithID(citizenId).orElseThrow();
 
                     // Update UI for this citizen
                     loadCitizenData();
@@ -364,7 +363,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
 
 
         List<SleepEntry> entries = new ArrayList<>();
-        for (AnsweredSurvey s : currentCitizen.getSurveys()) {
+        for (AnsweredSurvey s : selectedCitizen.getSurveys()) {
             switch (s) {
 
                 case AnsweredMorningSurvey m ->
@@ -406,7 +405,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
         addComponentAtIndex(1, statsRow); // Insert below breadcrumbs
 
         // Load survey answers dynamically
-        Div surveyBox = createSurveyAnswersBox(currentCitizen.getID());
+        Div surveyBox = createSurveyAnswersBox(selectedCitizen.getID());
 
         addComponentAtIndex(3, surveyBox); // Adjust index based on your layout
     }
