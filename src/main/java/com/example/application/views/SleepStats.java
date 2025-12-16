@@ -19,6 +19,7 @@ import com.example.application.model.AnsweredMorningSurvey;
 import com.example.application.model.AnsweredSurvey;
 import com.example.application.model.Citizen;
 import com.example.application.model.Model;
+import com.example.application.security.SecurityUtils;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.JavaScript;
@@ -69,6 +70,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
 
     public SleepStats(Model model) {
         this.model = model;
+        model.initAsAdvisor(SecurityUtils.getUsername());
         setSizeFull();
         setPadding(true);
         setSpacing(true);
@@ -341,7 +343,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
                     citizenId = UUID.fromString(idParam);
 
                     // Get citizen, may error
-                    this.currentCitizen = model.initAsCitizenWithID(citizenId).orElseThrow();
+                    this.currentCitizen = model.getCitizenWithID(citizenId).orElseThrow();
 
                     // Update UI for this citizen
                     loadCitizenData();

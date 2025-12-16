@@ -23,7 +23,7 @@ public class ModelImpl implements Model {
         this.database = database;
     }
 
-    public Optional<Citizen> initAsCitizenWithID(UUID UserID) {
+    public Optional<Citizen> getCitizenWithID(UUID UserID) {
         Optional<Citizen> citizen = database.getCitizenById(UserID);
         this.user = Optional.ofNullable(citizen.orElse(null)); // Java type inference couldn't infer the Optional<Citizen> to Optional<User>
         return citizen;
@@ -41,6 +41,18 @@ public class ModelImpl implements Model {
         return citizen;
     }
 
+
+    public SleepAdvisor initAsAdvisor(String username) {
+        final SleepAdvisor advisor;
+        Optional<SleepAdvisor> maybeA = database.getAdvisorByName(username);
+        if (maybeA.isEmpty()) {
+            advisor = database.newAdvisor(username);
+        } else {
+            advisor = maybeA.orElseThrow();
+        }
+        this.user = Optional.of(advisor);
+        return advisor;
+    }
 
     public Optional<User> getUser() {
         return user;
