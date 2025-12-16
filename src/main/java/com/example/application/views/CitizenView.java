@@ -76,16 +76,16 @@ public class CitizenView extends VerticalLayout {
         add(header);
         Hr hr = new Hr();
         hr.getStyle()
-        .set("margin-top", "-20px")
-        .set("margin-bottom", "40px");
+            .set("margin-top", "-20px")
+            .set("margin-bottom", "40px");
         add(hr);
 
         // Creates the "morninganswer box"
         Card morningCard = new Card();
         morningCard.getStyle()
-        .set("background-color", "white")
-        .set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)")
-        .set("padding", "20px");
+            .set("background-color", "white")
+            .set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)")
+            .set("padding", "20px");
         H2 morningH2 = new H2("Morgensvar");
         morningH2.getElement().setProperty("innerHTML",
     "<span style='color: orange;'>✹</span> Morgensvar");
@@ -95,11 +95,11 @@ public class CitizenView extends VerticalLayout {
         Button morningButton = new Button("Udfyld morgensvar");
         morningButton.setWidthFull();
         morningButton.getStyle()
-        .set("background-color", "darkblue")
-        .set("color", "white")
-        .set("padding", "20px")
-        .set("margin-top", "20px")
-        .set("cursor", "pointer");
+            .set("background-color", "darkblue")
+            .set("color", "white")
+            .set("padding", "20px")
+            .set("margin-top", "20px")
+            .set("cursor", "pointer");
         morningButton.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate("survey/morning")));
         morningCard.setWidth("100%");
         morningCard.add(
@@ -111,9 +111,9 @@ public class CitizenView extends VerticalLayout {
         // Creates the "eveninganswer box"
         Card eveningCard = new Card();
         eveningCard.getStyle()
-        .set("background-color", "white")
-        .set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)")
-        .set("padding", "20px");
+            .set("background-color", "white")
+            .set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)")
+            .set("padding", "20px");
         H2 eveningH2 = new H2("Aftensvar");
         eveningH2.getElement().setProperty("innerHTML",
     "<span style='color: purple;'>☾</span> Aftensvar");
@@ -123,11 +123,11 @@ public class CitizenView extends VerticalLayout {
         Button eveningButton = new Button("Udfyld aftensvar");
         eveningButton.setWidthFull();
         eveningButton.getStyle()
-        .set("background-color", "darkblue")
-        .set("color", "white")
-        .set("padding", "20px")
-        .set("margin-top", "20px")
-        .set("cursor", "pointer");
+            .set("background-color", "darkblue")
+            .set("color", "white")
+            .set("padding", "20px")
+            .set("margin-top", "20px")
+            .set("cursor", "pointer");
         eveningButton.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate("survey/evening")));
         eveningCard.setWidth("100%");
         eveningCard.add(
@@ -145,12 +145,12 @@ public class CitizenView extends VerticalLayout {
         // Create the Div to see the latest morning aswers
         Div latestMorningAnswersDiv = new Div();
         latestMorningAnswersDiv.getStyle()
-        .set("padding", "20px")
-        .set("cursor", "pointer")
-        .set("background-color", "lightgray")
-        .set("margin-top", "1px")
-        .set("border-radius", "8px")
-        .set("text-align", "center");
+            .set("padding", "20px")
+            .set("cursor", "pointer")
+            .set("background-color", "lightgray")
+            .set("margin-top", "1px")
+            .set("border-radius", "8px")
+            .set("text-align", "center");
         latestMorningAnswersDiv.setWidth("100%");
         H3 latestMorningH3 = new H3();
         Span tekstHistorik = new Span("Historik");
@@ -176,9 +176,9 @@ public class CitizenView extends VerticalLayout {
             morningHorizontal.add(leftSideMorning, morningDialogButton);
             morningHorizontal.getStyle().set("margin-top", "-30px");
             morningDialogButton.getStyle()
-            .set("background-color","darkblue")
-            .set("color","white")
-            .set("cursor", "pointer");
+                .set("background-color","darkblue")
+                .set("color","white")
+                .set("cursor", "pointer");
             dialog.setWidth("60%");
 
             VerticalLayout listLayout = new VerticalLayout();
@@ -462,16 +462,16 @@ public class CitizenView extends VerticalLayout {
         // Creates the "Seneste indtastninger box"
         Card latestAnswersCard = new Card();
         latestAnswersCard.getStyle()
-        .set("margin-top", "20px")
-        .set("display", "block")
-        .set("margin", "0 auto")
-        .set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)")
-        .set("background-color", "white")
-        .set("padding", "16px");
+            .set("margin-top", "20px")
+            .set("display", "block")
+            .set("margin", "0 auto")
+            .set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)")
+            .set("background-color", "white")
+            .set("padding", "16px");
         H3 lastestAnswerH3 = new H3("📆︎ Seneste indtastninger");
         lastestAnswerH3.getStyle()
-        .set("padding", "20px")
-        .set("margin-bottom", "-35px");
+            .set("padding", "20px")
+            .set("margin-bottom", "-35px");
         Span lastestAnswerSpan1 = new Span("Oversigt over dine seneste søvnregistreringer:");
         lastestAnswerSpan1.getStyle().set("padding", "20px").set("display", "block");
 
