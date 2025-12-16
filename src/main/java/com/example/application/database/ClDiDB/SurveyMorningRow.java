@@ -70,6 +70,7 @@ public final class SurveyMorningRow implements Survey {
     public GenericQuestion<?>[] getAnswers() {
         return allAnswers;
     }
+    
 	@Override
 	public SurveyType getType() {
         return SurveyType.morning;

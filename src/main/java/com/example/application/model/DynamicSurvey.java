@@ -73,6 +73,7 @@ public class DynamicSurvey {
     public SurveyType getType() {
         return type;
     }
+    
     public Boolean submitAnswers() {
         survey.setWhenAnswered(ZonedDateTime.now());
 

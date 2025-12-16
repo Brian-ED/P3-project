@@ -59,6 +59,7 @@ public final class SurveyEveningRow implements Survey {
     public GenericQuestion<?>[] getAnswers() {
         return allAnswers;
     }
+    
 	@Override
 	public SurveyType getType() {
 		return SurveyType.evening;

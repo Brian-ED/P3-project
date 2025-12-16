@@ -172,6 +172,16 @@ public class DashboardView extends VerticalLayout {
             }
             updateStats();
         });
+        toggleSwitch.addValueChangeListener(event -> {
+            if (event.getValue()) {
+                // Toggle ON: show only citizens assigned to me
+                refreshList(filterMyCitizens());
+            } else {
+                // Toggle OFF: show all citizens
+                refreshList(citizens);
+            }
+            updateStats();
+        });
 
         ComboBox<String> sortBox = new ComboBox<>();
         sortBox.setPlaceholder("Sorter efter");
