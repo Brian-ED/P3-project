@@ -38,3 +38,5 @@ public String getSeverity() {
 14. EASY NOT IMPORTANT change all uses of `TYPE[]` to `List<Type>`, so use List over Array.
 
 15. EASY ADD COMMENTS
+
+16. EASY in SleepStats, inside the empty catch branch, redirect to a 404 page not found page.
