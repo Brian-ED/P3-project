@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import com.example.application.database.ClDiDB.Questions.GenericQuestion;
+import com.example.application.model.AnsweredEveningSurvey;
+import com.example.application.model.AnsweredMorningSurvey;
 import com.example.application.model.AnsweredSurvey;
 import com.example.application.model.Citizen;
 import com.example.application.model.Model;
@@ -207,12 +209,15 @@ public class CitizenView extends VerticalLayout {
                 AnsweredSurvey eveningSurvey = null;
 
                 for (AnsweredSurvey survey : surveysOnDate) {
-                    if (survey.getType() == SurveyType.morning) {
-                        morningTime = survey.getWhenAnswered().format(timeFormatter);
-                        morningSurvey = survey;
-                    } else if (survey.getType() == SurveyType.evening) {
-                        eveningTime = survey.getWhenAnswered().format(timeFormatter);
-                        eveningSurvey = survey;
+                    switch(survey) {
+                        case AnsweredMorningSurvey a -> {
+                            morningTime = survey.getWhenAnswered().format(timeFormatter);
+                            morningSurvey = survey;
+                        }
+                        case AnsweredEveningSurvey a2 -> {
+                            eveningTime = survey.getWhenAnswered().format(timeFormatter);
+                            eveningSurvey = survey;
+                        }
                     }
                 }
 

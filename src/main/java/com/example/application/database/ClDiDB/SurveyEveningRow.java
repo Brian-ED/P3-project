@@ -31,6 +31,9 @@ public final class SurveyEveningRow implements Survey {
     @Id
     @GeneratedValue
     private UUID id;
+    public UUID getID() {
+        return id;
+    }
 
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false)

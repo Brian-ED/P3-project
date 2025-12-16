@@ -15,7 +15,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 
 
 @Entity
@@ -25,17 +24,6 @@ public class CitizenRow {
     @GeneratedValue
     private UUID id;
     public UUID getId() {return id;};
-
-    @Transient
-    private String lastEntry;
-
-    public String getLastEntry() { return lastEntry; }
-    public void setLastEntry(String lastEntry) { this.lastEntry = lastEntry; }
-
-        @Column(nullable = true, columnDefinition = "text")
-    private String severity;
-    public String getSeverity() { return severity; }
-    public void setSeverity(String severity) { this.severity = severity; }
 
     @Column(nullable = false, columnDefinition = "text", unique = true)
     private String fullName;

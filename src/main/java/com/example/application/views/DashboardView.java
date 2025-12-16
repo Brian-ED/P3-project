@@ -1,13 +1,18 @@
 package com.example.application.views;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
-import com.example.application.database.PostgreSQLDatabaseControler;
-import com.example.application.database.ClDiDB.AdvisorRow;
-import com.example.application.database.ClDiDB.CitizenRow;
+
+import com.example.application.database.ClDiDB.Questions.GenericQuestion;
+import com.example.application.model.AnsweredMorningSurvey;
+import com.example.application.model.AnsweredSurvey;
 import com.example.application.model.Citizen;
 import com.example.application.model.Model;
 import com.example.application.model.SleepAdvisor;
@@ -38,16 +43,15 @@ public class DashboardView extends VerticalLayout {
     private Span activeTodayValue;
     private String username;
     private Model model;
+    private SleepAdvisor meAdvisor;
     private List<com.example.application.model.Citizen> citizens = new ArrayList<>();
+    private final static String noName = "";
 
     private VerticalLayout listContainer;
-    private final PostgreSQLDatabaseControler db;
 
-    public DashboardView(PostgreSQLDatabaseControler db, Model model) {
-        Citizen citizen = model.getThisCitizen(SecurityUtils.getUsername());
-        this.username = citizen != null ? citizen.getFullName() : "Bruger";
+    public DashboardView(Model model) {
+        meAdvisor = model.getThisAdvisor(SecurityUtils.getUsername());
         this.model = model;
-        this.db = db;
 
         setSizeFull();
         setPadding(false);
@@ -204,17 +208,18 @@ public class DashboardView extends VerticalLayout {
                             break;
 
                         case "Sidste indtastning":
-                            citizens.sort(Comparator
-                                    .comparing((Citizen c) -> {
-                                        String v = c.getLastEntry();
-                                        return v.equals("Ingen indtastninger") || v.equals("-") ? "0000-00-00" : v;
-                                    })
-                                    .reversed());
+                            citizens.sort(Comparator.comparing((Citizen c) -> {
+                                long runningMax = 0;
+                                for (var i : c.getSurveys()) {
+                                    runningMax = Math.max(runningMax, i.getWhenAnswered().toEpochSecond());
+                                }
+                                return runningMax;
+                            }).reversed());
                             break;
 
                         case "Tilstand (Moderat/Ukendt)":
                             citizens.sort(Comparator.comparing(
-                                    (Citizen c) -> "Moderat".equalsIgnoreCase(c.getSeverity()) ? 0 : 1));
+                                (Citizen c) -> 0)); // TODO  Old code instead of 0: "Moderat".equalsIgnoreCase(getSeverity(c)) ? 0 : 1
                             break;
                     }
 
@@ -231,26 +236,20 @@ public class DashboardView extends VerticalLayout {
         listContainer.setSpacing(false);
         listContainer.setWidthFull();
 
-        List<com.example.application.model.Citizen> dbCitizens = Arrays.asList(db.searchCitizensByName(""));
-        SleepAdvisor advisor1 = new SleepAdvisor(new AdvisorRow());
-        advisor1.getRow().setFullName("Søvnrådgiver Anna");
+        SleepAdvisor advisor1 = new SleepAdvisor(UUID.randomUUID(), "Søvnrådgiver Anna");
+        SleepAdvisor advisor2 = new SleepAdvisor(UUID.randomUUID(), "Søvnrådgiver Peter");
 
-        SleepAdvisor advisor2 = new SleepAdvisor(new AdvisorRow());
-        advisor2.getRow().setFullName("Søvnrådgiver Peter");
-
-        citizens.add(
-                mockCitizen(UUID.fromString("00000000-0000-0000-0000-000000000001"),
-                        "Emma Jensen", "Moderat", "2025-12-14", advisor1));
-        citizens.add(
-                mockCitizen(UUID.fromString("00000000-0000-0000-0000-000000000002"),
-                        "Lars Hansen", "Ukendt", "2025-12-13", advisor2));
-        citizens.add(
-                mockCitizen(UUID.fromString("00000000-0000-0000-0000-000000000003"),
-                        "Maja Sørensen", "Moderat", "2025-12-12", advisor1));
+        citizens.add(mockCitizen("Emma Jensen",
+                                new AnsweredMorningSurvey(UUID.randomUUID(), new GenericQuestion[0], ZonedDateTime.of(2025, 12, 14, 0, 0, 0, 0, ZoneId.of("Asia/Kolkata"))),
+                                advisor1));
+        citizens.add(mockCitizen("Lars Hansen",
+                                new AnsweredMorningSurvey(UUID.randomUUID(), new GenericQuestion[0], ZonedDateTime.of(2025, 12, 13, 0, 0, 0, 0, ZoneId.of("Asia/Kolkata")) ),
+                                advisor2));
+        citizens.add(mockCitizen("Maja Sørensen",
+                                new AnsweredMorningSurvey(UUID.randomUUID(), new GenericQuestion[0], ZonedDateTime.of(2025, 12, 12, 0, 0, 0, 0, ZoneId.of("Asia/Kolkata")) ),
+                                advisor1));
 
         // Refresh UI
-
-        citizens.addAll(dbCitizens);
 
         refreshList();
         updateStats();
@@ -262,29 +261,46 @@ public class DashboardView extends VerticalLayout {
 
     }
 
-    private Citizen mockCitizen(
-            UUID fakeId,
-            String name,
-            String severity,
-            String lastEntry,
-            SleepAdvisor advisor) {
-        CitizenRow row = new CitizenRow();
-        row.setFullName(name);
-        row.setSeverity(severity);
-        row.setLastEntry(lastEntry);
+    String getSeverity(Citizen citizen) {
+        return "Moderate";
+    }
 
-        Citizen citizen = new Citizen(row);
+    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-        // Set UUID correctly
-        try {
-            var field = Citizen.class.getDeclaredField("id");
-            field.setAccessible(true);
-            field.set(citizen, fakeId);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    String getLastEntryTimeFormatted(Citizen citizen) {
+        return getLastEntry(citizen).map(x->x.getWhenAnswered()
+                                    .format(dateFormatter))
+                                    .orElse("Ingen indtastninger");
+    }
+
+    Optional<AnsweredSurvey> getLastEntry(Citizen citizen) {
+
+        List<AnsweredSurvey> surveys = Arrays.asList(citizen.getSurveys());
+
+        if (surveys.size() <= 0) {
+            return Optional.empty();
         }
 
-        citizen.setAdvisor(advisor);
+        long runningMax = 0;
+        AnsweredSurvey newestAnsweredSurvey = surveys.get(0);
+
+        for (var i : citizen.getSurveys()) {
+            long time = i.getWhenAnswered().toEpochSecond();
+            if (runningMax < time) {
+                newestAnsweredSurvey = i;
+            };
+            runningMax = Math.max(runningMax, time);
+        }
+        return Optional.of(newestAnsweredSurvey);
+    }
+
+    private Citizen mockCitizen(
+            String name,
+            AnsweredSurvey mockAnswer,
+            SleepAdvisor advisor) {
+        AnsweredSurvey[] surveys = new AnsweredSurvey[1];
+        surveys[0] = mockAnswer;
+        Citizen citizen = new Citizen(UUID.randomUUID(), name, surveys, Optional.of(advisor));
         return citizen;
     }
 
@@ -299,25 +315,14 @@ public class DashboardView extends VerticalLayout {
         // Active today
         String today = java.time.LocalDate.now().toString(); // "YYYY-MM-DD"
         long activeToday = citizens.stream()
-                .filter(c -> today.equals(c.getLastEntry()))
+                .filter(c -> today.equals(getLastEntryTimeFormatted(c)))
                 .count();
         activeTodayValue.setText(String.valueOf(activeToday));
     }
 
-    private SleepAdvisor getCurrentAdvisor() {
-        List<SleepAdvisor> advisors = db.getAllAdvisors();
-        return advisors.stream()
-                .filter(a -> a.getFullName().equals(username))
-                .findFirst()
-                .orElse(null);
-    }
-
     private List<Citizen> filterMyCitizens() {
-        SleepAdvisor currentAdvisor = getCurrentAdvisor();
-        if (currentAdvisor == null)
-            return new ArrayList<>();
         return citizens.stream()
-                .filter(c -> c.getAdvisor() != null && c.getAdvisor().equals(currentAdvisor))
+                .filter(c -> c.getAssignedAdvisor() != null && c.getAssignedAdvisor().equals(meAdvisor))
                 .toList();
     }
 
@@ -365,7 +370,7 @@ public class DashboardView extends VerticalLayout {
         row.getStyle().set("border-radius", "10px");
         row.getStyle().set("margin-bottom", "8px");
         row.getStyle().set("background",
-                "Moderat".equalsIgnoreCase(c.getSeverity()) ? "var(--lumo-moderate-color)" : "transparent"); // light
+                "Moderat".equalsIgnoreCase(getSeverity(c)) ? "var(--lumo-moderate-color)" : "transparent"); // light
                                                                                                              // highlight
                                                                                                              // for
                                                                                                              // moderate
@@ -391,17 +396,17 @@ public class DashboardView extends VerticalLayout {
         info.setPadding(false);
         info.setSpacing(false);
 
-        Span idLabel = new Span("ID: " + c.getId());
+        Span idLabel = new Span("ID: " + c.getID());
         idLabel.getStyle().set("font-size", "12px").set("color", "var(--lumo-secondary-text-color)");
 
-        Span lastSurveyLabel = new Span("Sidste indtastning: " + c.getLastEntry());
+        Span lastSurveyLabel = new Span("Sidste indtastning: " + getLastEntryTimeFormatted(c));
         lastSurveyLabel.getStyle().set("font-size", "13px").set("color", "var(--lumo-secondary-text-color)");
 
         Span nameLabel = new Span(c.getFullName());
         nameLabel.getStyle().set("font-weight", "600");
         nameLabel.getStyle().set("font-size", "14px");
 
-        Span sub = new Span("Sidste indtastning: " + c.getLastEntry());
+        Span sub = new Span("Sidste indtastning: " + getLastEntryTimeFormatted(c));
         sub.getStyle().set("color", "var(--lumo-secondary-text-color)");
         sub.getStyle().set("font-size", "13px");
 
@@ -414,13 +419,13 @@ public class DashboardView extends VerticalLayout {
         rightActions.setSpacing(true);
         rightActions.setAlignItems(Alignment.CENTER);
 
-        Span severityBadge = new Span(c.getSeverity());
+        Span severityBadge = new Span(getSeverity(c));
         severityBadge.getStyle().set("padding", "6px 10px");
         severityBadge.getStyle().set("border-radius", "999px");
         severityBadge.getStyle().set("font-size", "13px");
         severityBadge.getStyle().set("font-weight", "600");
         // color based on severity
-        if ("Moderat".equalsIgnoreCase(c.getSeverity())) {
+        if ("Moderat".equalsIgnoreCase(getSeverity(c))) {
             severityBadge.getStyle().set("background", "var(--lumo-base2-color)");
             severityBadge.getStyle().set("color", "#92400e");
             severityBadge.getStyle().set("border", "1px solid rgba(245,158,11,0.12)");
@@ -434,13 +439,18 @@ public class DashboardView extends VerticalLayout {
         advisorCombo.setPlaceholder("Vælg søvnrådgiver");
 
         // Options in the dropdown
-        List<SleepAdvisor> advisors = db.getAllAdvisors(); // We’ll add this method
-        List<String> advisorNames = advisors.stream().map(SleepAdvisor::getFullName).toList();
-        advisorCombo.setItems(advisorNames);
-        advisorCombo.setValue(c.getAdvisor());
+        String[] advisorNames = model.getAllAdvisorNames();
+        String[] items = new String[advisorNames.length+1];
+
+        items[0] = noName;
+        for (int i=0; i<advisorNames.length; i++) {
+            items[i+1] = advisorNames[i];
+        }
+        advisorCombo.setItems(items);
 
         // Default selection
-        advisorCombo.setValue(c.getAdvisor());
+        c.getAssignedAdvisor().ifPresentOrElse(advisor -> advisorCombo.setValue(advisor.getFullName()),
+                                                    () -> advisorCombo.setValue(noName));
 
         // Styling (similar to your Span)
         advisorCombo.getStyle().set("color", "var(--lumo-secondary-text-color)");
@@ -454,13 +464,7 @@ public class DashboardView extends VerticalLayout {
         advisorCombo.addValueChangeListener(event -> {
             String selected = event.getValue();
             if (selected != null) {
-                db.getAdvisorByName(selected).ifPresent(advisor -> {
-                    c.setAdvisor(advisor); // sets Optional<SleepAdvisor>
-                    db.getCitizenByName(c.getFullName()).ifPresent(citizen -> {
-                        citizen.setAdvisor(advisor);
-                        db.saveCitizen(citizen);
-                    });
-                });
+                model.setAssignedAdvisorByName(c, selected);
             }
         });
         Button viewData = new Button("Se data", new Icon(VaadinIcon.CHART));
@@ -469,7 +473,7 @@ public class DashboardView extends VerticalLayout {
         viewData.getElement().getStyle().set("border", "1px solid rgba(15,23,42,0.06)");
         viewData.getElement().getStyle().set("padding", "6px 10px");
         viewData.getElement().getStyle().set("font-size", "13px");
-        viewData.addClickListener(e -> viewData.getUI().ifPresent(ui -> ui.navigate("sleep-stats/" + c.getId())));
+        viewData.addClickListener(e -> viewData.getUI().ifPresent(ui -> ui.navigate("sleep-stats/" + c.getID())));
         rightActions.add(severityBadge, advisorCombo, viewData);
 
         // Expand info to use remaining space
@@ -486,7 +490,7 @@ public class DashboardView extends VerticalLayout {
         top.setAlignItems(Alignment.CENTER);
         // Setup user
         // Left: small app title
-        Span appTitle = new Span("Velkommen," + username);
+        Span appTitle = new Span("Velkommen," + meAdvisor.getFullName());
         appTitle.getStyle().set("font-weight", "700");
         appTitle.getStyle().set("font-size", "26px");
         appTitle.getStyle().set("color", "#072d85ff");

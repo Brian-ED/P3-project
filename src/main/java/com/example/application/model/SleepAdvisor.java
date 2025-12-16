@@ -1,37 +1,25 @@
 package com.example.application.model;
 
-import java.util.Optional;
-
-import com.example.application.database.ClDiDB.AdvisorRow;
+import java.util.UUID;
 
 public class SleepAdvisor implements User {
-    private String fullName;
-    private AdvisorRow row;
 
-    public SleepAdvisor(AdvisorRow row) {
-        this.fullName = row.getFullName();
-        this.row = row;
+    private final String fullName;
+    private final UUID id;
+
+    public SleepAdvisor(UUID id, String fullName) {
+        this.id = id;
+        this.fullName = fullName;
     }
 
-
+    public UUID getID() {
+        return id;
+    }
 
     @Override
     public String getFullName() {
         return fullName;
     }
-
-    public AdvisorRow getRow() {
-        return this.row;
-    }
-
-    /* TODO */ public void searchCitizensList() {}
-    /* TODO */ public void showOnlyYourCitizens() {}
-    /* TODO */ public void sortCitizensByAdvisor() {}
-    /* TODO */ public void sortCitizensByName() {}
-    public void changeAssignedAdvisor(Citizen citizen) {
-        citizen.changeAssignedAdvisor(Optional.of(this));
-    }
-    /* TODO */ public void seeCitizenData() {}
 
 	@Override
 	public UserType getUserType() {

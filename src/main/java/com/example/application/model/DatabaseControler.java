@@ -1,6 +1,7 @@
 package com.example.application.model;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import com.example.application.database.ClDiDB.Survey;
 
@@ -11,4 +12,6 @@ public interface DatabaseControler {
     Citizen newCitizen(String username);
     SleepAdvisor newAdvisor(String username);
     void saveSurvey(Survey survey); // TODO this file should maybe not have Survey, since it's from the DB
+    SleepAdvisor[] getAllAdvisors();
+    Optional<Citizen> getCitizenById(UUID id);
 }

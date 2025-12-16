@@ -1,15 +1,24 @@
 package com.example.application.views;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
-import java.time.Duration;
 
-import com.example.application.database.PostgreSQLDatabaseControler;
+import com.example.application.database.ClDiDB.Answers.DurationAnswer;
+import com.example.application.database.ClDiDB.Questions.GenericQuestion;
+import com.example.application.model.AnswerPayload.DurationPayload;
+import com.example.application.model.AnsweredEveningSurvey;
+import com.example.application.model.AnsweredMorningSurvey;
+import com.example.application.model.AnsweredSurvey;
 import com.example.application.model.Citizen;
+import com.example.application.model.Model;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.JavaScript;
@@ -25,6 +34,7 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
+
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 
@@ -39,7 +49,8 @@ import jakarta.annotation.security.RolesAllowed;
 public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
     private UUID citizenId;
     private Citizen currentCitizen;
-    private final PostgreSQLDatabaseControler db; // inject via constructor
+
+    private Model model;
 
     private final Grid<SleepEntry> grid = new Grid<>(SleepEntry.class, false);
     private final List<SleepEntry> entries = new ArrayList<>();
@@ -56,8 +67,8 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
         return createSurveyAnswersBox(UUID.randomUUID()); // calls main method with dummy UUID
     }
 
-    public SleepStats(PostgreSQLDatabaseControler db) {
-        this.db = db;
+    public SleepStats(Model model) {
+        this.model = model;
         setSizeFull();
         setPadding(true);
         setSpacing(true);
@@ -104,6 +115,37 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
         controls.add(startDate, endDate, filterButton);
         add(controls);
 
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("HH.mm");
+        AnsweredSurvey[] surveys = { new AnsweredMorningSurvey(UUID.randomUUID(), new GenericQuestion[0], ZonedDateTime.now()) };
+        final String timeInBed;
+        Optional<Integer> maybeMinutesInBedAccumulator = Optional.empty();
+
+        for (AnsweredSurvey survey : surveys) {
+            GenericQuestion<?>[] answers = survey.getAnswers();
+
+            for (GenericQuestion<?> answer : answers) {
+                if (answer.getMainQuestionTitle() == "Efter jeg slukkede lyset, sov jeg ca. efter:"
+                   && answer.getAnswer().getPayloadClass() == DurationPayload.class
+                ) {
+                    final Integer temp;
+                    if (maybeMinutesInBedAccumulator.isEmpty()) {
+                        final Integer i = maybeMinutesInBedAccumulator.orElseThrow();
+                        temp = i + ((DurationPayload)(answer.getAnswer().toPayload())).minutes();
+                    } else {
+                        temp = 0;
+                    }
+                    maybeMinutesInBedAccumulator = Optional.of(temp);
+                }
+            }
+        }
+        if (maybeMinutesInBedAccumulator.isEmpty()) {
+            timeInBed = "N/A";
+        } else {
+            Integer m = maybeMinutesInBedAccumulator.orElseThrow();
+            timeInBed = String.format("%02dt %02dm", Math.floor(m/60), Math.floor(m));
+        }
+
+//        String eveningTime = survey.getWhenAnswered().format(format);
 
         // Stats cards
         HorizontalLayout statsRow = new HorizontalLayout();
@@ -298,23 +340,48 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
                     // get UUID, may error
                     citizenId = UUID.fromString(idParam);
 
+                    // Get citizen, may error
+                    this.currentCitizen = model.initAsCitizenWithID(citizenId).orElseThrow();
+
                     // Update UI for this citizen
-                    db.getCitizenById(citizenId)
-                        .ifPresent(currentCitizen -> loadCitizenData(currentCitizen));
+                    loadCitizenData();
 
                 } catch (IllegalArgumentException e) {
-                    // Handle invalid ID format
+                    // TODO Handle invalid ID format
+                } catch (NoSuchElementException e) {
+                    // TODO Handle ID not found
                 }
             }
         );
     }
 
-    private void loadCitizenData(Citizen citizen) {
-        this.currentCitizen = citizen;
+    private void loadCitizenData() {
 
         // Load sleep entries for grid
-        entries.clear();
-        entries.addAll(db.getSleepEntriesForCitizen(citizen));
+        this.entries.clear();
+
+
+        List<SleepEntry> entries = new ArrayList<>();
+        for (AnsweredSurvey s : currentCitizen.getSurveys()) {
+            switch (s) {
+
+                case AnsweredMorningSurvey m ->
+                    entries.add(new SleepEntry(
+                        m.getWhenAnswered().toLocalDate(),
+                        ((DurationAnswer)(m.getAnswers()[4].getAnswer())).getAnswerInHours()
+                    ));
+
+                case AnsweredEveningSurvey e ->
+                    entries.add(new SleepEntry(
+                        e.getWhenAnswered().toLocalDate(),
+                        0.0 // or another relevant field if available
+                    ));
+            }
+        }
+
+        entries.sort((a, b) -> a.getDate().compareTo(b.getDate()));
+
+        this.entries.addAll(entries);
         refreshGrid();
 
         // Load dynamic stats from DB
@@ -337,7 +404,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver{
         addComponentAtIndex(1, statsRow); // Insert below breadcrumbs
 
         // Load survey answers dynamically
-        Div surveyBox = createSurveyAnswersBox(currentCitizen.getId());
+        Div surveyBox = createSurveyAnswersBox(currentCitizen.getID());
 
         addComponentAtIndex(3, surveyBox); // Adjust index based on your layout
     }

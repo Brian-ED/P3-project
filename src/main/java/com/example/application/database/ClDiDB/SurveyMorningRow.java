@@ -11,11 +11,10 @@ import com.example.application.database.ClDiDB.Answers.YesOrNoElaborateComboboxA
 import com.example.application.database.ClDiDB.Questions.ComboBoxQuestion;
 import com.example.application.database.ClDiDB.Questions.GenericQuestion;
 import com.example.application.database.ClDiDB.Questions.RollQuestion;
-import com.example.application.database.ClDiDB.Questions.TextFieldQuestion;
 import com.example.application.database.ClDiDB.Questions.RollQuestionShort;
+import com.example.application.database.ClDiDB.Questions.TextFieldQuestion;
 import com.example.application.database.ClDiDB.Questions.YesOrNoElaborateComboboxQuestion;
 import com.example.application.model.SurveyType;
-import com.vaadin.flow.component.textfield.TextField;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -33,6 +32,9 @@ public final class SurveyMorningRow implements Survey {
     @Id
     @GeneratedValue
     private UUID id;
+    public UUID getID() {
+        return id;
+    }
 
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false)
@@ -45,8 +47,8 @@ public final class SurveyMorningRow implements Survey {
     public ZonedDateTime getWhenAnswered() {return whenAnswered;};
     public void setWhenAnswered(ZonedDateTime whenAnswered) {this.whenAnswered = whenAnswered;};
     public DurationAnswer getAnswer4Value() {
-    return internelAnswer4;
-}
+        return internelAnswer4;
+    }
     //---------
     // Answers:
     @Embedded private YesOrNoElaborateComboboxAnswer internelAnswer0 = new YesOrNoElaborateComboboxAnswer(); @Transient final private YesOrNoElaborateComboboxQuestion answer0 = new YesOrNoElaborateComboboxQuestion("Tager du nogen gange sovemedicin eller melatonin piller?"     , "Hvad tager du?", new String[]{"Sovemedicin", "Melatonin"}, internelAnswer0); public YesOrNoElaborateComboboxQuestion getAnswer0() {return answer0;}

@@ -14,6 +14,9 @@ public class AdvisorRow {
     @Id
     @GeneratedValue
     private UUID id;
+    public UUID getID() {
+        return id;
+    }
 
     @Column(nullable = false, columnDefinition = "text", unique = true)
     private String fullName;

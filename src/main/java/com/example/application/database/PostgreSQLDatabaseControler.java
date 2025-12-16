@@ -1,6 +1,5 @@
 package com.example.application.database;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,10 +16,12 @@ import com.example.application.database.repositories.AdvisorRepository;
 import com.example.application.database.repositories.AnsweredSurveyEveningRepository;
 import com.example.application.database.repositories.AnsweredSurveyMorningRepository;
 import com.example.application.database.repositories.CitizenRepository;
+import com.example.application.model.AnsweredEveningSurvey;
+import com.example.application.model.AnsweredMorningSurvey;
+import com.example.application.model.AnsweredSurvey;
 import com.example.application.model.Citizen;
 import com.example.application.model.DatabaseControler;
 import com.example.application.model.SleepAdvisor;
-import com.example.application.views.SleepStats.SleepEntry;
 
 import jakarta.transaction.Transactional;
 
@@ -45,40 +46,40 @@ public class PostgreSQLDatabaseControler implements DatabaseControler {
         this.citizensRepo = citizensRepo;
         this.advisorsRepo = advisorsRepo;
     }
-@Transactional
-public Optional<Citizen> getCitizenById(UUID id) {
-    Optional<CitizenRow> maybeRow = citizensRepo.findById(id);
-    return maybeRow.map(Citizen::new);
-}
+    @Transactional
+    public Optional<Citizen> getCitizenById(UUID id) {
+        Optional<CitizenRow> maybeRow = citizensRepo.findById(id);
+        return maybeRow.map(row -> citizenRowToCitizen(row));
+    }
 
-@Transactional
-public List<SleepEntry> getSleepEntriesForCitizen(Citizen citizen) {
-    List<SleepEntry> entries = new ArrayList<>();
+    private Citizen citizenRowToCitizen(CitizenRow row) {
 
-    // Morning surveys
-    morningRepo.findByOwner(citizen.getRow()).forEach(m ->
-    entries.add(new SleepEntry(
-        m.getWhenAnswered().toLocalDate(),
-        m.getAnswer4Value().getAnswerInHours()
-    ))
-);
+        List<SurveyMorningRow> mornings = row.getMorningSurveys();
+        List<SurveyEveningRow> evenings = row.getEveningSurveys();
+        AnsweredSurvey[] answeredSurveys = new AnsweredSurvey[mornings.size()+evenings.size()];
+        for (int i = 0; i<mornings.size(); i++) {
+            SurveyMorningRow m = mornings.get(i);
+            answeredSurveys[i] = new AnsweredMorningSurvey(m.getID(), m.getAnswers(), m.getWhenAnswered());
+        }
+        for (int i = 0; i<evenings.size(); i++)  {
+            SurveyEveningRow e = evenings.get(i);
+            answeredSurveys[mornings.size() + i] = new AnsweredEveningSurvey(e.getID(), e.getAnswers(), e.getWhenAnswered());
+        }
+        Optional<SleepAdvisor> assignedAdvisor = row.getAssignedAdvisor().map(x -> new SleepAdvisor(row.getId(), x.getFullName()));
+        Citizen citizen = new Citizen(row.getId(), row.getFullName(), answeredSurveys, assignedAdvisor);
 
+        citizen.addUpdateListener(
+            () -> {
+                row.setFullName(citizen.getFullName());
+                citizen
+                    .getAssignedAdvisor()
+                    .flatMap(advisor -> advisorsRepo.findOneByFullName(advisor.getFullName()))
+                    .ifPresent(advisorRow -> row.setAssignedAdvisor(advisorRow));
+            }
+        );
 
-    // Evening surveys (if needed)
-    eveningRepo.findByOwner(citizen.getRow()).forEach(e ->
-        entries.add(new SleepEntry(
-            e.getWhenAnswered().toLocalDate(),
-            0.0 // or another relevant field if available
-        ))
-    );
-
-    entries.sort((a, b) -> a.getDate().compareTo(b.getDate()));
-
-    return entries;
-}
-
-
-
+        return citizen;
+    }
 
     @Override
     @Transactional
@@ -86,7 +87,7 @@ public List<SleepEntry> getSleepEntriesForCitizen(Citizen citizen) {
         List<CitizenRow> x = citizensRepo.findByFullName(name);
         Citizen[] r = new Citizen[x.size()];
         for (int i = 0; i<x.size(); i++) {
-            r[i]= new Citizen(x.get(i));
+            r[i] = citizenRowToCitizen(x.get(i));
         }
         return r;
     }
@@ -99,7 +100,7 @@ public List<SleepEntry> getSleepEntriesForCitizen(Citizen citizen) {
             return Optional.empty();
         }
         CitizenRow row = maybeRow.orElseThrow();
-        return Optional.of(new Citizen(row));
+        return Optional.of(citizenRowToCitizen(row));
     }
 
 	@Override
@@ -108,7 +109,7 @@ public List<SleepEntry> getSleepEntriesForCitizen(Citizen citizen) {
         CitizenRow row = new CitizenRow();
         row.setFullName(username);
         citizensRepo.save(row);
-        return new Citizen(row);
+        return citizenRowToCitizen(row);
 
 	}
 
@@ -130,7 +131,7 @@ public List<SleepEntry> getSleepEntriesForCitizen(Citizen citizen) {
             return Optional.empty();
         }
         AdvisorRow row = maybeRow.orElseThrow();
-        return Optional.of(new SleepAdvisor(row));
+        return Optional.of(new SleepAdvisor(row.getID(), row.getFullName()));
 	}
 
 	@Override
@@ -139,24 +140,17 @@ public List<SleepEntry> getSleepEntriesForCitizen(Citizen citizen) {
         AdvisorRow row = new AdvisorRow();
         row.setFullName(username);
         advisorsRepo.save(row);
-        return new SleepAdvisor(row);
+        return new SleepAdvisor(row.getID(), row.getFullName());
 	}
+
+	@Override
     @Transactional
-    public List<SleepAdvisor> getAllAdvisors() {
+    public SleepAdvisor[] getAllAdvisors() {
         List<AdvisorRow> rows = advisorsRepo.findAll();
-        return rows.stream().map(SleepAdvisor::new).toList();
-    }
-    @Transactional
-
-    public void saveCitizen(Citizen citizen) {
-        // Get the CitizenRow from the database
-        CitizenRow row = citizensRepo.findOneByFullName(citizen.getFullName())
-                                    .orElseThrow();
-
-        // Assign the advisor if present
-        citizen.getAssignedAdvisor().ifPresent(advisor -> row.setAssignedAdvisor(advisor.getRow()));
-
-        // Save the updated row
-        citizensRepo.saveAndFlush(row);
+        SleepAdvisor[] advisors = new SleepAdvisor[rows.size()];
+        for (int i=0; i<advisors.length; i++) {
+            advisors[i] = new SleepAdvisor(rows.get(i).getID(), rows.get(i).getFullName());
+        }
+        return advisors;
     }
 }
