@@ -34,3 +34,7 @@ public String getSeverity() {
     return row.getSeverity();
 }
 ```
+
+14. EASY NOT IMPORTANT change all uses of `TYPE[]` to `List<Type>`, so use List over Array.
+
+15. EASY ADD COMMENTS
