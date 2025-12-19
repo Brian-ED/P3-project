@@ -202,7 +202,6 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
 
                 citizenId = UUID.fromString(idParam);
 
-                System.out.println("Helo");
                 this.selectedCitizen = model.getCitizenWithID(citizenId).orElseThrow();
 
                 loadCitizenData();
