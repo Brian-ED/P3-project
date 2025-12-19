@@ -1,6 +1,7 @@
 package com.example.application.model;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,7 +27,7 @@ public class Citizen implements User {
         }
     }
 
-    public Citizen(UUID id, String fullName, AnsweredSurvey[] answeredSurveys, Optional<SleepAdvisor> assignedAdvisor) {
+    public Citizen(UUID id, String fullName, List<AnsweredSurvey> answeredSurveys, Optional<SleepAdvisor> assignedAdvisor) {
         this.fullName = fullName;
         this.id = id;
         this.answeredSurveys = answeredSurveys;
@@ -37,7 +38,7 @@ public class Citizen implements User {
     private final UUID id;
 
     private Optional<SleepAdvisor> assignedAdvisor;
-    private AnsweredSurvey[] answeredSurveys;
+    private List<AnsweredSurvey> answeredSurveys;
 
     public void setAssignedAdvisor(Optional<SleepAdvisor> assignedAdvisor) {
         this.assignedAdvisor = assignedAdvisor;
@@ -59,8 +60,12 @@ public class Citizen implements User {
 	public UserType getUserType() {
 		return UserType.CITIZEN;
 	}
-    public AnsweredSurvey[] getSurveys() {
+    public List<AnsweredSurvey> getSurveys() {
         return this.answeredSurveys;
+    };
+
+    public void submitSurvey(AnsweredSurvey survey) {
+        answeredSurveys.add(survey);
     };
 
     @Override

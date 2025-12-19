@@ -120,13 +120,21 @@ public class ModelImpl implements Model {
         }};
     }
 
+    public Citizen createCitizen(String username) {
+        return database
+            .getCitizenByName(username)
+            .orElseGet(() ->
+                database.newCitizen(username)
+            );
+    }
+
     public Citizen getThisCitizen(String username) {
         if (!user.isEmpty()) {
             User userR = user.orElseThrow();
             if (userR.getUserType() != UserType.CITIZEN || !(userR instanceof Citizen)) {
                 throw new IllegalStateException("Tried initializing advisor as citizen");
             }
-            return (Citizen)(user.orElseThrow());
+            return (Citizen)userR;
         }
 
         Citizen citizen = database

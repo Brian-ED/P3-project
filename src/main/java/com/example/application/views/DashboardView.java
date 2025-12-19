@@ -285,14 +285,12 @@ public class DashboardView extends VerticalLayout {
 
     Optional<AnsweredSurvey> getLastEntry(Citizen citizen) {
 
-        List<AnsweredSurvey> surveys = Arrays.asList(citizen.getSurveys());
-
-        if (surveys.size() <= 0) {
+        if (citizen.getSurveys().size() <= 0) {
             return Optional.empty();
         }
 
         long runningMax = 0;
-        AnsweredSurvey newestAnsweredSurvey = surveys.get(0);
+        AnsweredSurvey newestAnsweredSurvey = citizen.getSurveys().get(0);
 
         for (var i : citizen.getSurveys()) {
             long time = i.getWhenAnswered().toEpochSecond();
@@ -306,11 +304,11 @@ public class DashboardView extends VerticalLayout {
 
     private Citizen mockCitizen(
             String name,
-            AnsweredSurvey mockAnswer,
+            AnsweredSurvey mockSurveySubmission,
             SleepAdvisor advisor) {
-        AnsweredSurvey[] surveys = new AnsweredSurvey[1];
-        surveys[0] = mockAnswer;
-        Citizen citizen = new Citizen(UUID.randomUUID(), name, surveys, Optional.of(advisor));
+        Citizen citizen = model.createCitizen(name);
+        citizen.submitSurvey(mockSurveySubmission);
+        citizen.setAssignedAdvisor(advisor);
         return citizen;
     }
 

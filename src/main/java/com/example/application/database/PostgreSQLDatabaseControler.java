@@ -1,5 +1,6 @@
 package com.example.application.database;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -56,14 +57,12 @@ public class PostgreSQLDatabaseControler implements DatabaseControler {
 
         List<SurveyMorningRow> mornings = row.getMorningSurveys();
         List<SurveyEveningRow> evenings = row.getEveningSurveys();
-        AnsweredSurvey[] answeredSurveys = new AnsweredSurvey[mornings.size()+evenings.size()];
-        for (int i = 0; i<mornings.size(); i++) {
-            SurveyMorningRow m = mornings.get(i);
-            answeredSurveys[i] = new AnsweredMorningSurvey(m.getID(), m.getAnswers(), m.getWhenAnswered());
+        List<AnsweredSurvey> answeredSurveys = new ArrayList<>();
+        for (var m : mornings) {
+            answeredSurveys.add(new AnsweredMorningSurvey(m.getID(), m.getAnswers(), m.getWhenAnswered()));
         }
-        for (int i = 0; i<evenings.size(); i++)  {
-            SurveyEveningRow e = evenings.get(i);
-            answeredSurveys[mornings.size() + i] = new AnsweredEveningSurvey(e.getID(), e.getAnswers(), e.getWhenAnswered());
+        for (var e : evenings)  {
+            answeredSurveys.add(new AnsweredEveningSurvey(e.getID(), e.getAnswers(), e.getWhenAnswered()));
         }
         Optional<SleepAdvisor> assignedAdvisor = row.getAssignedAdvisor().map(x -> new SleepAdvisor(row.getId(), x.getFullName()));
         Citizen citizen = new Citizen(row.getId(), row.getFullName(), answeredSurveys, assignedAdvisor);
@@ -110,7 +109,6 @@ public class PostgreSQLDatabaseControler implements DatabaseControler {
         row.setFullName(username);
         citizensRepo.save(row);
         return citizenRowToCitizen(row);
-
 	}
 
 	@Override

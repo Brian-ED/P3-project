@@ -6,9 +6,10 @@ import java.util.UUID;
 import com.example.application.database.ClDiDB.CitizenRow;
 
 public interface Model {
-    Citizen initAsCitizen(String UserName);
-    SleepAdvisor initAsAdvisor(String UserName);
-    Optional<Citizen> getCitizenWithID(UUID UserID);
+    Citizen initAsCitizen(String userName);
+    Citizen createCitizen(String userName);
+    SleepAdvisor initAsAdvisor(String userName);
+    Optional<Citizen> getCitizenWithID(UUID userID);
     DynamicSurvey initDynamicSurvey(SurveyType type, CitizenRow owner);
     Optional<User> getUser();
     Optional<Citizen> getCitizen();

@@ -48,7 +48,7 @@ public class CitizenView extends VerticalLayout {
 
         String Username = citizen.getFullName();
 
-        AnsweredSurvey[] allSurveys = citizen.getSurveys();
+        List<AnsweredSurvey> allSurveys = citizen.getSurveys();
 
         AnsweredSurvey latestMorningSurvey = findLatestSurveyOfType(allSurveys, SurveyType.morning);
         AnsweredSurvey latestEveningSurvey = findLatestSurveyOfType(allSurveys, SurveyType.evening);
@@ -503,7 +503,7 @@ public class CitizenView extends VerticalLayout {
         add(latestAnswersCard);
     }
     // Finder seneste skema af en bestemt type (morgen / aften)
-    private AnsweredSurvey findLatestSurveyOfType(AnsweredSurvey[] surveys, SurveyType type) {
+    private AnsweredSurvey findLatestSurveyOfType(List<AnsweredSurvey> surveys, SurveyType type) {
         if (surveys == null) {
             return null;
         }
