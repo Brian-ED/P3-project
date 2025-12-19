@@ -1,0 +1,24 @@
+[33m552a52c[m[33m ([m[1;36mHEAD[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: pull --tags -r origin main (start): checkout 552a52ceeef34c88821673b024b53c477483fad3
+[33m68b294b[m[33m ([m[1;32mmain[m[33m)[m HEAD@{1}: commit: Minor Bug fixes
+[33m649bc98[m HEAD@{2}: pull --tags -r origin main (finish): returning to refs/heads/main
+[33m649bc98[m HEAD@{3}: pull --tags -r origin main (pick): Added Textfield for MorningSurvey
+[33ma047755[m HEAD@{4}: pull --tags -r origin main (start): checkout a0477553a8f2d26188f937fcc47f66a626f559fe
+[33mf69e0e5[m HEAD@{5}: commit: Added Textfield for MorningSurvey
+[33m9d434e7[m HEAD@{6}: reset: moving to origin/main
+[33m9d434e7[m HEAD@{7}: pull --tags -r origin main (finish): returning to refs/heads/main
+[33m9d434e7[m HEAD@{8}: pull --tags -r origin main (start): checkout 9d434e793771a70d2841e79de5852118e68e5e36
+[33m6a0b78e[m HEAD@{9}: pull --tags -r origin main: Fast-forward
+[33mcb33ba3[m HEAD@{10}: reset: moving to HEAD
+[33mcb33ba3[m HEAD@{11}: reset: moving to HEAD
+[33mcb33ba3[m HEAD@{12}: pull: Fast-forward
+[33mdbf0bea[m HEAD@{13}: commit (merge): Merge branch 'main' of https://github.com/Brian-ED/P3-project
+[33m2cd04a0[m HEAD@{14}: commit: Removed RollQuestion15, made it standard, minor UI changes
+[33mb945b9d[m HEAD@{15}: commit (merge): Merge branch 'main' of https://github.com/Brian-ED/P3-project
+[33me6977d0[m HEAD@{16}: commit: Tilføjet RollQuestion15 og RollQuestionShort
+[33m0d766ba[m HEAD@{17}: commit: Implemented FineRollQuestion as a temporary solution for questions with a shorter timespan "DONT TOUCH SURVEY"
+[33m863c92b[m HEAD@{18}: commit: Created routes from Citizen to surveys + minor UI fixes
+[33m6b69a83[m HEAD@{19}: pull: Fast-forward
+[33m6e180ec[m HEAD@{20}: pull: Fast-forward
+[33md6002d6[m HEAD@{21}: pull: Fast-forward
+[33m3a34e0a[m HEAD@{22}: commit: Integrated CitizenView into the database (need testing)
+[33m49aa877[m HEAD@{23}: clone: from https://github.com/Brian-ED/P3-project.git

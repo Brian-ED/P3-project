@@ -12,8 +12,11 @@ import com.example.application.database.ClDiDB.Questions.YesOrNoElaborateRollQue
 import com.example.application.database.ClDiDB.Questions.YesOrNoElaborateRollRollQuestion;
 import com.example.application.database.ClDiDB.Questions.YesOrNoQuestion;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
@@ -29,6 +32,57 @@ import java.util.List;
 
 
 public class UI {
+
+    private static final String WIDTH_COMBO = "300px";
+    private static final String WIDTH_TIME  = "250px";
+    private static final String WIDTH_TEXT  = "600px";
+    private static final String WIDTH_DEFAULT = "300px";
+
+    private static VerticalLayout questionBlock(String titleText, Component input) {
+        return questionBlock(titleText, input, defaultWidthFor(input));
+        }
+
+        private static VerticalLayout questionBlock(String titleText, Component input, String inputWidth) {
+        // Title styling (consistent everywhere)
+        H3 title = new H3(titleText);
+        title.getStyle()
+                .set("margin", "0")
+                .set("padding", "0")
+                .set("font-size", "28px");
+
+        // Prevent duplicate titles: clear label on inputs that have one
+        if (input instanceof HasLabel labeled) {
+            labeled.setLabel("");
+        }
+
+        // Standardize input width
+        if (inputWidth != null) {
+            if (input instanceof HasSize sized) {
+                sized.setWidth(inputWidth);
+            } else {
+                input.getElement().getStyle().set("width", inputWidth);
+            }
+        }
+
+        // Standard wrapper layout
+        VerticalLayout wrapper = new VerticalLayout(title, input);
+        wrapper.setPadding(false);
+        wrapper.setSpacing(false);
+        wrapper.setAlignItems(FlexComponent.Alignment.START);
+        wrapper.setWidthFull();
+        wrapper.getStyle().set("gap", "10px");
+
+        return wrapper;
+    }
+
+    private static String defaultWidthFor(Component input) {
+        if (input instanceof TimePicker) return WIDTH_TIME;
+        if (input instanceof ComboBox) return WIDTH_COMBO;
+        if (input instanceof TextArea) return WIDTH_TEXT;
+        if (input instanceof TextField) return WIDTH_TEXT;
+        return WIDTH_DEFAULT;
+    }
+
 
     private static TimePicker rollTimePicker(String label) {
         TimePicker tp = new TimePicker(label);
@@ -97,14 +151,26 @@ public class UI {
             container.add(yesNo);
 
             // If they answered "Ja", add the extra questions underneath
-            if ("Ja".equals(e.getValue())) {
-                container.add(
-                    new ComboBox<String>(question.getComboboxQuestionTitle()) {{
-                        setItems(question.getComboboxQuestionOptions());
-                    }},
-                    rollTimePicker(question.getRollQuestionTitle())
-                );
-            }
+           if ("Ja".equals(e.getValue())) {
+
+            // Combobox follow-up (title + input)
+            Span comboTitle = new Span(question.getComboboxQuestionTitle());
+
+            ComboBox<String> combo = new ComboBox<>();
+            combo.setItems(question.getComboboxQuestionOptions());
+            combo.setWidth("300px");
+            combo.setPlaceholder("Vælg en mulighed");
+            combo.setClearButtonVisible(true);
+
+            // Time follow-up (title + input)
+            Span timeTitle = new Span(question.getRollQuestionTitle());
+
+            TimePicker tp = rollTimePicker("");   // IMPORTANT: no label
+            tp.setWidth("250px");
+
+            // Add them
+            container.add(comboTitle, combo, timeTitle, tp);
+        }
         });
 
         return container;
@@ -232,10 +298,24 @@ public class UI {
 
             // If they answered "Ja", add the extra questions underneath
             if ("Ja".equals(e.getValue())) {
-                container.add(
-                    new TimePicker(question.getRollQuestionTitle()),
-                    new ComboBox<String>(question.getComboboxQuestionTitle()) {{setItems(question.getComboboxQuestionOptions());}}
-                );
+
+                // Combobox follow-up (title + input)
+                Span comboTitle = new Span(question.getComboboxQuestionTitle());
+
+                ComboBox<String> combo = new ComboBox<>();
+                combo.setItems(question.getComboboxQuestionOptions());
+                combo.setWidth("300px");
+                combo.setPlaceholder("Vælg en mulighed");
+                combo.setClearButtonVisible(true);
+
+                // Time follow-up (title + input)
+                Span timeTitle = new Span(question.getRollQuestionTitle());
+
+                TimePicker tp = rollTimePicker("");   // IMPORTANT: no label
+                tp.setWidth("250px");
+
+                // Add them
+                container.add(comboTitle, combo, timeTitle, tp);
             }
         });
 
@@ -243,11 +323,15 @@ public class UI {
     }
 
     public static Component drawUI(GenericQuestion<?> question) {
-        return switch (question) {
-            case ComboBoxQuestion x ->
-                new ComboBox<String>(x.getMainQuestionTitle()) {{
-                    setItems(x.getComboboxQuestionOptions());
-                }};
+    return switch (question) {
+        case ComboBoxQuestion x -> {
+            ComboBox<String> cb = new ComboBox<>();
+            cb.setItems(x.getComboboxQuestionOptions());
+            cb.setPlaceholder("Vælg en mulighed");
+            cb.setClearButtonVisible(true);
+
+            yield questionBlock(x.getMainQuestionTitle(), cb);
+        }
 
             case YesOrNoElaborateRollRollQuestion x -> drawYesNo(x);
             case YesOrNoElaborateRollQuestion x -> drawYesNo(x);
@@ -301,7 +385,7 @@ public class UI {
                 resize();
             """);
 
-            yield ta;
+            yield questionBlock(x.getMainQuestionTitle(), ta);
         }
 
         case YesOrNoQuestion x -> drawYesNo(x);
