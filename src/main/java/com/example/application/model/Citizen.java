@@ -66,6 +66,7 @@ public class Citizen implements User {
 
     public void submitSurvey(AnsweredSurvey survey) {
         answeredSurveys.add(survey);
+        sendUpdateNotification();
     };
 
     @Override
