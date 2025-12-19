@@ -50,7 +50,7 @@ public class DashboardView extends VerticalLayout {
     private VerticalLayout listContainer;
 
     public DashboardView(Model model) {
-        meAdvisor = model.getThisAdvisor(SecurityUtils.getUsername());
+        this.meAdvisor = model.initAsAdvisor(SecurityUtils.getUsername());
         this.model = model;
 
         setSizeFull();
