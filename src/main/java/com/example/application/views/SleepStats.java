@@ -204,148 +204,148 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
                     throw new IllegalArgumentException("Invalid UUID");
                 }
                 try {
-                        this.selectedCitizen = model.getCitizenWithID(citizenId).orElseThrow();
-                    } catch (NoSuchElementException e) { // Citizen was not found in database
-                        throw new IllegalArgumentException("Citizen was not found in database");
-                    }
+                    this.selectedCitizen = model.getCitizenWithID(citizenId).orElseThrow();
+                } catch (NoSuchElementException e) { // Citizen was not found in database
+                    throw new IllegalArgumentException("Citizen was not found in database");
+                }
 
-                    loadCitizenData();
+                loadCitizenData();
 
-                    List<AnsweredSurvey> surveys = this.selectedCitizen.getSurveys();
-                    final String timeInBed;
-                    Optional<Integer> maybeMinutesInBedAccumulator = Optional.empty();
+                List<AnsweredSurvey> surveys = this.selectedCitizen.getSurveys();
+                final String timeInBed;
+                Optional<Integer> maybeMinutesInBedAccumulator = Optional.empty();
 
-                    for (AnsweredSurvey survey : surveys) {
-                        GenericQuestion<?>[] answers = survey.getAnswers();
+                for (AnsweredSurvey survey : surveys) {
+                    GenericQuestion<?>[] answers = survey.getAnswers();
 
-                        for (GenericQuestion<?> answer : answers) {
-                            if (answer.getMainQuestionTitle().equals("Efter jeg slukkede lyset, sov jeg ca. efter:")
-                            && answer.getAnswer().getPayloadClass() == DurationPayload.class
-                            ) {
-                                final Integer temp;
-                                if (maybeMinutesInBedAccumulator.isEmpty()) {
-                                    temp = 0;
-                                } else {
-                                    final Integer i = maybeMinutesInBedAccumulator.orElseThrow();
-                                    temp = i + ((DurationPayload)(answer.getAnswer().toPayload())).minutes();
-                                }
-                                maybeMinutesInBedAccumulator = Optional.of(temp);
+                    for (GenericQuestion<?> answer : answers) {
+                        if (answer.getMainQuestionTitle().equals("Efter jeg slukkede lyset, sov jeg ca. efter:")
+                        && answer.getAnswer().getPayloadClass() == DurationPayload.class
+                        ) {
+                            final Integer temp;
+                            if (maybeMinutesInBedAccumulator.isEmpty()) {
+                                temp = 0;
+                            } else {
+                                final Integer i = maybeMinutesInBedAccumulator.orElseThrow();
+                                temp = i + ((DurationPayload)(answer.getAnswer().toPayload())).minutes();
                             }
+                            maybeMinutesInBedAccumulator = Optional.of(temp);
                         }
                     }
-                    if (maybeMinutesInBedAccumulator.isEmpty()) {
-                        timeInBed = "N/A";
-                    } else {
-                        Integer m = maybeMinutesInBedAccumulator.orElseThrow();
-                        int hours = m / 60;
-                        int minutes = m % 60;
-                        timeInBed = String.format("%02dt %02dm", hours, minutes);
-                    }
+                }
+                if (maybeMinutesInBedAccumulator.isEmpty()) {
+                    timeInBed = "N/A";
+                } else {
+                    Integer m = maybeMinutesInBedAccumulator.orElseThrow();
+                    int hours = m / 60;
+                    int minutes = m % 60;
+                    timeInBed = String.format("%02dt %02dm", hours, minutes);
+                }
 
-                    // Stats cards
-                    HorizontalLayout statsRow = new HorizontalLayout();
-                    statsRow.setWidthFull();
-                    statsRow.setSpacing(true);
+                // Stats cards
+                HorizontalLayout statsRow = new HorizontalLayout();
+                statsRow.setWidthFull();
+                statsRow.setSpacing(true);
 
-                    statsRow.add(
-                        createStatCard("TIB - Tid i seng", formatDuration(stats.getTib())),
-                        createStatCard("TST - Total Søvntid", formatDuration(stats.getTst())),
-                        createStatCard("Søvneffektivitet", formatPercentage(stats.getSleepEfficiency())),
-                        createStatCard("SOL - Indsovningstid", formatDuration(stats.getSol())),
-                        createStatCard("WASO - Opvågninger", formatDuration(stats.getWaso())),
-                        createStatCard("Morgenfølelse", formatRating(stats.getMorningFeeling()))
-                    );
+                statsRow.add(
+                    createStatCard("TIB - Tid i seng", formatDuration(stats.getTib())),
+                    createStatCard("TST - Total Søvntid", formatDuration(stats.getTst())),
+                    createStatCard("Søvneffektivitet", formatPercentage(stats.getSleepEfficiency())),
+                    createStatCard("SOL - Indsovningstid", formatDuration(stats.getSol())),
+                    createStatCard("WASO - Opvågninger", formatDuration(stats.getWaso())),
+                    createStatCard("Morgenfølelse", formatRating(stats.getMorningFeeling()))
+                );
 
-                    add(statsRow);
-
-
-
+                add(statsRow);
 
 
-                    // Create a wrapper for centering the sleep chart
-                    Div sleepChartWrapper = new Div();
-                    sleepChartWrapper.setWidthFull();
-                    sleepChartWrapper.getStyle()
-                        .set("display", "flex")
-                        .set("justify-content", "center");
 
-                    // Create the sleep chart container
-                    Div chartContainer = new Div();
-                    chartContainer.setId("sleepChartContainer");
-                    chartContainer.setWidth("90%"); // Adjust this percentage (e.g., 80%, 85%, 90%)
-                    chartContainer.setHeight("400px");
-                    chartContainer.getStyle()
-                        .set("background-color", "white")
-                        .set("border-radius", "12px")
-                        .set("border", "1px solid #e0e0e0")
-                        .set("padding", "20px")
-                        .set("box-shadow", "0 2px 4px rgba(0,0,0,0.05)");
 
-                    sleepChartWrapper.add(chartContainer);
-                    add(sleepChartWrapper);
 
-                    addAttachListener(event2 -> {
-                        getUI().ifPresent(ui -> {
-                            ui.getPage().executeJs(
-                                "console.log('Attempting to call createSleepChart...'); " +
-                                "console.log('window.createSleepChart exists?', typeof window.createSleepChart); " +
-                                "if (window.createSleepChart) { " +
-                                "  window.createSleepChart($0); " +
-                                "} else { " +
-                                "  console.error('createSleepChart not found on window'); " +
-                                "}",
-                                "sleepChartContainer"
-                            );
-                        });
+                // Create a wrapper for centering the sleep chart
+                Div sleepChartWrapper = new Div();
+                sleepChartWrapper.setWidthFull();
+                sleepChartWrapper.getStyle()
+                    .set("display", "flex")
+                    .set("justify-content", "center");
+
+                // Create the sleep chart container
+                Div chartContainer = new Div();
+                chartContainer.setId("sleepChartContainer");
+                chartContainer.setWidth("90%"); // Adjust this percentage (e.g., 80%, 85%, 90%)
+                chartContainer.setHeight("400px");
+                chartContainer.getStyle()
+                    .set("background-color", "white")
+                    .set("border-radius", "12px")
+                    .set("border", "1px solid #e0e0e0")
+                    .set("padding", "20px")
+                    .set("box-shadow", "0 2px 4px rgba(0,0,0,0.05)");
+
+                sleepChartWrapper.add(chartContainer);
+                add(sleepChartWrapper);
+
+                addAttachListener(event2 -> {
+                    getUI().ifPresent(ui -> {
+                        ui.getPage().executeJs(
+                            "console.log('Attempting to call createSleepChart...'); " +
+                            "console.log('window.createSleepChart exists?', typeof window.createSleepChart); " +
+                            "if (window.createSleepChart) { " +
+                            "  window.createSleepChart($0); " +
+                            "} else { " +
+                            "  console.error('createSleepChart not found on window'); " +
+                            "}",
+                            "sleepChartContainer"
+                        );
                     });
+                });
 
 
 
 
-                    // Create a wrapper for centering the effectiveness chart
-                    Div chartWrapper = new Div();
-                    chartWrapper.setWidthFull();
-                    chartWrapper.getStyle()
-                        .set("display", "flex")
-                        .set("justify-content", "center")
-                        .set("margin-top", "20px"); // Add spacing between charts
+                // Create a wrapper for centering the effectiveness chart
+                Div chartWrapper = new Div();
+                chartWrapper.setWidthFull();
+                chartWrapper.getStyle()
+                    .set("display", "flex")
+                    .set("justify-content", "center")
+                    .set("margin-top", "20px"); // Add spacing between charts
 
-                    // Create the effectiveness chart container
-                    Div effectivenessChartContainer = new Div();
-                    effectivenessChartContainer.setId("effectivenessChartContainer");
-                    effectivenessChartContainer.setWidth("90%");
-                    effectivenessChartContainer.setHeight("400px");
-                    effectivenessChartContainer.getStyle()
-                        .set("background-color", "white")
-                        .set("border-radius", "12px")
-                        .set("border", "1px solid #e0e0e0")
-                        .set("padding", "20px")
-                        .set("box-shadow", "0 2px 4px rgba(0,0,0,0.05)");
+                // Create the effectiveness chart container
+                Div effectivenessChartContainer = new Div();
+                effectivenessChartContainer.setId("effectivenessChartContainer");
+                effectivenessChartContainer.setWidth("90%");
+                effectivenessChartContainer.setHeight("400px");
+                effectivenessChartContainer.getStyle()
+                    .set("background-color", "white")
+                    .set("border-radius", "12px")
+                    .set("border", "1px solid #e0e0e0")
+                    .set("padding", "20px")
+                    .set("box-shadow", "0 2px 4px rgba(0,0,0,0.05)");
 
-                    chartWrapper.add(effectivenessChartContainer);
-                    add(chartWrapper);
+                chartWrapper.add(effectivenessChartContainer);
+                add(chartWrapper);
 
-                    // Call the chart on attach
-                    addAttachListener(event2 -> {
-                        getUI().ifPresent(ui -> ui.getPage().executeJs(
-                            "if (window.createEffectivenessChart) { window.createEffectivenessChart($0); }",
-                            "effectivenessChartContainer"
-                        ));
-                    });
+                // Call the chart on attach
+                addAttachListener(event2 -> {
+                    getUI().ifPresent(ui -> ui.getPage().executeJs(
+                        "if (window.createEffectivenessChart) { window.createEffectivenessChart($0); }",
+                        "effectivenessChartContainer"
+                    ));
+                });
 
-                    // Create a wrapper for centering the survey answers box
-                    Div surveyWrapper = new Div();
-                    surveyWrapper.setWidthFull();
-                    surveyWrapper.getStyle()
-                        .set("display", "flex")
-                        .set("justify-content", "center")
-                        .set("margin-top", "20px");
-                    Div surveyBox = createSurveyAnswersBox();
-                    // Sleep Survey Answers Box
-                    surveyWrapper.add(surveyBox);
-                    add(surveyWrapper);
+                // Create a wrapper for centering the survey answers box
+                Div surveyWrapper = new Div();
+                surveyWrapper.setWidthFull();
+                surveyWrapper.getStyle()
+                    .set("display", "flex")
+                    .set("justify-content", "center")
+                    .set("margin-top", "20px");
+                Div surveyBox = createSurveyAnswersBox();
+                // Sleep Survey Answers Box
+                surveyWrapper.add(surveyBox);
+                add(surveyWrapper);
 
-                    refreshGrid();
+                refreshGrid();
             }
         );
     }
