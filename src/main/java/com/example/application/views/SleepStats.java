@@ -215,7 +215,6 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
                 loadCitizenData();
 
                 List<AnsweredSurvey> surveys = this.selectedCitizen.getSurveys();
-                final String timeInBed;
                 Optional<Integer> maybeMinutesInBedAccumulator = Optional.empty();
 
                 for (AnsweredSurvey survey : surveys) {
