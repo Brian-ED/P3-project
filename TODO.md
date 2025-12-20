@@ -12,9 +12,9 @@ This may be easier to do after 1.
 
 5. ✅ Alaxander MEDIUM AND LOOONG: Test as many methods as possible, using vaadin's testing system.
 
-6. MEDIUM: make testing implementations of the Model interface. This requires researching how you test via dependency injection in vaadin.
+6. ✅ MEDIUM: make testing implementations of the Model interface. This requires researching how you test via dependency injection in vaadin.
 
-7. ✅ MEDIUM-HARD: Like how `src/main/java/com/example/application/views/CitizenView.java` uses the database, please also add the database to the survey view. This heavily relies on 1. and 2. being done.
+7. ⛔ MEDIUM-HARD: Like how `src/main/java/com/example/application/views/CitizenView.java` uses the database, please also add the database to the survey view. This heavily relies on 1. and 2. being done.
 
 8. ✅ Implement observer pattern in model.
 
