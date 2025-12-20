@@ -1,9 +1,10 @@
 package com.example.application.views;
 
 import com.example.application.UI;
-import com.example.application.database.ClDiDB.CitizenRow;
 import com.example.application.model.AnswerPayload;
+import com.example.application.model.Citizen;
 import com.example.application.model.DynamicSurvey;
+import com.example.application.model.Model;
 import com.example.application.model.SurveyListener;
 import com.example.application.model.SurveyType;
 import com.example.application.security.SecurityUtils;
@@ -33,15 +34,17 @@ public class Survey extends VerticalLayout implements BeforeEnterObserver {
 
         @Override
         public void questionAnswered(int index, AnswerPayload payload) {}
-
-		@Override
-		public void notifySubmitted(com.example.application.database.ClDiDB.Survey survey) {}
     }
 
     // Layout that will contain the current question UI
     public VerticalLayout content;
 
-    public Survey() {
+    private Model model;
+    private Citizen thisCitizen;
+
+    public Survey(Model model) {
+        this.model = model;
+        this.thisCitizen = model.initAsCitizen(SecurityUtils.getUsername());
         Button next = new Button("Næste >");
         Button prev = new Button("< Tilbage");
         H3 h3 = new H3("Spørgeskema");
@@ -100,11 +103,7 @@ public class Survey extends VerticalLayout implements BeforeEnterObserver {
             return;
         }
 
-        // TODO: Replace this hardcoded user with the actual logged-in citizen row
-        CitizenRow user = new CitizenRow();
-        user.setFullName(SecurityUtils.getUsername());
-
-        this.survey = new DynamicSurvey(surveyType, user);
+        this.survey = model.initDynamicSurvey(surveyType, thisCitizen);
 
         SurveyListener listener = new ThisListener();
         survey.addListener(listener);
