@@ -1,21 +1,42 @@
 package com.example.application.views;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.example.application.database.ClDiDB.Questions.GenericQuestion;
-import com.example.application.model.AnsweredMorningSurvey;
+import com.example.application.database.ClDiDB.Answers.Answer;
+import com.example.application.database.ClDiDB.Answers.ComboBoxAnswer;
+import com.example.application.database.ClDiDB.Answers.DurationAnswer;
+import com.example.application.database.ClDiDB.Answers.RollAnswer;
+import com.example.application.database.ClDiDB.Answers.TextFieldAnswer;
+import com.example.application.database.ClDiDB.Answers.YesOrNoAnswer;
+import com.example.application.database.ClDiDB.Answers.YesOrNoElaborateComboboxAnswer;
+import com.example.application.database.ClDiDB.Answers.YesOrNoElaborateComboboxRollAnswer;
+import com.example.application.database.ClDiDB.Answers.YesOrNoElaborateRollAnswer;
+import com.example.application.database.ClDiDB.Answers.YesOrNoElaborateRollComboboxAnswer;
+import com.example.application.database.ClDiDB.Answers.YesOrNoElaborateRollRollAnswer;
+import com.example.application.model.AnswerPayload;
+import com.example.application.model.AnswerPayload.ComboBoxPayload;
+import com.example.application.model.AnswerPayload.DurationPayload;
+import com.example.application.model.AnswerPayload.RollPayload;
+import com.example.application.model.AnswerPayload.TextFieldPayload;
+import com.example.application.model.AnswerPayload.YesOrNoElaborateComboboxPayload;
+import com.example.application.model.AnswerPayload.YesOrNoElaborateComboboxRollPayload;
+import com.example.application.model.AnswerPayload.YesOrNoElaborateRollComboboxPayload;
+import com.example.application.model.AnswerPayload.YesOrNoElaborateRollPayload;
+import com.example.application.model.AnswerPayload.YesOrNoElaborateRollRollPayload;
+import com.example.application.model.AnswerPayload.YesOrNoPayload;
 import com.example.application.model.AnsweredSurvey;
 import com.example.application.model.Citizen;
+import com.example.application.model.DynamicSurvey;
 import com.example.application.model.Model;
 import com.example.application.model.SleepAdvisor;
+import com.example.application.model.SurveyListener;
+import com.example.application.model.SurveyType;
 import com.example.application.security.SecurityUtils;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
@@ -41,7 +62,6 @@ public class DashboardView extends VerticalLayout {
     private Span totalCitizensValue;
     private Span myCitizensValue;
     private Span activeTodayValue;
-    private String username;
     private Model model;
     private SleepAdvisor meAdvisor;
     private List<com.example.application.model.Citizen> citizens = new ArrayList<>();
@@ -250,13 +270,10 @@ public class DashboardView extends VerticalLayout {
         SleepAdvisor advisor2 = new SleepAdvisor(UUID.randomUUID(), "Søvnrådgiver Peter");
 
         citizens.add(mockCitizen("Emma Jensen",
-                                new AnsweredMorningSurvey(UUID.randomUUID(), new GenericQuestion[0], ZonedDateTime.of(2025, 12, 14, 0, 0, 0, 0, ZoneId.of("Asia/Kolkata"))),
                                 advisor1));
         citizens.add(mockCitizen("Lars Hansen",
-                                new AnsweredMorningSurvey(UUID.randomUUID(), new GenericQuestion[0], ZonedDateTime.of(2025, 12, 13, 0, 0, 0, 0, ZoneId.of("Asia/Kolkata")) ),
                                 advisor2));
         citizens.add(mockCitizen("Maja Sørensen",
-                                new AnsweredMorningSurvey(UUID.randomUUID(), new GenericQuestion[0], ZonedDateTime.of(2025, 12, 12, 0, 0, 0, 0, ZoneId.of("Asia/Kolkata")) ),
                                 advisor1));
 
         // Refresh UI
@@ -302,13 +319,55 @@ public class DashboardView extends VerticalLayout {
         return Optional.of(newestAnsweredSurvey);
     }
 
+    private class CheckForEnd implements SurveyListener {
+        private Boolean hasChangedBool = true; // Changed is true by default since it changes from non-existence to pointing at first question.
+
+        public Boolean hasChanged() {
+            Boolean temp = hasChangedBool;
+            this.hasChangedBool = false;
+            return temp;
+        }
+
+        @Override
+        public void currentQuestionChanged(int newIndex) {
+            hasChangedBool = true;
+        }
+
+        @Override
+        public void questionAnswered(int index, AnswerPayload payload) {}
+    }
+
     private Citizen mockCitizen(
             String name,
-            AnsweredSurvey mockSurveySubmission,
             SleepAdvisor advisor) {
         Citizen citizen = model.createCitizen(name);
-        citizen.submitSurvey(mockSurveySubmission);
+
+        DynamicSurvey survey = model.initDynamicSurvey(SurveyType.morning, citizen);
+        CheckForEnd endCheckerListener = new CheckForEnd();
+        survey.addListener(endCheckerListener);
+        while (endCheckerListener.hasChanged()) {
+            System.out.println(survey.currentQuestion());
+            Answer<?> a = survey.currentQuestion().getAnswer();
+            ZonedDateTime t = ZonedDateTime.now();
+            switch (a) {
+                case YesOrNoElaborateRollRollAnswer     y  -> {y .answer(new YesOrNoElaborateRollRollPayload    (false, t, t));}
+                case YesOrNoElaborateRollAnswer         y2 -> {y2.answer(new YesOrNoElaborateRollPayload        (false, t));}
+                case YesOrNoElaborateComboboxRollAnswer y3 -> {y3.answer(new YesOrNoElaborateComboboxRollPayload(false, (short)0, t));}
+                case YesOrNoElaborateRollComboboxAnswer y4 -> {y4.answer(new YesOrNoElaborateRollComboboxPayload(false, t, (short)0));}
+                case YesOrNoElaborateComboboxAnswer     y5 -> {y5.answer(new YesOrNoElaborateComboboxPayload    (false, (short)0));}
+                case ComboBoxAnswer                     c  -> {c .answer(new ComboBoxPayload                    ((short)0));}
+                case RollAnswer                         r  -> {r .answer(new RollPayload                        (t));}
+                case DurationAnswer                     d  -> {d .answer(new DurationPayload                    (0));}
+                case TextFieldAnswer                    tt -> {tt.answer(new TextFieldPayload                   ("I'm doing good, thanks"));}
+                case YesOrNoAnswer                      y6 -> {y6.answer(new YesOrNoPayload                     (false));}
+            }
+            survey.nextQuestion();
+        }
+        AnsweredSurvey answered = survey.submitAnswers().orElseThrow(() -> new IllegalStateException("Not all questions were answered in mock data"));
+
+        citizen.submitSurvey(answered);
         citizen.setAssignedAdvisor(advisor);
+
         return citizen;
     }
 
