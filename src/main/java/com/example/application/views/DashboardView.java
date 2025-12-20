@@ -57,7 +57,6 @@ import jakarta.annotation.security.RolesAllowed;
 @Route("dashboard")
 @PageTitle("Søvnrådgiver Dashboard")
 @RolesAllowed({ "ADVISOR", "ADMIN" })
-
 public class DashboardView extends VerticalLayout {
     private Span totalCitizensValue;
     private Span myCitizensValue;
