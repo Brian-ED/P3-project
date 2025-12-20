@@ -6,8 +6,8 @@ import com.example.application.model.AnswerPayload.YesOrNoElaborateRollRollPaylo
 public final class YesOrNoElaborateRollRollQuestion
         extends GenericQuestion<YesOrNoElaborateRollRollAnswer> {
 
-    private final RollQuestionShort q0; // minutes
-    private final RollQuestion q1;      // time-of-day
+    private final RollQuestionShort q0;
+    private final RollQuestion q1;
 
     public YesOrNoElaborateRollRollQuestion(
             String title,
@@ -28,25 +28,17 @@ public final class YesOrNoElaborateRollRollQuestion
         return q1;
     }
 
+    public String getRollQuestion0Title() {
+        return q0.getMainQuestionTitle();
+    }
+
+    public String getRollQuestion1Title() {
+        return q1.getMainQuestionTitle();
+    }
+
+    @Override
     public String format(Boolean hasAnswered) {
-        if (hasAnswered) {
-            YesOrNoElaborateRollRollPayload x = this.getAnswer().toPayload();
-            if (x.yesNo()) {
-                // Use the *titles from the objects* instead of old strings
-                return getMainQuestionTitle()
-                        + ", svaret: Ja; og "
-                        + q0.getMainQuestionTitle() + ", svaret: " + x.timestamp1()
-                        + "; og "
-                        + q1.getMainQuestionTitle() + ", svaret:" + x.timestamp2()
-                        + ";";
-            } else {
-                return getMainQuestionTitle() + ", svaret: Nej";
-            }
-        } else {
-            return getMainQuestionTitle()
-                    + ", og hvis ja: "
-                    + q0.getMainQuestionTitle() + " og "
-                    + q1.getMainQuestionTitle();
-        }
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'format'");
     }
 }
