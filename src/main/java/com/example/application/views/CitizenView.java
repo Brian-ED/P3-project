@@ -414,8 +414,7 @@ public class CitizenView extends VerticalLayout {
                     .set("display", "inline-block")
                     .set("color", "#666");
 
-                Hr HR = new Hr();
-                hr.getStyle()
+                hr.getStyle() // TODO There is no way resetting the style here is intended
                     .set("margin-top", "10px")
                     .set("margin-bottom", "10px");
 
