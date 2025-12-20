@@ -35,14 +35,4 @@ public class CitizenRow {
     private AdvisorRow assignedAdvisor;
     public Optional<AdvisorRow> getAssignedAdvisor() {return Optional.ofNullable(assignedAdvisor);};
     public void setAssignedAdvisor(AdvisorRow assignedAdvisor) {this.assignedAdvisor = assignedAdvisor;};
-
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<SurveyMorningRow> morningSurveys = new ArrayList<>();
-    public List<SurveyMorningRow> getMorningSurveys() {return morningSurveys;};
-    public void setMorningSurveys(List<SurveyMorningRow> morningSurveys) {this.morningSurveys = morningSurveys;};
-
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
-    private List<SurveyEveningRow> eveningSurveys = new ArrayList<>();
-    public List<SurveyEveningRow> getEveningSurveys() {return eveningSurveys;};
-    public void setEveningSurveys(List<SurveyEveningRow> eveningSurveys) {this.eveningSurveys = eveningSurveys;};
 }

@@ -55,8 +55,8 @@ public class PostgreSQLDatabaseControler implements DatabaseControler {
 
     private Citizen citizenRowToCitizen(CitizenRow row) {
 
-        List<SurveyMorningRow> mornings = row.getMorningSurveys();
-        List<SurveyEveningRow> evenings = row.getEveningSurveys();
+        List<SurveyMorningRow> mornings = morningRepo.findByOwner(row);
+        List<SurveyEveningRow> evenings = eveningRepo.findByOwner(row);
         List<AnsweredSurvey> answeredSurveys = new ArrayList<>();
         for (var m : mornings) {
             answeredSurveys.add(new AnsweredMorningSurvey(m.getID(), m.getAnswers(), m.getWhenAnswered()));
@@ -75,17 +75,10 @@ public class PostgreSQLDatabaseControler implements DatabaseControler {
                     .flatMap(advisor -> advisorsRepo.findOneByFullName(advisor.getFullName()))
                     .ifPresent(advisorRow -> row.setAssignedAdvisor(advisorRow));
 
-                Integer newSurveysAmount = citizen.getSurveys().size() - row.getEveningSurveys().size() - row.getMorningSurveys().size();
+                Integer newSurveysAmount = citizen.getSurveys().size() - mornings.size() - evenings.size();
 
                 if (newSurveysAmount != 1 && newSurveysAmount != 0) {
                     throw new IllegalStateException("Can only append one survey at a time to a citizen, but "+newSurveysAmount +" were appended");
-                }
-
-                if (newSurveysAmount == 1) {
-                    switch (citizen.getSurveys().getLast()) {
-                        case AnsweredMorningSurvey a -> row.getMorningSurveys().add(morningRepo.findByID(a.getID()).orElseThrow());
-                        case AnsweredEveningSurvey b -> row.getEveningSurveys().add(eveningRepo.findByID(b.getID()).orElseThrow());
-                    }
                 }
                 citizensRepo.save(row);
             }
