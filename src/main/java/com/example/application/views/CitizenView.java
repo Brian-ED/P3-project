@@ -246,7 +246,6 @@ public class CitizenView extends VerticalLayout {
                     .set("margin-left", "10px");
 
                 // Tilføj click listener til knappen
-                LocalDate currentDate = date;
                 AnsweredSurvey finalMorningSurvey = morningSurvey;
                 AnsweredSurvey finalEveningSurvey = eveningSurvey;
                 String finalMorningTime = morningTime;
