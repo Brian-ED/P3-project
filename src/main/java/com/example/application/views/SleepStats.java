@@ -150,11 +150,11 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
 
 
     private String formatDuration(Duration d) {
-    long hours = d.toHours();
-    long minutes = d.minusHours(hours).toMinutes();
-    return hours > 0
-            ? hours + "t " + minutes + "m"
-            : minutes + "m";
+        long hours = d.toHours();
+        long minutes = d.minusHours(hours).toMinutes();
+        return hours > 0
+                ? hours + "t " + minutes + "m"
+                : minutes + "m";
     }
 
     private String formatPercentage(double value) {
