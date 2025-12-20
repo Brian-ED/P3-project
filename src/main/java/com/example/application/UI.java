@@ -214,8 +214,8 @@ public class UI {
 
                 if ("Ja".equals(e.getValue())) {
                     container.add(
-                            drawUI(question.getRollQuestion0()), // RollQuestionShort renderer
-                            drawUI(question.getRollQuestion1())  // RollQuestion renderer
+                            new TimePicker(question.getRollQuestion0Title()), // RollQuestionShort renderer
+                            new TimePicker(question.getRollQuestion1Title())  // RollQuestion renderer
                     );
                 }
             });
