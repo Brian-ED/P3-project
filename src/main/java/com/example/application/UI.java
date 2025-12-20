@@ -311,15 +311,15 @@ public class UI {
     }
 
     public static Component drawUI(GenericQuestion<?> question) {
-    return switch (question) {
-        case ComboBoxQuestion x -> {
-            ComboBox<String> cb = new ComboBox<>();
-            cb.setItems(x.getComboboxQuestionOptions());
-            cb.setPlaceholder("Vælg en mulighed");
-            cb.setClearButtonVisible(true);
+        return switch (question) {
+            case ComboBoxQuestion x -> {
+                ComboBox<String> cb = new ComboBox<>();
+                cb.setItems(x.getComboboxQuestionOptions());
+                cb.setPlaceholder("Vælg en mulighed");
+                cb.setClearButtonVisible(true);
 
-            yield questionBlock(x.getMainQuestionTitle(), cb);
-        }
+                yield questionBlock(x.getMainQuestionTitle(), cb);
+            }
 
             case YesOrNoElaborateRollRollQuestion x -> drawYesNo(x);
             case YesOrNoElaborateRollQuestion x -> drawYesNo(x);
