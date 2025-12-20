@@ -310,6 +310,81 @@ public class UI {
         return container;
     }
 
+    private static Component drawYesNoRollRoll(YesOrNoElaborateRollRollQuestion question) {
+
+        H3 h3 = new H3(question.getMainQuestionTitle());
+
+        RadioButtonGroup<String> yesNo = new RadioButtonGroup<>();
+        yesNo.setItems("Ja", "Nej");
+        yesNo.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+
+        VerticalLayout container = new VerticalLayout(h3, yesNo);
+        container.setAlignItems(FlexComponent.Alignment.START);
+
+        yesNo.addValueChangeListener(e -> {
+            container.removeAll();
+            container.add(h3, yesNo);
+
+            if ("Ja".equals(e.getValue())) {
+                container.add(
+                    rollQuestionShortUI(question.getRollQuestion0Title()), // minutes-style
+                    rollQuestionUI(question.getRollQuestion1Title())       // time-style
+                );
+            }
+        });
+
+        return container;
+    }
+
+    private static Component drawYesNoRoll(YesOrNoElaborateRollQuestion question) {
+
+        H3 h3 = new H3(question.getMainQuestionTitle());
+
+        RadioButtonGroup<String> yesNo = new RadioButtonGroup<>();
+        yesNo.setItems("Ja", "Nej");
+        yesNo.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+
+        VerticalLayout container = new VerticalLayout(h3, yesNo);
+        container.setAlignItems(FlexComponent.Alignment.START);
+
+        yesNo.addValueChangeListener(e -> {
+            container.removeAll();
+            container.add(h3, yesNo);
+
+            if ("Ja".equals(e.getValue())) {
+                // ✅ RollQuestion-style follow-up (not plain TimePicker)
+                container.add(rollQuestionUI(question.getRollQuestionTitle()));
+            }
+        });
+
+        return container;
+    }
+
+    private static Component rollQuestionShortUI(String title) {
+        ComboBox<Integer> cb = new ComboBox<>(title);
+
+        List<Integer> values = new ArrayList<>();
+        for (int i = 0; i <= 250; i += 5) {
+            values.add(i);
+        }
+
+        cb.setItems(values);
+        cb.setItemLabelGenerator(i -> i + " min");
+        cb.setPlaceholder("Vælg antal minutter");
+        cb.setClearButtonVisible(true);
+
+        return cb;
+    }
+
+    private static Component rollQuestionUI(String title) {
+        TimePicker tp = new TimePicker(title);
+        tp.setStep(Duration.ofMinutes(15));
+        tp.setPlaceholder("Vælg tidspunkt");
+        tp.setAutoOpen(true);
+        tp.setClearButtonVisible(true);
+        return tp;
+    }
+
     public static Component drawUI(GenericQuestion<?> question) {
         return switch (question) {
             case ComboBoxQuestion x -> {
@@ -321,8 +396,8 @@ public class UI {
                 yield questionBlock(x.getMainQuestionTitle(), cb);
             }
 
-            case YesOrNoElaborateRollRollQuestion x -> drawYesNo(x);
-            case YesOrNoElaborateRollQuestion x -> drawYesNo(x);
+            case YesOrNoElaborateRollRollQuestion x -> drawYesNoRollRoll(x);
+            case YesOrNoElaborateRollQuestion x -> drawYesNoRoll(x);
             case YesOrNoElaborateComboboxRollQuestion x -> drawYesNo(x);
             case YesOrNoElaborateRollComboboxQuestion x -> drawYesNo(x);
             case YesOrNoElaborateComboboxQuestion x -> drawYesNo(x);
