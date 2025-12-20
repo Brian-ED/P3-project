@@ -199,41 +199,29 @@ public class UI {
 
     private static Component drawYesNo(YesOrNoElaborateRollRollQuestion question) {
 
-        // Title
-        H3 h3 = new H3(question.getMainQuestionTitle());
+            H3 h3 = new H3(question.getMainQuestionTitle());
 
-        // Yes/No selector
-        RadioButtonGroup<String> yesNo = new RadioButtonGroup<>();
-        yesNo.setItems("Ja", "Nej");
+            RadioButtonGroup<String> yesNo = new RadioButtonGroup<>();
+            yesNo.setItems("Ja", "Nej");
+            yesNo.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
 
-        // Make each question be on their own row
-        yesNo.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+            VerticalLayout container = new VerticalLayout(h3, yesNo);
+            container.setAlignItems(FlexComponent.Alignment.START);
 
-        // Container for the yes/no question + any follow-up questions
-        VerticalLayout container = new VerticalLayout(h3, yesNo);
-        container.setAlignItems(FlexComponent.Alignment.START);
-        container.setJustifyContentMode(JustifyContentMode.START);
-        container.setAlignSelf(Alignment.START, h3);
-        container.setAlignSelf(Alignment.START, yesNo);
+            yesNo.addValueChangeListener(e -> {
+                container.removeAll();
+                container.add(h3, yesNo);
 
-        // When user changes the answer...
-        yesNo.addValueChangeListener(e -> {
-            // First remove all follow-up questions (keep only the yes/no)
-            container.removeAll();
-            container.add(h3);
-            container.add(yesNo);
+                if ("Ja".equals(e.getValue())) {
+                    container.add(
+                            drawUI(question.getRollQuestion0()), // RollQuestionShort renderer
+                            drawUI(question.getRollQuestion1())  // RollQuestion renderer
+                    );
+                }
+            });
 
-            // If they answered "Ja", add the extra questions underneath
-            if ("Ja".equals(e.getValue())) {
-                container.add(
-                    new TimePicker(question.getRollQuestion0Title()),
-                    new TimePicker(question.getRollQuestion1Title())
-                );
-            }
-        });
-
-        return container;
-    }
+            return container;
+        }
 
     private static Component drawYesNo(YesOrNoElaborateRollQuestion question) {
 
