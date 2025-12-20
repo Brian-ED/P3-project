@@ -6,7 +6,6 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -467,7 +466,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
         for (LocalDate date : sortedDates) {
             surveyPairs.add(surveysByDate.get(date));
         }
-        
+
         // Loop through the big arraylist
         for (AnsweredSurvey[] surveyPair : surveyPairs) {
             // Gets the date from either morning or eveningsurvey (if one of them exsists)
@@ -477,12 +476,11 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
             } else if (surveyPair[1] != null) {
                 dateTimeForCell = surveyPair[1].getWhenAnswered();
             }
-            
+
             if (dateTimeForCell != null) {
                 // Formats date
-                String date = dateTimeForCell.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-                table.add(createTableCell(date));
-                
+                table.add(createTableCell(dateTimeForCell.toLocalDate()));
+
                 // Adds a cell with button for morning-survey if it exists
                 if (surveyPair[0] != null) {
                     table.add(createTableCellWithButton(surveyPair[0].getWhenAnswered().toLocalTime()));
@@ -490,7 +488,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
                     // Adds empty cell if no morning-survey exists
                     table.add(createTableCell(""));
                 }
-                
+
                 // Adds a cell with button for evening-survey if it exists
                 if (surveyPair[1] != null) {
                     table.add(createTableCellWithButton(surveyPair[1].getWhenAnswered().toLocalTime()));
@@ -500,7 +498,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
                 }
             }
         }
-        
+
         box.add(table);
         return box;
     }
