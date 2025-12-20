@@ -15,5 +15,5 @@ public interface DatabaseControler {
     void saveSurvey(Survey survey); // TODO this file should maybe not have Survey, since it's from the DB
     SleepAdvisor[] getAllAdvisors();
     Optional<Citizen> getCitizenById(UUID id);
-    Optional<CitizenRow> getCitizenRowById(UUID id);
+    Optional<CitizenRow> getCitizenRowById(UUID id); // TODO this was used for a quickfix. Ideally should be removed and fixed properly
 }
