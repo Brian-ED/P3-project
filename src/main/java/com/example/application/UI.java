@@ -352,7 +352,6 @@ public class UI {
             container.add(h3, yesNo);
 
             if ("Ja".equals(e.getValue())) {
-                // ✅ RollQuestion-style follow-up (not plain TimePicker)
                 container.add(rollQuestionUI(question.getRollQuestionTitle()));
             }
         });
