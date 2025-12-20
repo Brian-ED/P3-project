@@ -1,6 +1,7 @@
 package com.example.application.database.repositories;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +13,5 @@ import com.example.application.database.ClDiDB.SurveyMorningRow;
 @Repository
 public interface AnsweredSurveyMorningRepository extends JpaRepository<SurveyMorningRow, UUID> {
     List<SurveyMorningRow> findByOwner(CitizenRow owner);
+    Optional<SurveyMorningRow> findByID(UUID id);
 }
