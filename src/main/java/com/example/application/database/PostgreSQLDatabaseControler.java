@@ -74,6 +74,20 @@ public class PostgreSQLDatabaseControler implements DatabaseControler {
                     .getAssignedAdvisor()
                     .flatMap(advisor -> advisorsRepo.findOneByFullName(advisor.getFullName()))
                     .ifPresent(advisorRow -> row.setAssignedAdvisor(advisorRow));
+
+                Integer newSurveysAmount = citizen.getSurveys().size() - row.getEveningSurveys().size() - row.getMorningSurveys().size();
+
+                if (newSurveysAmount != 1 && newSurveysAmount != 0) {
+                    throw new IllegalStateException("Can only append one survey at a time to a citizen, but "+newSurveysAmount +" were appended");
+                }
+
+                if (newSurveysAmount == 1) {
+                    switch (citizen.getSurveys().getLast()) {
+                        case AnsweredMorningSurvey a -> row.getMorningSurveys().add(morningRepo.findByID(a.getID()).orElseThrow());
+                        case AnsweredEveningSurvey b -> row.getEveningSurveys().add(eveningRepo.findByID(b.getID()).orElseThrow());
+                    }
+                }
+                citizensRepo.save(row);
             }
         );
 
@@ -150,5 +164,11 @@ public class PostgreSQLDatabaseControler implements DatabaseControler {
             advisors[i] = new SleepAdvisor(rows.get(i).getID(), rows.get(i).getFullName());
         }
         return advisors;
+    }
+
+    // TODO Ideally this function is temporary, it should be removed and replaced by observer pattern to initialize DynamicSurvey
+    @Override
+    public Optional<CitizenRow> getCitizenRowById(UUID id) {
+        return citizensRepo.findById(id);
     }
 }

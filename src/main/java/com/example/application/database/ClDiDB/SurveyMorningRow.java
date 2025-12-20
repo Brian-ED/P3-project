@@ -32,6 +32,8 @@ public final class SurveyMorningRow implements Survey {
     @Id
     @GeneratedValue
     private UUID id;
+
+    @Override
     public UUID getID() {
         return id;
     }
@@ -52,7 +54,7 @@ public final class SurveyMorningRow implements Survey {
     //---------
     // Answers:
     @Embedded private YesOrNoElaborateComboboxAnswer internelAnswer0 = new YesOrNoElaborateComboboxAnswer(); @Transient final private YesOrNoElaborateComboboxQuestion answer0 = new YesOrNoElaborateComboboxQuestion("Tager du nogen gange sovemedicin eller melatonin piller?"     , "Hvad tager du?", new String[]{"Sovemedicin", "Melatonin"}, internelAnswer0); public YesOrNoElaborateComboboxQuestion getAnswer0() {return answer0;}
-    @Embedded private TextFieldAnswer                 internelAnswer1 = new TextFieldAnswer                (); @Transient final private TextFieldQuestion                 answer1 = new TextFieldQuestion                ("Hvad foretog du dig de sidste par timer inden du gik i seng?"                               , internelAnswer1); public TextFieldQuestion                 getAnswer1() {return answer1;}
+    @Embedded private TextFieldAnswer                internelAnswer1 = new TextFieldAnswer                (); @Transient final private TextFieldQuestion                 answer1 = new TextFieldQuestion                ("Hvad foretog du dig de sidste par timer inden du gik i seng?"                               , internelAnswer1); public TextFieldQuestion                 getAnswer1() {return answer1;}
     @Embedded private RollAnswer                     internelAnswer2 = new RollAnswer                    (); @Transient final private RollQuestion                 answer2 = new RollQuestion                ("I går gik jeg i seng klokken:"                                                                                                , internelAnswer2); public RollQuestion                 getAnswer2() {return answer2;}
     @Embedded private RollAnswer                     internelAnswer3 = new RollAnswer                    (); @Transient final private RollQuestion                     answer3 = new RollQuestion                    ("Jeg slukkede lyset klokken:"                                                                                                  , internelAnswer3); public RollQuestion                     getAnswer3() {return answer3;}
     @Embedded private DurationAnswer                 internelAnswer4 = new DurationAnswer                (); @Transient final private RollQuestionShort                 answer4 = new RollQuestionShort                ("Efter jeg slukkede lyset, sov jeg ca. efter:"                                                                                 , internelAnswer4); public RollQuestionShort                 getAnswer4() {return answer4;}
@@ -61,16 +63,33 @@ public final class SurveyMorningRow implements Survey {
     @Embedded private RollAnswer                     internelAnswer7 = new RollAnswer                    (); @Transient final private RollQuestion                     answer7 = new RollQuestion                    ("I morges vågnede jeg klokken:"                                                                                                , internelAnswer7); public RollQuestion                     getAnswer7() {return answer7;}
     @Embedded private RollAnswer                     internelAnswer8 = new RollAnswer                    (); @Transient final private RollQuestion                     answer8 = new RollQuestion                    ("Jeg stod op klokken:"                                                                                                         , internelAnswer8); public RollQuestion                     getAnswer8() {return answer8;}
 
-    @Transient final private GenericQuestion<?>[] allAnswers = new GenericQuestion[] {
-        answer0, answer1, answer2,
-        answer3, answer4, answer5,
-        answer6, answer7, answer8,
+    private static final int ANSWER_COUNT = 9;
+
+    public SurveyMorningRow() {
+        GenericQuestion<?>[] x = new GenericQuestion<?>[] {
+            answer0, answer1, answer2,
+            answer3, answer4, answer5,
+            answer6, answer7, answer8,
+        };
+        for (int i=0; i<ANSWER_COUNT; i++) {
+            allAnswers[i] = x[i];
+        };
+        if (allAnswers.length != x.length) {
+            throw new IllegalStateException("Amount of questions does not match ANSWER_COUNT");
+        }
+    }
+
+    @Transient final private GenericQuestion<?>[] allAnswers = new GenericQuestion<?>[ANSWER_COUNT];
+
+    public static Integer size() {
+        return ANSWER_COUNT;
     };
 
+    @Override
     public GenericQuestion<?>[] getAnswers() {
         return allAnswers;
     }
-    
+
 	@Override
 	public SurveyType getType() {
         return SurveyType.morning;

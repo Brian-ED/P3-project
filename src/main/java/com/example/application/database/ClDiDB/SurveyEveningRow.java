@@ -3,7 +3,6 @@ package com.example.application.database.ClDiDB;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-
 import com.example.application.database.ClDiDB.Answers.YesOrNoElaborateComboboxRollAnswer;
 import com.example.application.database.ClDiDB.Answers.YesOrNoElaborateRollAnswer;
 import com.example.application.database.ClDiDB.Answers.YesOrNoElaborateRollComboboxAnswer;
@@ -32,6 +31,8 @@ public final class SurveyEveningRow implements Survey {
     @Id
     @GeneratedValue
     private UUID id;
+
+    @Override
     public UUID getID() {
         return id;
     }
@@ -55,12 +56,26 @@ public final class SurveyEveningRow implements Survey {
     @Embedded private YesOrNoElaborateRollComboboxAnswer internelAnswer3 = new YesOrNoElaborateRollComboboxAnswer(); @Transient final private YesOrNoElaborateRollComboboxQuestion answer3 = new YesOrNoElaborateRollComboboxQuestion("Har du drukket alkohol?"                    , "Hvornår på dagen drak du den sidste genstand?", "Hvor mange genstande har du ca. drukket i løbet af dagen?", new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "Mere end 16" }     , internelAnswer3); public YesOrNoElaborateRollComboboxQuestion  getAnswer3() {return answer3;} // AskMoreIfYesQuestion("Har du drukket alkohol?", RollQuestion ("Hvornår på dagen drak du den sidste genstand?"), ComboBoxQuestion("Hvor mange genstande har du ca. drukket i løbet af dagen?", "1", "2", "3")),
     @Embedded private YesOrNoElaborateRollAnswer         internelAnswer4 = new YesOrNoElaborateRollAnswer        (); @Transient final private YesOrNoElaborateRollQuestion         answer4 = new YesOrNoElaborateRollQuestion        ("Har du sovet i løbet af dagen?"             , "Hvornår på dagen?"                                                                                                                           , internelAnswer4); public YesOrNoElaborateRollQuestion          getAnswer4() {return answer4;} // AskMoreIfYesQuestion("Har du sovet i løbet af dagen?", RollQuestion("Hvornår på dagen?"))
 
-    @Transient final private GenericQuestion<?>[] allAnswers = new GenericQuestion<?>[] {answer0, answer1, answer2, answer3, answer4};
+    private static final int ANSWER_COUNT = 5;
 
+    public SurveyEveningRow() {
+        GenericQuestion<?>[] x = new GenericQuestion<?>[] {answer0, answer1, answer2, answer3, answer4};
+        for (int i=0; i<ANSWER_COUNT; i++) {
+            allAnswers[i] = x[i];
+        };
+    }
+
+    @Transient final private GenericQuestion<?>[] allAnswers = new GenericQuestion<?>[ANSWER_COUNT];
+
+    public static Integer size() {
+        return ANSWER_COUNT;
+    };
+
+    @Override
     public GenericQuestion<?>[] getAnswers() {
         return allAnswers;
     }
-    
+
 	@Override
 	public SurveyType getType() {
 		return SurveyType.evening;
