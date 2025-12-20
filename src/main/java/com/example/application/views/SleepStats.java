@@ -262,10 +262,6 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
 
                 add(statsRow);
 
-
-
-
-
                 // Create a wrapper for centering the sleep chart
                 Div sleepChartWrapper = new Div();
                 sleepChartWrapper.setWidthFull();
