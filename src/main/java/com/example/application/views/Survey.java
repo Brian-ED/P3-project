@@ -105,8 +105,7 @@ public class Survey extends VerticalLayout implements BeforeEnterObserver {
 
         this.survey = model.initDynamicSurvey(surveyType, thisCitizen);
 
-        SurveyListener listener = new ThisListener();
-        survey.addListener(listener);
+        survey.addListener(new ThisListener());
 
         showQuestion(UI.drawUI(survey.currentQuestion()));
     }
