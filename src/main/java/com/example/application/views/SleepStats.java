@@ -440,29 +440,29 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
         // Sorts surveys by time (oldest first)
         List<AnsweredSurvey> sortedSurveys = selectedCitizen.getSurveys();
         sortedSurveys.sort((s1, s2) -> s1.getWhenAnswered().compareTo(s2.getWhenAnswered()));
-            
+
         // Groups surveys by date in a map
         Map<LocalDate, AnsweredSurvey[]> surveysByDate = new HashMap<>();
-            
+
         for (AnsweredSurvey survey : sortedSurveys) {
             LocalDate date = survey.getWhenAnswered().toLocalDate();
             AnsweredSurvey[] surveysForDate = surveysByDate.getOrDefault(date, new AnsweredSurvey[2]);
-            
+
             switch(survey.getType()){
                 case evening -> surveysForDate[0] = survey; // Morninganswer on the first index
                 case morning -> surveysForDate[1] = survey; // Eveninganswer on the second index
             }
-            
+
             surveysByDate.put(date, surveysForDate);
         }
-        
+
         // Creates a big ArrayList of smaller arrays
         List<AnsweredSurvey[]> surveyPairs = new ArrayList<>();
-        
+
         // Sorts dates (oldest first) and adds it til surveyPairs
         List<LocalDate> sortedDates = new ArrayList<>(surveysByDate.keySet());
         sortedDates.sort(LocalDate::compareTo);
-        
+
         for (LocalDate date : sortedDates) {
             surveyPairs.add(surveysByDate.get(date));
         }
