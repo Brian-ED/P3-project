@@ -200,7 +200,15 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
             .ifPresent(idParam -> {
                 try {
                     citizenId = UUID.fromString(idParam);
-                    this.selectedCitizen = model.getCitizenWithID(citizenId).orElseThrow();
+                } catch (IllegalArgumentException e) { // Invalid UUID
+                    throw new IllegalArgumentException("Invalid UUID");
+                }
+                try {
+                        this.selectedCitizen = model.getCitizenWithID(citizenId).orElseThrow();
+                    } catch (NoSuchElementException e) { // Citizen was not found in database
+                        throw new IllegalArgumentException("Citizen was not found in database");
+                    }
+
                     loadCitizenData();
 
                     List<AnsweredSurvey> surveys = this.selectedCitizen.getSurveys();
@@ -211,15 +219,15 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
                         GenericQuestion<?>[] answers = survey.getAnswers();
 
                         for (GenericQuestion<?> answer : answers) {
-                            if (answer.getMainQuestionTitle() == "Efter jeg slukkede lyset, sov jeg ca. efter:"
+                            if (answer.getMainQuestionTitle().equals("Efter jeg slukkede lyset, sov jeg ca. efter:")
                             && answer.getAnswer().getPayloadClass() == DurationPayload.class
                             ) {
                                 final Integer temp;
                                 if (maybeMinutesInBedAccumulator.isEmpty()) {
+                                    temp = 0;
+                                } else {
                                     final Integer i = maybeMinutesInBedAccumulator.orElseThrow();
                                     temp = i + ((DurationPayload)(answer.getAnswer().toPayload())).minutes();
-                                } else {
-                                    temp = 0;
                                 }
                                 maybeMinutesInBedAccumulator = Optional.of(temp);
                             }
@@ -229,7 +237,9 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
                         timeInBed = "N/A";
                     } else {
                         Integer m = maybeMinutesInBedAccumulator.orElseThrow();
-                        timeInBed = String.format("%02dt %02dm", Math.floor(m/60), Math.floor(m));
+                        int hours = m / 60;
+                        int minutes = m % 60;
+                        timeInBed = String.format("%02dt %02dm", hours, minutes);
                     }
 
                     // Stats cards
@@ -336,12 +346,6 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
                     add(surveyWrapper);
 
                     refreshGrid();
-
-                } catch (IllegalArgumentException e) { // Invalid UUID
-                    throw new IllegalArgumentException("Invalid UUID");
-                } catch (NoSuchElementException e) { // Citizen was not found in database
-                    throw new IllegalArgumentException("Citizen was not found in database");
-                }
             }
         );
     }
@@ -435,19 +439,13 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
         table.add(createTableHeader("Aftensvar"));
 
         // --- MOCK DATA ---
-        List<SleepSurveyAnswer> answers = List.of(
-            new SleepSurveyAnswer(LocalDate.of(2025, 10, 19), LocalTime.of(9, 54), LocalTime.of(22, 31)),
-            new SleepSurveyAnswer(LocalDate.of(2025, 10, 20), LocalTime.of(9, 50), LocalTime.of(22, 25)),
-            new SleepSurveyAnswer(LocalDate.of(2025, 10, 21), LocalTime.of(9, 45), LocalTime.of(22, 20)),
-            new SleepSurveyAnswer(LocalDate.of(2025, 10, 22), LocalTime.of(9, 55), LocalTime.of(22, 30)),
-            new SleepSurveyAnswer(LocalDate.of(2025, 10, 23), LocalTime.of(9, 50), LocalTime.of(22, 15))
-        );
-        // --- END MOCK DATA ---
+        List<AnsweredSurvey> answers = selectedCitizen.getSurveys();
+        System.out.println(answers);
 
-        for (SleepSurveyAnswer answer : answers) {
-            table.add(createTableCell(answer.getDate()));
-            table.add(createTableCellWithButton(answer.getMorningTime()));
-            table.add(createTableCellWithButton(answer.getEveningTime()));
+        for (AnsweredSurvey answer : answers) {
+            table.add(createTableCell(answer.getWhenAnswered().toLocalDate()));
+            table.add(createTableCellWithButton(answer.getWhenAnswered().toLocalTime()));
+            table.add(createTableCellWithButton(answer.getWhenAnswered().toLocalTime()));
         }
 
         box.add(table);
