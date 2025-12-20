@@ -38,11 +38,9 @@ import jakarta.annotation.security.RolesAllowed;
 @PageTitle("Klient Dashboard")
 public class CitizenView extends VerticalLayout {
 
-    private Model model;
-
     public CitizenView(Model model) {
         getElement().getStyle().set("background-color", "#f7f7f7ff");
-        this.model = model;
+
         // Setup user
         Citizen citizen = model.getThisCitizen(SecurityUtils.getUsername());
 
@@ -245,7 +243,6 @@ public class CitizenView extends VerticalLayout {
                     .set("margin-left", "10px");
 
                 // Add a click listener to the button
-                LocalDate currentDate = date;
                 AnsweredSurvey finalMorningSurvey = morningSurvey;
                 AnsweredSurvey finalEveningSurvey = eveningSurvey;
                 String finalMorningTime = morningTime;
