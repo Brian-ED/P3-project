@@ -1,5 +1,6 @@
 package com.example.application.model;
 
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -8,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import com.example.application.database.ClDiDB.CitizenRow;
 import com.example.application.database.ClDiDB.Survey;
+import com.example.application.database.ClDiDB.SurveyEveningRow;
+import com.example.application.database.ClDiDB.SurveyMorningRow;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 
 
@@ -89,21 +92,6 @@ public class ModelImpl implements Model {
         return advisor;
     }
 
-    private class SaveSurveyListener implements SurveyListener {
-		@Override public void currentQuestionChanged(int newIndex) {}
-		@Override public void questionAnswered(int index, AnswerPayload payload) {}
-        private final DatabaseControler db;
-
-        public SaveSurveyListener(DatabaseControler db) {
-            this.db = db;
-        }
-
-        @Override
-		public void notifySubmitted(Survey survey) {
-            db.saveSurvey(survey);
-        }
-    }
-
     @Override
     public String[] getAllAdvisorNames() {
         SleepAdvisor[] advisors = database.getAllAdvisors();
@@ -114,10 +102,33 @@ public class ModelImpl implements Model {
         return advisorNames;
     }
 
-    public DynamicSurvey initDynamicSurvey(SurveyType type, CitizenRow owner) {
-        return new DynamicSurvey(type, owner) {{
-            addListener(new SaveSurveyListener(database));
-        }};
+    @Override
+    public DynamicSurvey initDynamicSurvey(SurveyType type, Citizen owner) {
+        Survey surveyRow = switch (type) {
+            case SurveyType.morning -> new SurveyMorningRow();
+            case SurveyType.evening -> new SurveyEveningRow();
+        };
+
+        CitizenRow ownerRow = database.getCitizenRowById(owner.getID()).orElseThrow();
+        surveyRow.setOwner(ownerRow);
+
+        return new DynamicSurvey(
+            type,
+            surveyRow.getAnswers(),
+            database.getCitizenById(owner.getID()).orElseThrow(),
+            () -> {
+                ZonedDateTime now = ZonedDateTime.now();
+                surveyRow.setWhenAnswered(now);
+                System.out.println(surveyRow);
+                System.out.println(surveyRow.getAnswers()[0].getAnswer().toPayload());
+                database.saveSurvey(surveyRow);
+                AnsweredSurvey finishedSurvey = switch (type) {
+                    case SurveyType.morning -> new AnsweredMorningSurvey(surveyRow.getID(), surveyRow.getAnswers(), now);
+                    case SurveyType.evening -> new AnsweredEveningSurvey(surveyRow.getID(), surveyRow.getAnswers(), now);
+                };
+                return finishedSurvey;
+            }
+        );
     }
 
     public Citizen createCitizen(String username) {
