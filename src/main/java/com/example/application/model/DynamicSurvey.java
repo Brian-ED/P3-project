@@ -74,4 +74,8 @@ public class DynamicSurvey {
         }
         return Optional.of(submitListenerToProvideAnsweredSurvey.get());
     }
+
+    public int totalQuestions() {
+        return length;
+    }
 }
