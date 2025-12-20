@@ -30,9 +30,6 @@ public class Survey extends VerticalLayout implements BeforeEnterObserver {
     private final ProgressBar progressBar = new ProgressBar(0, 1, 0);
     private final VerticalLayout progressWrap = new VerticalLayout(progressText, progressBar);
 
-    private int totalQuestions = 1;
-
-
     DynamicSurvey survey;
 
     class ThisListener implements SurveyListener {
@@ -147,7 +144,6 @@ public class Survey extends VerticalLayout implements BeforeEnterObserver {
         this.survey = model.initDynamicSurvey(surveyType, thisCitizen);
         this.survey.addListener(new ThisListener());
 
-        totalQuestions = survey.totalQuestions();
         updateProgress(survey.currentQuestionIndex);
 
         showQuestion(UI.drawUI(survey.currentQuestion()));
