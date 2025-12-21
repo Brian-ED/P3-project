@@ -3,9 +3,13 @@ package com.example.application.views;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
@@ -438,20 +442,72 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
         table.add(createTableHeader("Morgensvar"));
         table.add(createTableHeader("Aftensvar"));
 
-        // --- MOCK DATA ---
-        List<AnsweredSurvey> answers = selectedCitizen.getSurveys();
-        System.out.println(answers);
-
-        for (AnsweredSurvey answer : answers) {
-            table.add(createTableCell(answer.getWhenAnswered().toLocalDate()));
-            table.add(createTableCellWithButton(answer.getWhenAnswered().toLocalTime()));
-            table.add(createTableCellWithButton(answer.getWhenAnswered().toLocalTime()));
+        // Sorts surveys by time (oldest first)
+        List<AnsweredSurvey> sortedSurveys = selectedCitizen.getSurveys();
+        sortedSurveys.sort((s1, s2) -> s1.getWhenAnswered().compareTo(s2.getWhenAnswered()));
+            
+        // Groups surveys by date in a map
+        Map<LocalDate, AnsweredSurvey[]> surveysByDate = new HashMap<>();
+            
+        for (AnsweredSurvey survey : sortedSurveys) {
+            LocalDate date = survey.getWhenAnswered().toLocalDate();
+            AnsweredSurvey[] surveysForDate = surveysByDate.getOrDefault(date, new AnsweredSurvey[2]);
+            
+            switch(survey.getType()){
+                case evening -> surveysForDate[0] = survey; // Morninganswer on the first index
+                case morning -> surveysForDate[1] = survey; // Eveninganswer on the second index
+            }
+            
+            surveysByDate.put(date, surveysForDate);
         }
-
+        
+        // Creates a big ArrayList of smaller arrays
+        List<AnsweredSurvey[]> surveyPairs = new ArrayList<>();
+        
+        // Sorts dates (oldest first) and adds it til surveyPairs
+        List<LocalDate> sortedDates = new ArrayList<>(surveysByDate.keySet());
+        sortedDates.sort(LocalDate::compareTo);
+        
+        for (LocalDate date : sortedDates) {
+            surveyPairs.add(surveysByDate.get(date));
+        }
+        
+        // Loop through the big arraylist
+        for (AnsweredSurvey[] surveyPair : surveyPairs) {
+            // Gets the date from either morning or eveningsurvey (if one of them exsists)
+            ZonedDateTime dateTimeForCell = null;
+            if (surveyPair[0] != null) {
+                dateTimeForCell = surveyPair[0].getWhenAnswered();
+            } else if (surveyPair[1] != null) {
+                dateTimeForCell = surveyPair[1].getWhenAnswered();
+            }
+            
+            if (dateTimeForCell != null) {
+                // Formats date
+                String date = dateTimeForCell.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                table.add(createTableCell(date));
+                
+                // Adds a cell with button for morning-survey if it exists
+                if (surveyPair[0] != null) {
+                    table.add(createTableCellWithButton(surveyPair[0].getWhenAnswered().toLocalTime()));
+                } else {
+                    // Adds empty cell if no morning-survey exists
+                    table.add(createTableCell(""));
+                }
+                
+                // Adds a cell with button for evening-survey if it exists
+                if (surveyPair[1] != null) {
+                    table.add(createTableCellWithButton(surveyPair[1].getWhenAnswered().toLocalTime()));
+                } else {
+                    // Adds empty cell if no evening-survey exists
+                    table.add(createTableCell(""));
+                }
+            }
+        }
+        
         box.add(table);
         return box;
     }
-
 
     private Span createTableHeader(String text) {
         Span header = new Span(text);
@@ -568,8 +624,6 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
         card.add(t, v);
         return card;
     }
-
-
 
     public static class SleepEntry {
         private LocalDate date;
