@@ -142,40 +142,40 @@ public class CitizenView extends VerticalLayout {
         sideBySideCards1.setSpacing(true);
         add(sideBySideCards1);
 
-        // Create the Div to see the latest morning aswers
-        Div latestMorningAnswersDiv = new Div();
-        latestMorningAnswersDiv.getStyle()
+        // Create the Div to see the survey history
+        Div latestHistoryAnswersDiv = new Div();
+        latestHistoryAnswersDiv.getStyle()
             .set("padding", "20px")
             .set("cursor", "pointer")
             .set("background-color", "lightgray")
             .set("margin-top", "1px")
             .set("border-radius", "8px")
             .set("text-align", "center");
-        latestMorningAnswersDiv.setWidth("100%");
-        H3 latestMorningH3 = new H3();
+        latestHistoryAnswersDiv.setWidth("100%");
+        H3 latestHistoryH3 = new H3();
         Span tekstHistorik = new Span("Historik");
-        latestMorningH3.add(tekstHistorik);
-        latestMorningAnswersDiv.add(latestMorningH3);
+        latestHistoryH3.add(tekstHistorik);
+        latestHistoryAnswersDiv.add(latestHistoryH3);
 
         //Listens if the "History button" is clicked
-        latestMorningAnswersDiv.addClickListener(e -> {
+        latestHistoryAnswersDiv.addClickListener(e -> {
             Dialog dialog = new Dialog();
-            Button morningDialogButton = new Button("Luk", click -> dialog.close());
-            HorizontalLayout morningHorizontal = new HorizontalLayout();
-            VerticalLayout leftSideMorning = new VerticalLayout();
-            H3 h3Morning = new H3("Historik:");
-            h3Morning.getStyle().set("color", "darkblue");
-            leftSideMorning.setSpacing(false);
-            leftSideMorning.setPadding(false);
-            leftSideMorning.add(h3Morning);
+            Button historyDialogButton = new Button("Luk", click -> dialog.close());
+            HorizontalLayout historyHorizontal = new HorizontalLayout();
+            VerticalLayout leftSideHistory = new VerticalLayout();
+            H3 h3History = new H3("Historik:");
+            h3History.getStyle().set("color", "darkblue");
+            leftSideHistory.setSpacing(false);
+            leftSideHistory.setPadding(false);
+            leftSideHistory.add(h3History);
 
-            morningHorizontal.setPadding(true);
-            morningHorizontal.setWidthFull();
-            morningHorizontal.setJustifyContentMode(JustifyContentMode.BETWEEN);
-            morningHorizontal.setAlignItems(Alignment.CENTER);
-            morningHorizontal.add(leftSideMorning, morningDialogButton);
-            morningHorizontal.getStyle().set("margin-top", "-30px");
-            morningDialogButton.getStyle()
+            historyHorizontal.setPadding(true);
+            historyHorizontal.setWidthFull();
+            historyHorizontal.setJustifyContentMode(JustifyContentMode.BETWEEN);
+            historyHorizontal.setAlignItems(Alignment.CENTER);
+            historyHorizontal.add(leftSideHistory, historyDialogButton);
+            historyHorizontal.getStyle().set("margin-top", "-30px");
+            historyDialogButton.getStyle()
                 .set("background-color","darkblue")
                 .set("color","white")
                 .set("cursor", "pointer");
@@ -449,12 +449,12 @@ public class CitizenView extends VerticalLayout {
                 listLayout.add(noDataSpan);
             }
 
-            dialog.add(morningHorizontal, listLayout);
+            dialog.add(historyHorizontal, listLayout);
             dialog.open();
         });
 
         // Place latest morning and latest evening answer side by side
-        HorizontalLayout sideBySideCards2 = new HorizontalLayout(latestMorningAnswersDiv);
+        HorizontalLayout sideBySideCards2 = new HorizontalLayout(latestHistoryAnswersDiv);
         sideBySideCards2.setWidthFull();
         sideBySideCards2.setSpacing(true);
 
