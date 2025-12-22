@@ -25,15 +25,15 @@ public sealed interface AnswerPayload permits
     YesOrNoElaborateComboboxRollPayload,
     YesOrNoElaborateRollComboboxPayload {
 
-    public record YesOrNoPayload                      (boolean yesNo                                                    ) implements AnswerPayload {}
-    public record YesOrNoElaborateComboboxPayload     (boolean yesNo, Short whichIsSelected                             ) implements AnswerPayload {}
+    public record YesOrNoPayload                      (Boolean yesNo                                                    ) implements AnswerPayload {}
+    public record YesOrNoElaborateComboboxPayload     (Boolean yesNo, Short whichIsSelected                             ) implements AnswerPayload {}
     public record RollPayload                         (ZonedDateTime timestamp                                          ) implements AnswerPayload {}
     public record ComboBoxPayload                     (Short whichIsSelected                                            ) implements AnswerPayload {}
     public record DurationPayload                     (Integer minutes                                                  ) implements AnswerPayload {}
     public record TextFieldPayload                    (String text                                                      ) implements AnswerPayload {}
-    public record YesOrNoElaborateRollRollPayload     (boolean yesNo, ZonedDateTime timestamp1, ZonedDateTime timestamp2) implements AnswerPayload {}
-    public record YesOrNoElaborateRollPayload         (boolean yesNo, ZonedDateTime timestamp                           ) implements AnswerPayload {}
-    public record YesOrNoElaborateComboboxRollPayload (boolean yesNo, Short whichIsSelected, ZonedDateTime timestamp    ) implements AnswerPayload {}
-    public record YesOrNoElaborateRollComboboxPayload (boolean yesNo, ZonedDateTime timestamp, Short whichIsSelected    ) implements AnswerPayload {}
+    public record YesOrNoElaborateRollRollPayload     (Boolean yesNo, ZonedDateTime timestamp1, ZonedDateTime timestamp2) implements AnswerPayload {}
+    public record YesOrNoElaborateRollPayload         (Boolean yesNo, ZonedDateTime timestamp                           ) implements AnswerPayload {}
+    public record YesOrNoElaborateComboboxRollPayload (Boolean yesNo, Short whichIsSelected, ZonedDateTime timestamp    ) implements AnswerPayload {}
+    public record YesOrNoElaborateRollComboboxPayload (Boolean yesNo, ZonedDateTime timestamp, Short whichIsSelected    ) implements AnswerPayload {}
 
 }

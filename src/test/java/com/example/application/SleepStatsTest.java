@@ -255,4 +255,3 @@ public void testStatCardsVisible() {
         context.close();
     }
 }
-}

@@ -1,27 +1,27 @@
 package com.example.application.model;
 
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 
-import com.example.application.database.ClDiDB.CitizenRow;
-import com.example.application.database.ClDiDB.Survey;
-import com.example.application.database.ClDiDB.SurveyEveningRow;
-import com.example.application.database.ClDiDB.SurveyMorningRow;
 import com.example.application.database.ClDiDB.Questions.GenericQuestion;
 
 public class DynamicSurvey {
 
     public Integer currentQuestionIndex = 0;
-    public GenericQuestion<?> currentQuestion() {return survey.getAnswers()[currentQuestionIndex];};
+    public GenericQuestion<?> currentQuestion() {
+        return questions[currentQuestionIndex];
+    };
     public Boolean hasCurrentQuestionBeenAnswered() {return hasAnswered[currentQuestionIndex];};
     SurveyType surveyType;
-    private final Survey survey;
-    private final Boolean[] hasAnswered;
+    private final boolean[] hasAnswered;
     private final Integer length;
     private final SurveyType type;
+    private final GenericQuestion<?>[] questions;
 
     private final List<SurveyListener> listeners = new ArrayList<>();
+    private final Supplier<AnsweredSurvey> submitListenerToProvideAnsweredSurvey;
 
     public void addListener(SurveyListener l) {
         listeners.add(l);
@@ -38,22 +38,16 @@ public class DynamicSurvey {
         }
     }
 
-    private void notifyQuestionAnswered(int index, AnswerPayload payload) {
-        for (var l : listeners) {
-            l.questionAnswered(index, payload);
-        }
-    }
-
-    public DynamicSurvey(SurveyType type, CitizenRow owner) {
+    public DynamicSurvey(SurveyType type, GenericQuestion<?>[] questions, Citizen owner, Supplier<AnsweredSurvey> submitListenerToProvideAnsweredSurvey) {
+        this.submitListenerToProvideAnsweredSurvey = submitListenerToProvideAnsweredSurvey;
         this.type = type;
-        this.survey = switch (type) {
-            case evening -> new SurveyEveningRow();
-            case morning -> new SurveyMorningRow();
-        };
-        survey.setOwner(owner);
-
-        this.length = survey.getAnswers().length;
-        this.hasAnswered = new Boolean[length];
+        this.questions = questions;
+        this.length = questions.length;
+        this.hasAnswered = new boolean[length];
+        for (int i=0; i<questions.length; i++) {
+            final int index = i;
+            questions[i].getAnswer().addListener(a->{hasAnswered[index] = true;});
+        }
     }
 
     public void nextQuestion() {
@@ -73,13 +67,15 @@ public class DynamicSurvey {
     public SurveyType getType() {
         return type;
     }
-    public Boolean submitAnswers() {
-        survey.setWhenAnswered(ZonedDateTime.now());
 
-        for(boolean b : hasAnswered) if(!b) return false;
-        for (var i : listeners) {
-            i.notifySubmitted(survey);
+    public Optional<AnsweredSurvey> submitAnswers() {
+        for(boolean b : hasAnswered) {
+            if(!b) return Optional.empty();
         }
-        return true;
+        return Optional.of(submitListenerToProvideAnsweredSurvey.get());
+    }
+
+    public int totalQuestions() {
+        return length;
     }
 }

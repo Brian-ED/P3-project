@@ -6,6 +6,7 @@ import com.example.application.model.AnswerPayload.RollPayload;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.NotNull;
 
 @Embeddable
 public final class RollAnswer extends Answer<RollPayload> {
@@ -13,6 +14,7 @@ public final class RollAnswer extends Answer<RollPayload> {
         super(RollPayload.class);
     }
 
+    @NotNull
     @Column(nullable = false)
     private ZonedDateTime timestamp;
 

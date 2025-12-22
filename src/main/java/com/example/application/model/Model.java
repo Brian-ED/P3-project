@@ -1,15 +1,18 @@
 package com.example.application.model;
 
 import java.util.Optional;
-
-import com.example.application.database.ClDiDB.CitizenRow;
+import java.util.UUID;
 
 public interface Model {
-    Citizen initAsCitizen(String UserName);
-    DynamicSurvey initDynamicSurvey(SurveyType type, CitizenRow owner);
+    Citizen initAsCitizen(String userName);
+    Citizen createCitizen(String userName);
+    SleepAdvisor initAsAdvisor(String userName);
+    Optional<Citizen> getCitizenWithID(UUID userID);
+    DynamicSurvey initDynamicSurvey(SurveyType type, Citizen owner);
     Optional<User> getUser();
     Optional<Citizen> getCitizen();
-    Optional<UserType> getUserType();
     Citizen getThisCitizen(String username);
     SleepAdvisor getThisAdvisor(String username);
+    String[] getAllAdvisorNames();
+    void setAssignedAdvisorByName(Citizen citizen, String advisorName);
 }

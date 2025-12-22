@@ -1,10 +1,29 @@
 package com.example.application.views;
 
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.UUID;
 
+import com.example.application.database.ClDiDB.Answers.DurationAnswer;
+import com.example.application.database.ClDiDB.Questions.GenericQuestion;
+import com.example.application.model.AnswerPayload.DurationPayload;
+import com.example.application.model.AnsweredEveningSurvey;
+import com.example.application.model.AnsweredMorningSurvey;
+import com.example.application.model.AnsweredSurvey;
+import com.example.application.model.Citizen;
+import com.example.application.model.Model;
+import com.example.application.security.SecurityUtils;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -13,11 +32,11 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.flow.component.datepicker.DatePicker;
-
 
 import jakarta.annotation.security.RolesAllowed;
 
@@ -25,15 +44,38 @@ import jakarta.annotation.security.RolesAllowed;
 
 @JsModule("./SleepStats.js")
 @JavaScript("https://cdn.jsdelivr.net/npm/chart.js")
-@Route(value = "sleep-stats", layout = MainLayout.class)
+@Route(value = "sleep-stats/:citizenId", layout = MainLayout.class)
 @PageTitle("Søvnstatistik")
 @RolesAllowed({"ADVISOR", "ADMIN"})
-public class SleepStats extends VerticalLayout {
+public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
+    private UUID citizenId;
+    private Citizen selectedCitizen;
+
+    private Model model;
 
     private final Grid<SleepEntry> grid = new Grid<>(SleepEntry.class, false);
     private final List<SleepEntry> entries = new ArrayList<>();
+    // Mock stats for initial display
+    private SleepStatsData stats = new SleepStatsData(
+        Duration.ofMinutes(555),
+        Duration.ofMinutes(481),
+        0.90,
+        Duration.ofMinutes(15),
+        Duration.ofMinutes(40),
+        4.0
+    );
+    private Div createSurveyAnswersBox() {
+        return createSurveyAnswersBox(UUID.randomUUID()); // calls main method with dummy UUID
+    }
 
-    public SleepStats() {
+    public SleepStats(Model model) {
+        this.model = model;
+        model.initAsAdvisor(SecurityUtils.getUsername());
+        setSizeFull();
+        setPadding(true);
+        setSpacing(true);
+        getElement().getStyle().set("background-color", "#f7f7f7ff");
+
         setSizeFull();
         setPadding(true);
         setSpacing(true);
@@ -74,113 +116,294 @@ public class SleepStats extends VerticalLayout {
         });
         controls.add(startDate, endDate, filterButton);
         add(controls);
+    }
+
+    public class SleepStatsData {
+        private Duration tib;   // Time in Bed
+        private Duration tst;   // Total Sleep Time
+        private double sleepEfficiency;
+        private Duration sol;   // Sleep Onset Latency
+        private Duration waso;  // Wake After Sleep Onset
+        private double morningFeeling;
+
+        // Constructor
+        public SleepStatsData(Duration tib, Duration tst, double sleepEfficiency,
+                            Duration sol, Duration waso, double morningFeeling) {
+            this.tib = tib;
+            this.tst = tst;
+            this.sleepEfficiency = sleepEfficiency;
+            this.sol = sol;
+            this.waso = waso;
+            this.morningFeeling = morningFeeling;
+        }
+
+        // Getters
+        public Duration getTib() { return tib; }
+        public Duration getTst() { return tst; }
+        public double getSleepEfficiency() { return sleepEfficiency; }
+        public Duration getSol() { return sol; }
+        public Duration getWaso() { return waso; }
+        public double getMorningFeeling() { return morningFeeling; }
+    }
 
 
-        // Stats cards
+
+
+    private String formatDuration(Duration d) {
+        long hours = d.toHours();
+        long minutes = d.minusHours(hours).toMinutes();
+        return hours > 0
+                ? hours + "t " + minutes + "m"
+                : minutes + "m";
+    }
+
+    private String formatPercentage(double value) {
+        return Math.round(value * 100) + "%";
+    }
+
+    private String formatRating(double rating) {
+        return String.format("%.1f/5", rating);
+    }
+
+
+
+    public final class Formatters {
+
+        private Formatters() {}
+
+        public static final DateTimeFormatter DATE_DK =
+                DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        public static final DateTimeFormatter TIME =
+                DateTimeFormatter.ofPattern("HH:mm");
+
+        public static final DateTimeFormatter DATE_TIME =
+                DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    }
+
+    public class SleepSurveyAnswer {
+        private LocalDate date;
+        private LocalTime morningTime;
+        private LocalTime eveningTime;
+
+        public SleepSurveyAnswer(LocalDate date, LocalTime morningTime, LocalTime eveningTime) {
+            this.date = date;
+            this.morningTime = morningTime;
+            this.eveningTime = eveningTime;
+        }
+
+        public LocalDate getDate() { return date; }
+        public LocalTime getMorningTime() { return morningTime; }
+        public LocalTime getEveningTime() { return eveningTime; }
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        event.getRouteParameters().get("citizenId")
+            .ifPresent(idParam -> {
+                try {
+                    citizenId = UUID.fromString(idParam);
+                } catch (IllegalArgumentException e) { // Invalid UUID
+                    throw new IllegalArgumentException("Invalid UUID");
+                }
+                try {
+                    this.selectedCitizen = model.getCitizenWithID(citizenId).orElseThrow();
+                } catch (NoSuchElementException e) { // Citizen was not found in database
+                    throw new IllegalArgumentException("Citizen was not found in database");
+                }
+
+                loadCitizenData();
+
+                List<AnsweredSurvey> surveys = this.selectedCitizen.getSurveys();
+                final String timeInBed;
+                Optional<Integer> maybeMinutesInBedAccumulator = Optional.empty();
+
+                for (AnsweredSurvey survey : surveys) {
+                    GenericQuestion<?>[] answers = survey.getAnswers();
+
+                    for (GenericQuestion<?> answer : answers) {
+                        if (answer.getMainQuestionTitle().equals("Efter jeg slukkede lyset, sov jeg ca. efter:")
+                        && answer.getAnswer().getPayloadClass() == DurationPayload.class
+                        ) {
+                            final Integer temp;
+                            if (maybeMinutesInBedAccumulator.isEmpty()) {
+                                temp = 0;
+                            } else {
+                                final Integer i = maybeMinutesInBedAccumulator.orElseThrow();
+                                temp = i + ((DurationPayload)(answer.getAnswer().toPayload())).minutes();
+                            }
+                            maybeMinutesInBedAccumulator = Optional.of(temp);
+                        }
+                    }
+                }
+                if (maybeMinutesInBedAccumulator.isEmpty()) {
+                    timeInBed = "N/A";
+                } else {
+                    Integer m = maybeMinutesInBedAccumulator.orElseThrow();
+                    int hours = m / 60;
+                    int minutes = m % 60;
+                    timeInBed = String.format("%02dt %02dm", hours, minutes);
+                }
+
+                // Stats cards
+                HorizontalLayout statsRow = new HorizontalLayout();
+                statsRow.setWidthFull();
+                statsRow.setSpacing(true);
+
+                statsRow.add(
+                    createStatCard("TIB - Tid i seng", formatDuration(stats.getTib())),
+                    createStatCard("TST - Total Søvntid", formatDuration(stats.getTst())),
+                    createStatCard("Søvneffektivitet", formatPercentage(stats.getSleepEfficiency())),
+                    createStatCard("SOL - Indsovningstid", formatDuration(stats.getSol())),
+                    createStatCard("WASO - Opvågninger", formatDuration(stats.getWaso())),
+                    createStatCard("Morgenfølelse", formatRating(stats.getMorningFeeling()))
+                );
+
+                add(statsRow);
+
+                // Create a wrapper for centering the sleep chart
+                Div sleepChartWrapper = new Div();
+                sleepChartWrapper.setWidthFull();
+                sleepChartWrapper.getStyle()
+                    .set("display", "flex")
+                    .set("justify-content", "center");
+
+                // Create the sleep chart container
+                Div chartContainer = new Div();
+                chartContainer.setId("sleepChartContainer");
+                chartContainer.setWidth("90%"); // Adjust this percentage (e.g., 80%, 85%, 90%)
+                chartContainer.setHeight("400px");
+                chartContainer.getStyle()
+                    .set("background-color", "white")
+                    .set("border-radius", "12px")
+                    .set("border", "1px solid #e0e0e0")
+                    .set("padding", "20px")
+                    .set("box-shadow", "0 2px 4px rgba(0,0,0,0.05)");
+
+                sleepChartWrapper.add(chartContainer);
+                add(sleepChartWrapper);
+
+                addAttachListener(event2 -> {
+                    getUI().ifPresent(ui -> {
+                        ui.getPage().executeJs(
+                            "console.log('Attempting to call createSleepChart...'); " +
+                            "console.log('window.createSleepChart exists?', typeof window.createSleepChart); " +
+                            "if (window.createSleepChart) { " +
+                            "  window.createSleepChart($0); " +
+                            "} else { " +
+                            "  console.error('createSleepChart not found on window'); " +
+                            "}",
+                            "sleepChartContainer"
+                        );
+                    });
+                });
+
+
+
+
+                // Create a wrapper for centering the effectiveness chart
+                Div chartWrapper = new Div();
+                chartWrapper.setWidthFull();
+                chartWrapper.getStyle()
+                    .set("display", "flex")
+                    .set("justify-content", "center")
+                    .set("margin-top", "20px"); // Add spacing between charts
+
+                // Create the effectiveness chart container
+                Div effectivenessChartContainer = new Div();
+                effectivenessChartContainer.setId("effectivenessChartContainer");
+                effectivenessChartContainer.setWidth("90%");
+                effectivenessChartContainer.setHeight("400px");
+                effectivenessChartContainer.getStyle()
+                    .set("background-color", "white")
+                    .set("border-radius", "12px")
+                    .set("border", "1px solid #e0e0e0")
+                    .set("padding", "20px")
+                    .set("box-shadow", "0 2px 4px rgba(0,0,0,0.05)");
+
+                chartWrapper.add(effectivenessChartContainer);
+                add(chartWrapper);
+
+                // Call the chart on attach
+                addAttachListener(event2 -> {
+                    getUI().ifPresent(ui -> ui.getPage().executeJs(
+                        "if (window.createEffectivenessChart) { window.createEffectivenessChart($0); }",
+                        "effectivenessChartContainer"
+                    ));
+                });
+
+                // Create a wrapper for centering the survey answers box
+                Div surveyWrapper = new Div();
+                surveyWrapper.setWidthFull();
+                surveyWrapper.getStyle()
+                    .set("display", "flex")
+                    .set("justify-content", "center")
+                    .set("margin-top", "20px");
+                Div surveyBox = createSurveyAnswersBox();
+                // Sleep Survey Answers Box
+                surveyWrapper.add(surveyBox);
+                add(surveyWrapper);
+
+                refreshGrid();
+            }
+        );
+    }
+
+    private void loadCitizenData() {
+
+        // Load sleep entries for grid
+        this.entries.clear();
+
+
+        List<SleepEntry> entries = new ArrayList<>();
+        for (AnsweredSurvey s : selectedCitizen.getSurveys()) {
+            switch (s) {
+
+                case AnsweredMorningSurvey m ->
+                    entries.add(new SleepEntry(
+                        m.getWhenAnswered().toLocalDate(),
+                        ((DurationAnswer)(m.getAnswers()[4].getAnswer())).getAnswerInHours()
+                    ));
+
+                case AnsweredEveningSurvey e ->
+                    entries.add(new SleepEntry(
+                        e.getWhenAnswered().toLocalDate(),
+                        0.0 // or another relevant field if available
+                    ));
+            }
+        }
+
+        entries.sort((a, b) -> a.getDate().compareTo(b.getDate()));
+
+        this.entries.addAll(entries);
+        refreshGrid();
+
+        // Load dynamic stats from DB
+        //SleepStatsData stats = db.getSleepStatsForCitizen(citizen.getId());
+
+        // Update the stats row
         HorizontalLayout statsRow = new HorizontalLayout();
         statsRow.setWidthFull();
         statsRow.setSpacing(true);
-        statsRow.add(createStatCard("TIB - Tid i seng", " 9t 15m"),
-                     createStatCard("TST - Total Søvntid", " 8t 1m"),
-                     createStatCard("søvneffektivitet", " 90%"),
-                     createStatCard("SOL - Indsovningstid", " 15m"),
-                     createStatCard("WASO - Opvågninger" , " 40m"),
-                     createStatCard("Morgenfølelse", " 4.0/5")
-                    );
 
-        add(statsRow);
+        statsRow.add(
+            createStatCard("TIB - Tid i seng", formatDuration(stats.getTib())),
+            createStatCard("TST - Total Søvntid", formatDuration(stats.getTst())),
+            createStatCard("Søvneffektivitet", formatPercentage(stats.getSleepEfficiency())),
+            createStatCard("SOL - Indsovningstid", formatDuration(stats.getSol())),
+            createStatCard("WASO - Opvågninger", formatDuration(stats.getWaso())),
+            createStatCard("Morgenfølelse", formatRating(stats.getMorningFeeling()))
+        );
 
+        addComponentAtIndex(1, statsRow); // Insert below breadcrumbs
 
+        // Load survey answers dynamically
+        Div surveyBox = createSurveyAnswersBox(selectedCitizen.getID());
 
-
-        // Create a wrapper for centering the sleep chart
-        Div sleepChartWrapper = new Div();
-        sleepChartWrapper.setWidthFull();
-        sleepChartWrapper.getStyle()
-            .set("display", "flex")
-            .set("justify-content", "center");
-
-        // Create the sleep chart container
-        Div chartContainer = new Div();
-        chartContainer.setId("sleepChartContainer");
-        chartContainer.setWidth("90%"); // Adjust this percentage (e.g., 80%, 85%, 90%)
-        chartContainer.setHeight("400px");
-        chartContainer.getStyle()
-            .set("background-color", "white")
-            .set("border-radius", "12px")
-            .set("border", "1px solid #e0e0e0")
-            .set("padding", "20px")
-            .set("box-shadow", "0 2px 4px rgba(0,0,0,0.05)");
-
-        sleepChartWrapper.add(chartContainer);
-        add(sleepChartWrapper);
-
-        addAttachListener(event -> {
-            getUI().ifPresent(ui -> {
-                ui.getPage().executeJs(
-                    "console.log('Attempting to call createSleepChart...'); " +
-                    "console.log('window.createSleepChart exists?', typeof window.createSleepChart); " +
-                    "if (window.createSleepChart) { " +
-                    "  window.createSleepChart($0); " +
-                    "} else { " +
-                    "  console.error('createSleepChart not found on window'); " +
-                    "}",
-                    "sleepChartContainer"
-                );
-            });
-        });
-
-
-
-
-        // Create a wrapper for centering the effectiveness chart
-        Div chartWrapper = new Div();
-        chartWrapper.setWidthFull();
-        chartWrapper.getStyle()
-            .set("display", "flex")
-            .set("justify-content", "center")
-            .set("margin-top", "20px"); // Add spacing between charts
-
-        // Create the effectiveness chart container
-        Div effectivenessChartContainer = new Div();
-        effectivenessChartContainer.setId("effectivenessChartContainer");
-        effectivenessChartContainer.setWidth("90%");
-        effectivenessChartContainer.setHeight("400px");
-        effectivenessChartContainer.getStyle()
-            .set("background-color", "white")
-            .set("border-radius", "12px")
-            .set("border", "1px solid #e0e0e0")
-            .set("padding", "20px")
-            .set("box-shadow", "0 2px 4px rgba(0,0,0,0.05)");
-
-        chartWrapper.add(effectivenessChartContainer);
-        add(chartWrapper);
-
-        // Call the chart on attach
-        addAttachListener(event -> {
-            getUI().ifPresent(ui -> ui.getPage().executeJs(
-                "if (window.createEffectivenessChart) { window.createEffectivenessChart($0); }",
-                "effectivenessChartContainer"
-            ));
-        });
-
-        // Create a wrapper for centering the survey answers box
-        Div surveyWrapper = new Div();
-        surveyWrapper.setWidthFull();
-        surveyWrapper.getStyle()
-            .set("display", "flex")
-            .set("justify-content", "center")
-            .set("margin-top", "20px");
-
-        // Sleep Survey Answers Box
-        Div surveyBox = createSurveyAnswersBox();
-        surveyWrapper.add(surveyBox);
-        add(surveyWrapper);
-
-        refreshGrid();
+        addComponentAtIndex(3, surveyBox); // Adjust index based on your layout
     }
 
-     private Div createSurveyAnswersBox() {
+    private Div createSurveyAnswersBox(UUID citizenId) {
         Div box = new Div();
         box.setWidth("90%");
         box.setHeight("400px");
@@ -214,51 +437,67 @@ public class SleepStats extends VerticalLayout {
         table.add(createTableHeader("Morgensvar"));
         table.add(createTableHeader("Aftensvar"));
 
-        // Sample data rows
-        table.add(createTableCell("19/10/2025"));
-        table.add(createTableCellWithButton("9:54"));
-        table.add(createTableCellWithButton("22:31"));
+        // Sorts surveys by time (oldest first)
+        List<AnsweredSurvey> sortedSurveys = selectedCitizen.getSurveys();
+        sortedSurveys.sort((s1, s2) -> s1.getWhenAnswered().compareTo(s2.getWhenAnswered()));
 
-        table.add(createTableCell("20/10/2025"));
-        table.add(createTableCellWithButton("9:11"));
-        table.add(createTableCellWithButton("22:28"));
+        // Groups surveys by date in a map
+        Map<LocalDate, AnsweredSurvey[]> surveysByDate = new HashMap<>();
 
-        table.add(createTableCell("21/10/2025"));
-        table.add(createTableCellWithButton("9:32"));
-        table.add(createTableCellWithButton("22:53"));
+        for (AnsweredSurvey survey : sortedSurveys) {
+            LocalDate date = survey.getWhenAnswered().toLocalDate();
+            AnsweredSurvey[] surveysForDate = surveysByDate.getOrDefault(date, new AnsweredSurvey[2]);
 
-          table.add(createTableCell("21/10/2025"));
-        table.add(createTableCellWithButton("9:32"));
-        table.add(createTableCellWithButton("22:53"));
+            switch(survey.getType()){
+                case evening -> surveysForDate[0] = survey; // Morninganswer on the first index
+                case morning -> surveysForDate[1] = survey; // Eveninganswer on the second index
+            }
 
-          table.add(createTableCell("21/10/2025"));
-        table.add(createTableCellWithButton("9:32"));
-        table.add(createTableCellWithButton("22:53"));
+            surveysByDate.put(date, surveysForDate);
+        }
 
-          table.add(createTableCell("21/10/2025"));
-        table.add(createTableCellWithButton("9:32"));
-        table.add(createTableCellWithButton("22:53"));
+        // Creates a big ArrayList of smaller arrays
+        List<AnsweredSurvey[]> surveyPairs = new ArrayList<>();
 
-          table.add(createTableCell("21/10/2025"));
-        table.add(createTableCellWithButton("9:32"));
-        table.add(createTableCellWithButton("22:53"));
+        // Sorts dates (oldest first) and adds it til surveyPairs
+        List<LocalDate> sortedDates = new ArrayList<>(surveysByDate.keySet());
+        sortedDates.sort(LocalDate::compareTo);
 
-          table.add(createTableCell("21/10/2025"));
-        table.add(createTableCellWithButton("9:32"));
-        table.add(createTableCellWithButton("22:53"));
+        for (LocalDate date : sortedDates) {
+            surveyPairs.add(surveysByDate.get(date));
+        }
 
-          table.add(createTableCell("21/10/2025"));
-        table.add(createTableCellWithButton("9:32"));
-        table.add(createTableCellWithButton("22:53"));
+        // Loop through the big arraylist
+        for (AnsweredSurvey[] surveyPair : surveyPairs) {
+            // Gets the date from either morning or eveningsurvey (if one of them exsists)
+            ZonedDateTime dateTimeForCell = null;
+            if (surveyPair[0] != null) {
+                dateTimeForCell = surveyPair[0].getWhenAnswered();
+            } else if (surveyPair[1] != null) {
+                dateTimeForCell = surveyPair[1].getWhenAnswered();
+            }
 
-          table.add(createTableCell("21/10/2025"));
-        table.add(createTableCellWithButton("9:32"));
-        table.add(createTableCellWithButton("22:53"));
+            if (dateTimeForCell != null) {
+                // Formats date
+                table.add(createTableCell(dateTimeForCell.toLocalDate()));
 
-          table.add(createTableCell("21/10/2025"));
-        table.add(createTableCellWithButton("9:32"));
-        table.add(createTableCellWithButton("22:53"));
+                // Adds a cell with button for morning-survey if it exists
+                if (surveyPair[0] != null) {
+                    table.add(createTableCellWithButton(surveyPair[0].getWhenAnswered().toLocalTime()));
+                } else {
+                    // Adds empty cell if no morning-survey exists
+                    table.add(createTableCell(""));
+                }
 
+                // Adds a cell with button for evening-survey if it exists
+                if (surveyPair[1] != null) {
+                    table.add(createTableCellWithButton(surveyPair[1].getWhenAnswered().toLocalTime()));
+                } else {
+                    // Adds empty cell if no evening-survey exists
+                    table.add(createTableCell(""));
+                }
+            }
+        }
 
         box.add(table);
         return box;
@@ -279,14 +518,18 @@ public class SleepStats extends VerticalLayout {
         return cell;
     }
 
-    private HorizontalLayout createTableCellWithButton(String time) {
+    private Span createTableCell(LocalDate date) {
+        return createTableCell(date.format(Formatters.DATE_DK));
+    }
+
+    private HorizontalLayout createTableCellWithButton(LocalTime time) {
         HorizontalLayout cell = new HorizontalLayout();
         cell.setSpacing(true);
         cell.getStyle()
             .set("align-items", "center")
             .set("gap", "8px");
 
-        Span timeText = new Span(time);
+        Span timeText = new Span(time.format(Formatters.TIME));
         timeText.getStyle().set("color", "#475569");
 
         Button viewButton = new Button("Se svar");
@@ -299,21 +542,22 @@ public class SleepStats extends VerticalLayout {
             .set("font-size", "12px")
             .set("cursor", "pointer");
 
-        viewButton.addClickListener(e -> {
-            // Handle view button click - show survey details dialog
-            showSurveyDetails(time);
-        });
+        viewButton.addClickListener(e -> showSurveyDetails(time));
 
         cell.add(timeText, viewButton);
         return cell;
     }
 
-    private void showSurveyDetails(String time) {
+    private void showSurveyDetails(LocalTime time) {
         Dialog dialog = new Dialog();
-        dialog.setHeaderTitle("Søvnundersøgelse Svar - " + time);
+
+        String formattedTime = time.format(Formatters.TIME);
+        dialog.setHeaderTitle("Søvnundersøgelse Svar - " + formattedTime);
 
         VerticalLayout content = new VerticalLayout();
-        content.add(new Span("Survey details for " + time + " will be displayed here."));
+        content.add(new Span(
+            "Survey details for " + formattedTime + " will be displayed here."
+        ));
 
         dialog.add(content);
 
@@ -322,6 +566,7 @@ public class SleepStats extends VerticalLayout {
 
         dialog.open();
     }
+
 
     private void applyDateFilter(LocalDate start, LocalDate end) {
         if (start == null || end == null) {
@@ -373,8 +618,6 @@ public class SleepStats extends VerticalLayout {
         card.add(t, v);
         return card;
     }
-
-
 
     public static class SleepEntry {
         private LocalDate date;

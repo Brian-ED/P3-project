@@ -68,10 +68,10 @@ Realized one table for surveyAnswers was amazing, and that I am overthinking the
 @MappedSuperclass
 class Answer {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(nullable = false)
-    private Long id;
+    @GeneratedValue
+    private UUID id;
 
+    @NotNull
     @Column(nullable = false)
     private Citizen answerer;
 

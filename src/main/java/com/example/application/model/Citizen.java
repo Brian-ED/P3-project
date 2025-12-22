@@ -1,85 +1,58 @@
 package com.example.application.model;
 
-import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.UUID;
 
-import com.example.application.database.ClDiDB.AdvisorRow;
-import com.example.application.database.ClDiDB.CitizenRow;
-import com.example.application.database.ClDiDB.SurveyEveningRow;
-import com.example.application.database.ClDiDB.SurveyMorningRow;
+public class Citizen implements User {
 
-// ChatGPT generated class
-class EventSource<T> {
-    public static class Token {}
-    private final Map<Token, Function<T,Void>> listeners = new HashMap<>();
+    public static class CitizenListenerToken {}
+    private final Map<CitizenListenerToken, Runnable> listeners = new HashMap<>();
 
-    public Token addListener(Function<T,Void> listener) {
-        Token t = new Token();
+    public CitizenListenerToken addUpdateListener(Runnable listener) {
+        CitizenListenerToken t = new CitizenListenerToken();
         listeners.put(t, listener);
         return t;
     }
 
-    public void removeListener(Token token) {
+    public void removeUpdateListener(CitizenListenerToken token) {
         listeners.remove(token);
     }
 
-    public void fire(T value) {
-        for (var entry : listeners.entrySet()) {
-            entry.getValue().apply(value);
+    private void sendUpdateNotification() {
+        for (var listener : listeners.values()) {
+            listener.run();
         }
     }
-}
 
-
-public class Citizen implements User {
-    private final CitizenRow row;
-    public Citizen(CitizenRow citizenData) {
-        List<SurveyMorningRow> mornings = citizenData.getMorningSurveys();
-        List<SurveyEveningRow> evenings = citizenData.getEveningSurveys();
-        AnsweredSurvey[] answeredSurveys = new AnsweredSurvey[mornings.size()+evenings.size()];
-        for (int i = 0; i<mornings.size(); i++) {
-            SurveyMorningRow m = mornings.get(i);
-            answeredSurveys[i] = new AnsweredSurvey(m.getAnswers(), SurveyType.morning, m.getWhenAnswered());
-        }
-        for (int i = 0; i<evenings.size(); i++)  {
-            SurveyEveningRow e = evenings.get(i);
-            answeredSurveys[mornings.size() + i] = new AnsweredSurvey(e.getAnswers(), SurveyType.morning, e.getWhenAnswered());
-        }
-        this.row = citizenData;
-        this.fullName = citizenData.getFullName();
+    public Citizen(UUID id, String fullName, List<AnsweredSurvey> answeredSurveys, Optional<SleepAdvisor> assignedAdvisor) {
+        this.fullName = fullName;
+        this.id = id;
         this.answeredSurveys = answeredSurveys;
         this.assignedAdvisor = Optional.empty();
-        this.currentSurveyMorning = new DynamicSurvey(SurveyType.morning, citizenData);
-        this.currentSurveyEvening = new DynamicSurvey(SurveyType.evening, citizenData);
     }
 
-
-    private String fullName;
-    private Long id;
-    private final DynamicSurvey currentSurveyMorning;
-    private final DynamicSurvey currentSurveyEvening;
-    DynamicSurvey getCurrentSurveyMorning() {return currentSurveyMorning;}
-    DynamicSurvey getCurrentSurveyEvening() {return currentSurveyEvening;}
+    private final String fullName;
+    private final UUID id;
 
     private Optional<SleepAdvisor> assignedAdvisor;
-    private AnsweredSurvey[] answeredSurveys;
+    private List<AnsweredSurvey> answeredSurveys;
 
-    private EventSource<Integer> userID = new EventSource<>();
-    public EventSource.Token addLoginListener(Function<Integer,Void> listener) {return userID.addListener(listener);}
-    public void removeLoginListener(EventSource.Token token) {userID.removeListener(token);}
-    public void userLoggedIn(Integer value) {userID.fire(value);}
-
-    /* TODO */ public void seeAnsweredSurvey() {}
-    /* TODO */ public void answerMorningSurvey() {}
-    /* TODO */ public void answerEveningSurvey() {}
-    public void changeAssignedAdvisor(Optional<SleepAdvisor> newSleepAdvisor) {
-        this.assignedAdvisor = newSleepAdvisor;
+    public void setAssignedAdvisor(Optional<SleepAdvisor> assignedAdvisor) {
+        this.assignedAdvisor = assignedAdvisor;
+        sendUpdateNotification();
     }
+    public void setAssignedAdvisor(SleepAdvisor assignedAdvisor) {
+        this.assignedAdvisor = Optional.of(assignedAdvisor);
+        sendUpdateNotification();
+    }
+    public void clearAssignedAdvisor() {
+        this.assignedAdvisor = Optional.empty();
+        sendUpdateNotification();
+    }
+
     public Optional<SleepAdvisor> getAssignedAdvisor() {
         return this.assignedAdvisor;
     }
@@ -87,52 +60,21 @@ public class Citizen implements User {
 	public UserType getUserType() {
 		return UserType.CITIZEN;
 	}
-    public AnsweredSurvey[] getSurveys() {
+    public List<AnsweredSurvey> getSurveys() {
         return this.answeredSurveys;
     };
 
+    public void submitSurvey(AnsweredSurvey survey) {
+        answeredSurveys.add(survey);
+        sendUpdateNotification();
+    };
 
-public String getLastEntry() {
-    if (answeredSurveys == null || answeredSurveys.length == 0) {
-        return "Ingen indtastninger";
+    @Override
+    public String getFullName() {
+        return fullName;
     }
 
-    return Arrays.stream(answeredSurveys)
-                 .map(AnsweredSurvey::getWhenAnswered) // ZonedDateTime
-                 .max(ZonedDateTime::compareTo)        // Compare ZonedDateTime
-                 .map(ZonedDateTime::toString)         // Convert to string
-                 .orElse("Ingen indtastninger");
-}
-
-
-@Override
-public String getFullName() {
-        return fullName;
-}
-
-public String getSeverity() {
-    // Placeholder logic; you can replace with actual logic based on surveys
-    return "Ukendt"; // or "Moderat"
-}
-
-public String getAdvisor() {
-    return assignedAdvisor.map(SleepAdvisor::getFullName).orElse("");
-}
-
-public void setAdvisor(SleepAdvisor advisor) {
-    this.assignedAdvisor = Optional.ofNullable(advisor);
-}
-
-public boolean isHighlight() {
-    return "Moderat".equalsIgnoreCase(getSeverity());
-}
-
-public Long getId() {
-    return id;
-}
-
-public CitizenRow getRow() {
-    return this.row; // row is the CitizenRow you store internally
-}
-
+    public UUID getID() {
+        return id;
+    }
 }

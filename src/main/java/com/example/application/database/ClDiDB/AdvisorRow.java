@@ -1,9 +1,10 @@
 package com.example.application.database.ClDiDB;
 
+import java.util.UUID;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -11,9 +12,11 @@ import jakarta.persistence.Table;
 @Table
 public class AdvisorRow {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(nullable = false)
-    private Long id;
+    @GeneratedValue
+    private UUID id;
+    public UUID getID() {
+        return id;
+    }
 
     @Column(nullable = false, columnDefinition = "text", unique = true)
     private String fullName;

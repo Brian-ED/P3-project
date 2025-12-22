@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import com.example.application.database.ClDiDB.Questions.GenericQuestion;
+import com.example.application.model.AnsweredEveningSurvey;
+import com.example.application.model.AnsweredMorningSurvey;
 import com.example.application.model.AnsweredSurvey;
 import com.example.application.model.Citizen;
 import com.example.application.model.Model;
@@ -36,17 +38,15 @@ import jakarta.annotation.security.RolesAllowed;
 @PageTitle("Klient Dashboard")
 public class CitizenView extends VerticalLayout {
 
-    private Model model;
-
     public CitizenView(Model model) {
         getElement().getStyle().set("background-color", "#f7f7f7ff");
-        this.model = model;
+
         // Setup user
         Citizen citizen = model.getThisCitizen(SecurityUtils.getUsername());
 
         String Username = citizen.getFullName();
 
-        AnsweredSurvey[] allSurveys = citizen.getSurveys();
+        List<AnsweredSurvey> allSurveys = citizen.getSurveys();
 
         AnsweredSurvey latestMorningSurvey = findLatestSurveyOfType(allSurveys, SurveyType.morning);
         AnsweredSurvey latestEveningSurvey = findLatestSurveyOfType(allSurveys, SurveyType.evening);
@@ -74,30 +74,31 @@ public class CitizenView extends VerticalLayout {
         add(header);
         Hr hr = new Hr();
         hr.getStyle()
-        .set("margin-top", "-20px")
-        .set("margin-bottom", "40px");
+            .set("margin-top", "-20px")
+            .set("margin-bottom", "40px");
         add(hr);
 
         // Creates the "morninganswer box"
         Card morningCard = new Card();
         morningCard.getStyle()
-        .set("background-color", "white")
-        .set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)")
-        .set("padding", "20px");
+            .set("background-color", "white")
+            .set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)")
+            .set("padding", "20px");
         H2 morningH2 = new H2("Morgensvar");
         morningH2.getElement().setProperty("innerHTML",
     "<span style='color: orange;'>✹</span> Morgensvar");
         morningH2.getStyle().set("padding", "20px");
         Span morningSpan = new Span("Udfyld dit morgenskema om nattens søvn");
         morningSpan.getStyle().set("padding", "20px");
-        Button morningButton = new Button("Udfyld aftensvar");
+        Button morningButton = new Button("Udfyld morgensvar");
         morningButton.setWidthFull();
         morningButton.getStyle()
-        .set("background-color", "darkblue")
-        .set("color", "white")
-        .set("padding", "20px")
-        .set("margin-top", "20px")
-        .set("cursor", "pointer");
+            .set("background-color", "darkblue")
+            .set("color", "white")
+            .set("padding", "20px")
+            .set("margin-top", "20px")
+            .set("cursor", "pointer");
+        morningButton.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate("survey/morning")));
         morningCard.setWidth("100%");
         morningCard.add(
             morningH2,
@@ -108,9 +109,9 @@ public class CitizenView extends VerticalLayout {
         // Creates the "eveninganswer box"
         Card eveningCard = new Card();
         eveningCard.getStyle()
-        .set("background-color", "white")
-        .set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)")
-        .set("padding", "20px");
+            .set("background-color", "white")
+            .set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)")
+            .set("padding", "20px");
         H2 eveningH2 = new H2("Aftensvar");
         eveningH2.getElement().setProperty("innerHTML",
     "<span style='color: purple;'>☾</span> Aftensvar");
@@ -120,11 +121,12 @@ public class CitizenView extends VerticalLayout {
         Button eveningButton = new Button("Udfyld aftensvar");
         eveningButton.setWidthFull();
         eveningButton.getStyle()
-        .set("background-color", "darkblue")
-        .set("color", "white")
-        .set("padding", "20px")
-        .set("margin-top", "20px")
-        .set("cursor", "pointer");
+            .set("background-color", "darkblue")
+            .set("color", "white")
+            .set("padding", "20px")
+            .set("margin-top", "20px")
+            .set("cursor", "pointer");
+        eveningButton.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate("survey/evening")));
         eveningCard.setWidth("100%");
         eveningCard.add(
             eveningH2,
@@ -138,43 +140,43 @@ public class CitizenView extends VerticalLayout {
         sideBySideCards1.setSpacing(true);
         add(sideBySideCards1);
 
-        // Create the Div to see the latest morning aswers
-        Div latestMorningAnswersDiv = new Div();
-        latestMorningAnswersDiv.getStyle()
-        .set("padding", "20px")
-        .set("cursor", "pointer")
-        .set("background-color", "lightgray")
-        .set("margin-top", "1px")
-        .set("border-radius", "8px")
-        .set("text-align", "center");
-        latestMorningAnswersDiv.setWidth("100%");
-        H3 latestMorningH3 = new H3();
+        // Create the Div to see the survey history
+        Div latestHistoryAnswersDiv = new Div();
+        latestHistoryAnswersDiv.getStyle()
+            .set("padding", "20px")
+            .set("cursor", "pointer")
+            .set("background-color", "lightgray")
+            .set("margin-top", "1px")
+            .set("border-radius", "8px")
+            .set("text-align", "center");
+        latestHistoryAnswersDiv.setWidth("100%");
+        H3 latestHistoryH3 = new H3();
         Span tekstHistorik = new Span("Historik");
-        latestMorningH3.add(tekstHistorik);
-        latestMorningAnswersDiv.add(latestMorningH3);
+        latestHistoryH3.add(tekstHistorik);
+        latestHistoryAnswersDiv.add(latestHistoryH3);
 
         //Listens if the "History button" is clicked
-        latestMorningAnswersDiv.addClickListener(e -> {
+        latestHistoryAnswersDiv.addClickListener(e -> {
             Dialog dialog = new Dialog();
-            Button morningDialogButton = new Button("Luk", click -> dialog.close());
-            HorizontalLayout morningHorizontal = new HorizontalLayout();
-            VerticalLayout leftSideMorning = new VerticalLayout();
-            H3 h3Morning = new H3("Historik:");
-            h3Morning.getStyle().set("color", "darkblue");
-            leftSideMorning.setSpacing(false);
-            leftSideMorning.setPadding(false);
-            leftSideMorning.add(h3Morning);
+            Button historyDialogButton = new Button("Luk", click -> dialog.close());
+            HorizontalLayout historyHorizontal = new HorizontalLayout();
+            VerticalLayout leftSideHistory = new VerticalLayout();
+            H3 h3History = new H3("Historik:");
+            h3History.getStyle().set("color", "darkblue");
+            leftSideHistory.setSpacing(false);
+            leftSideHistory.setPadding(false);
+            leftSideHistory.add(h3History);
 
-            morningHorizontal.setPadding(true);
-            morningHorizontal.setWidthFull();
-            morningHorizontal.setJustifyContentMode(JustifyContentMode.BETWEEN);
-            morningHorizontal.setAlignItems(Alignment.CENTER);
-            morningHorizontal.add(leftSideMorning, morningDialogButton);
-            morningHorizontal.getStyle().set("margin-top", "-30px");
-            morningDialogButton.getStyle()
-            .set("background-color","darkblue")
-            .set("color","white")
-            .set("cursor", "pointer");
+            historyHorizontal.setPadding(true);
+            historyHorizontal.setWidthFull();
+            historyHorizontal.setJustifyContentMode(JustifyContentMode.BETWEEN);
+            historyHorizontal.setAlignItems(Alignment.CENTER);
+            historyHorizontal.add(leftSideHistory, historyDialogButton);
+            historyHorizontal.getStyle().set("margin-top", "-30px");
+            historyDialogButton.getStyle()
+                .set("background-color","darkblue")
+                .set("color","white")
+                .set("cursor", "pointer");
             dialog.setWidth("60%");
 
             VerticalLayout listLayout = new VerticalLayout();
@@ -182,7 +184,7 @@ public class CitizenView extends VerticalLayout {
             listLayout.setPadding(true);
 
 
-            // Gruppér skemaer efter dato
+            // Groups surveys after date
             Map<LocalDate, List<AnsweredSurvey>> surveysByDate = new TreeMap<>(Collections.reverseOrder());
 
             for (AnsweredSurvey survey : allSurveys) {
@@ -190,7 +192,7 @@ public class CitizenView extends VerticalLayout {
                 surveysByDate.computeIfAbsent(date, k -> new ArrayList<>()).add(survey);
             }
 
-            // Generér en entry for hver dato (nyeste først)
+            // Generates an entry for each date (newest first)
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH.mm");
 
@@ -198,25 +200,27 @@ public class CitizenView extends VerticalLayout {
                 LocalDate date = entry.getKey();
                 List<AnsweredSurvey> surveysOnDate = entry.getValue();
 
-                // Find morgen- og aftenskemaer for denne dato
+                // Find morning- and eveningsurveys for this date
                 String morningTime = null;
                 String eveningTime = null;
                 AnsweredSurvey morningSurvey = null;
                 AnsweredSurvey eveningSurvey = null;
 
                 for (AnsweredSurvey survey : surveysOnDate) {
-                    if (survey.getType() == SurveyType.morning) {
-                        morningTime = survey.getWhenAnswered().format(timeFormatter);
-                        morningSurvey = survey;
-                    } else if (survey.getType() == SurveyType.evening) {
-                        eveningTime = survey.getWhenAnswered().format(timeFormatter);
-                        eveningSurvey = survey;
+                    switch(survey) {
+                        case AnsweredMorningSurvey a -> {
+                            morningTime = survey.getWhenAnswered().format(timeFormatter);
+                            morningSurvey = survey;
+                        }
+                        case AnsweredEveningSurvey a2 -> {
+                            eveningTime = survey.getWhenAnswered().format(timeFormatter);
+                            eveningSurvey = survey;
+                        }
                     }
                 }
 
-                // Opret kun entry hvis mindst et skema er udfyldt
+                // Create only en entry if only one survey is filled out
                 if (morningTime != null || eveningTime != null) {
-                    // Byg teksten for tidspunkter præcis som på billedet
                     StringBuilder timeText = new StringBuilder();
                     if (morningTime != null) {
                         timeText.append("(Morgensvar: ").append(morningTime).append(")");
@@ -228,7 +232,7 @@ public class CitizenView extends VerticalLayout {
                         timeText.append("(Aftensvar: ").append(eveningTime).append(")");
                     }
 
-                // Opret "Se data" knap med ikon
+                // Create "See data" button with icon
                 Button viewDataButton = new Button("Se data", new Icon(VaadinIcon.CHART));
                 viewDataButton.getElement().getStyle()
                     .set("border-radius", "8px")
@@ -238,8 +242,7 @@ public class CitizenView extends VerticalLayout {
                     .set("font-size", "13px")
                     .set("margin-left", "10px");
 
-                // Tilføj click listener til knappen
-                LocalDate currentDate = date;
+                // Add a click listener to the button
                 AnsweredSurvey finalMorningSurvey = morningSurvey;
                 AnsweredSurvey finalEveningSurvey = eveningSurvey;
                 String finalMorningTime = morningTime;
@@ -277,7 +280,7 @@ public class CitizenView extends VerticalLayout {
                     contentLayout.setPadding(true);
                     contentLayout.setWidthFull();
 
-                    // Tilføj tidspunkter øverst i dialogen
+                    // Add time marks at the top of the dialog
                     Div timeInfoDiv = new Div();
                     if (finalMorningTime != null && finalEveningTime != null) {
                         timeInfoDiv.add(new Span("Morgensvar kl. " + finalMorningTime + " | Aftensvar kl. " + finalEveningTime));
@@ -292,7 +295,7 @@ public class CitizenView extends VerticalLayout {
                         .set("color", "#666");
                     contentLayout.add(timeInfoDiv);
 
-                    // Vis morgenundersøgelse hvis den findes
+                    // Show morningsurvey if it exists
                     if (finalMorningSurvey != null) {
                         H3 morningTitle = new H3("Morgenskema");
                         morningTitle.getStyle()
@@ -301,7 +304,7 @@ public class CitizenView extends VerticalLayout {
                             .set("margin-top", "0");
                         contentLayout.add(morningTitle);
 
-                        // Vis alle svar fra morgenundersøgelsen
+                        // Show all answers from the morningsurvey
                         GenericQuestion<?>[] morningAnswers = finalMorningSurvey.getAnswers();
                         if (morningAnswers != null && morningAnswers.length > 0) {
                             for (GenericQuestion<?> answer : morningAnswers) {
@@ -330,7 +333,7 @@ public class CitizenView extends VerticalLayout {
                             contentLayout.add(noAnswers);
                         }
 
-                        // Tilføj separator kun hvis der også er aftenundersøgelse
+                        // Create a separator only of there are an evening survey too
                         if (finalEveningSurvey != null) {
                             Hr separator = new Hr();
                             separator.getStyle()
@@ -340,21 +343,21 @@ public class CitizenView extends VerticalLayout {
                         }
                     }
 
-                    // Vis aftenundersøgelse hvis den findes
+                    // Show the eveningsurvey if it exists
                     if (finalEveningSurvey != null) {
                         H3 eveningTitle = new H3("Aftenskema");
                         eveningTitle.getStyle()
                             .set("color", "purple")
                             .set("margin-bottom", "15px");
 
-                        // Hvis der ikke var morgenundersøgelse, fjern top margin
+                        // If there are no morningsurvey delete top margin
                         if (finalMorningSurvey == null) {
                             eveningTitle.getStyle().set("margin-top", "0");
                         }
 
                         contentLayout.add(eveningTitle);
 
-                        // Vis alle svar fra aftenundersøgelse
+                        // Show all answers from the evening survey
                         GenericQuestion<?>[] eveningAnswers = finalEveningSurvey.getAnswers();
                         if (eveningAnswers != null && eveningAnswers.length > 0) {
                             for (GenericQuestion<?> answer : eveningAnswers) {
@@ -384,7 +387,7 @@ public class CitizenView extends VerticalLayout {
                         }
                     }
 
-                    // Hvis ingen skemaer har svar (dette burde ikke ske da vi kun opretter knap hvis mindst et er udfyldt)
+                    // In case no surveys have answer (This is not expected to happen because we only create a button if at least one answer is filled in)
                     if (finalMorningSurvey == null && finalEveningSurvey == null) {
                         Span noData = new Span("Ingen skemadata tilgængelig for denne dato");
                         noData.getStyle()
@@ -399,7 +402,7 @@ public class CitizenView extends VerticalLayout {
                     dataDialog.open();
                 });
 
-                // Opret spans for data entry - PRÆCIS SOM PÅ BILLEDET
+                // Create spans for data entry
                 Span dateSpan = new Span("Svar - Registreret: " + date.format(dateFormatter));
                 dateSpan.getStyle()
                     .set("display", "inline-block")
@@ -411,18 +414,17 @@ public class CitizenView extends VerticalLayout {
                     .set("display", "inline-block")
                     .set("color", "#666");
 
-                Hr HR = new Hr();
-                hr.getStyle()
+                hr.getStyle() // TODO There is no way resetting the style here is intended
                     .set("margin-top", "10px")
                     .set("margin-bottom", "10px");
 
-                // Opret entry container - struktur præcis som på billedet
+                // Create entry container
                 Div entryDiv = new Div();
                 entryDiv.getStyle()
                     .set("white-space", "nowrap")
                     .set("padding", "10px 0");
 
-                // Tilføj elementer i den rigtige rækkefølge: dato → tider → knap
+                // Create elements in the right order: "date" then "time" then "button"
                 entryDiv.add(dateSpan);
                 entryDiv.add(timeSpan);
                 entryDiv.add(viewDataButton);
@@ -430,10 +432,10 @@ public class CitizenView extends VerticalLayout {
 
                 listLayout.add(entryDiv);
             }
-            // Hvis både morningTime og eveningTime er null, oprettes INGEN linje
+            // If both morningTime and eveningTime is null, then no line is created
         }
 
-            // Hvis der ikke er nogen data
+            // If there are no data
             if (listLayout.getComponentCount() == 0) {
                 Span noDataSpan = new Span("Ingen skemadata fundet");
                 noDataSpan.getStyle()
@@ -443,32 +445,32 @@ public class CitizenView extends VerticalLayout {
                 listLayout.add(noDataSpan);
             }
 
-            dialog.add(morningHorizontal, listLayout);
+            dialog.add(historyHorizontal, listLayout);
             dialog.open();
         });
 
         // Place latest morning and latest evening answer side by side
-        HorizontalLayout sideBySideCards2 = new HorizontalLayout(latestMorningAnswersDiv);
+        HorizontalLayout sideBySideCards2 = new HorizontalLayout(latestHistoryAnswersDiv);
         sideBySideCards2.setWidthFull();
         sideBySideCards2.setSpacing(true);
 
         // Creates the "Seneste indtastninger box"
         Card latestAnswersCard = new Card();
         latestAnswersCard.getStyle()
-        .set("margin-top", "20px")
-        .set("display", "block")
-        .set("margin", "0 auto")
-        .set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)")
-        .set("background-color", "white")
-        .set("padding", "16px");
+            .set("margin-top", "20px")
+            .set("display", "block")
+            .set("margin", "0 auto")
+            .set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)")
+            .set("background-color", "white")
+            .set("padding", "16px");
         H3 lastestAnswerH3 = new H3("📆︎ Seneste indtastninger");
         lastestAnswerH3.getStyle()
-        .set("padding", "20px")
-        .set("margin-bottom", "-35px");
+            .set("padding", "20px")
+            .set("margin-bottom", "-35px");
         Span lastestAnswerSpan1 = new Span("Oversigt over dine seneste søvnregistreringer:");
         lastestAnswerSpan1.getStyle().set("padding", "20px").set("display", "block");
 
-        // Brug det seneste rigtige skema fra databasen
+        // Use the latest right survey from the database
         String latestText;
         if (latestSurvey != null) {
             latestText = latestSurvey.getWhenAnswered()
@@ -495,8 +497,8 @@ public class CitizenView extends VerticalLayout {
         latestAnswersCard.add(sideBySideCards2);
         add(latestAnswersCard);
     }
-    // Finder seneste skema af en bestemt type (morgen / aften)
-    private AnsweredSurvey findLatestSurveyOfType(AnsweredSurvey[] surveys, SurveyType type) {
+    // Finds the latest survey of a certain type (morning / evening)
+    private AnsweredSurvey findLatestSurveyOfType(List<AnsweredSurvey> surveys, SurveyType type) {
         if (surveys == null) {
             return null;
         }
@@ -513,11 +515,12 @@ public class CitizenView extends VerticalLayout {
         return latest;
     }
 
-    // Vælger den nyeste af to skemaer (kan være null)
+    // Chooses the newest of two surveys
     private AnsweredSurvey getNewestSurvey(AnsweredSurvey s1, AnsweredSurvey s2) {
         if (s1 == null) return s2;
         if (s2 == null) return s1;
         return s1.getWhenAnswered().isAfter(s2.getWhenAnswered()) ? s1 : s2;
     }
+    
 
 }
