@@ -4,6 +4,7 @@ import com.example.application.model.AnswerPayload.ComboBoxPayload;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.NotNull;
 
 @Embeddable
 public final class ComboBoxAnswer extends Answer<ComboBoxPayload> {
@@ -12,6 +13,7 @@ public final class ComboBoxAnswer extends Answer<ComboBoxPayload> {
         super(ComboBoxPayload.class);
     }
 
+    @NotNull
     @Column(nullable = false)
     private Short whichIsSelected;
 

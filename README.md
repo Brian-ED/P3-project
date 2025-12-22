@@ -71,6 +71,7 @@ class Answer {
     @GeneratedValue
     private UUID id;
 
+    @NotNull
     @Column(nullable = false)
     private Citizen answerer;
 

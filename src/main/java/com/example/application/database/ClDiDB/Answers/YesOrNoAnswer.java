@@ -4,6 +4,7 @@ import com.example.application.model.AnswerPayload.YesOrNoPayload;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.NotNull;
 
 @Embeddable
 public final class YesOrNoAnswer extends Answer<YesOrNoPayload> {
@@ -11,6 +12,7 @@ public final class YesOrNoAnswer extends Answer<YesOrNoPayload> {
         super(YesOrNoPayload.class);
     }
 
+    @NotNull
     @Column(nullable = false)
     private Boolean yesNo;
 

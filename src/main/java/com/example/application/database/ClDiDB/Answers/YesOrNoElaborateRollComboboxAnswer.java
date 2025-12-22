@@ -7,6 +7,7 @@ import com.example.application.model.AnswerPayload.YesOrNoElaborateRollComboboxP
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.NotNull;
 
 @Embeddable
 public final class YesOrNoElaborateRollComboboxAnswer extends Answer<YesOrNoElaborateRollComboboxPayload> {
@@ -15,12 +16,15 @@ public final class YesOrNoElaborateRollComboboxAnswer extends Answer<YesOrNoElab
         super(YesOrNoElaborateRollComboboxPayload.class);
     }
 
+    @NotNull
     @Column(nullable = false)
     private Boolean value;
 
+    @NotNull
     @Column(nullable = false)
     private ZonedDateTime timestamp;
 
+    @NotNull
     @Column(nullable = false)
     private Short whichIsSelected;
 

@@ -23,6 +23,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table
@@ -43,6 +44,7 @@ public final class SurveyEveningRow implements Survey {
     public CitizenRow getOwner() {return owner;};
     public void setOwner(CitizenRow owner) {this.owner = owner;};
 
+    @NotNull
     @Column(nullable = false)
     private ZonedDateTime whenAnswered;
     public ZonedDateTime getWhenAnswered() {return whenAnswered;};

@@ -4,6 +4,7 @@ import com.example.application.model.AnswerPayload.DurationPayload;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.NotNull;
 
 @Embeddable
 public final class DurationAnswer extends Answer<DurationPayload> {
@@ -14,7 +15,9 @@ public final class DurationAnswer extends Answer<DurationPayload> {
     public double getAnswerInHours() {
        return minutes != null ? minutes / 60.0 : 0.0; // convert minutes to hours, handle null safely
     }
-       @Column(nullable = false)
+
+    @NotNull
+    @Column(nullable = false)
     private Integer minutes;
 
     @Override

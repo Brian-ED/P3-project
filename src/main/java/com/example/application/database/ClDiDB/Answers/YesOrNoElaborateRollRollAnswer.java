@@ -6,6 +6,7 @@ import com.example.application.model.AnswerPayload.YesOrNoElaborateRollRollPaylo
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.NotNull;
 
 @Embeddable
 public final class YesOrNoElaborateRollRollAnswer extends Answer<YesOrNoElaborateRollRollPayload> {
@@ -14,12 +15,15 @@ public final class YesOrNoElaborateRollRollAnswer extends Answer<YesOrNoElaborat
         super(YesOrNoElaborateRollRollPayload.class);
     }
 
+    @NotNull
     @Column(nullable = false)
     private Boolean yesNo;
 
+    @NotNull
     @Column(nullable = false)
     private ZonedDateTime timestamp1;
 
+    @NotNull
     @Column(nullable = false)
     private ZonedDateTime timestamp2;
 
