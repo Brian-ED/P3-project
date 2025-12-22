@@ -28,7 +28,6 @@ import jakarta.transaction.Transactional;
 
 @Service
 @RestController
-
 public class PostgreSQLDatabaseControler implements DatabaseControler {
 
     private final AnsweredSurveyMorningRepository morningRepo;
