@@ -49,12 +49,14 @@ public class Survey extends VerticalLayout implements BeforeEnterObserver {
     private Model model;
     private Citizen thisCitizen;
 
+    private Button prev;
+
     public Survey(Model model) {
 
         this.model = model;
         this.thisCitizen = model.initAsCitizen(SecurityUtils.getUsername());
         Button next = new Button("Næste >");
-        Button prev = new Button("< Tilbage");
+        prev = new Button("< Tilbage");
         H3 h3 = new H3("Spørgeskema");
 
 
@@ -107,17 +109,27 @@ public class Survey extends VerticalLayout implements BeforeEnterObserver {
     }
 
     private void updateProgress(int newIndex) {
-            if (survey == null) return;
+        if (survey == null) return;
 
-            int total = survey.totalQuestions(); // see note below
-            if (total <= 0) return;
+        int total = survey.totalQuestions();
+        if (total <= 0) return;
 
-            double fraction = (total == 1) ? 1.0 : (double) (newIndex + 1) / total;
-            int pct = (int) Math.round(fraction * 100);
+        // Keep progress bar fill correct
+        double fraction = (total == 1) ? 1.0 : (double) (newIndex + 1) / total;
+        progressBar.setValue(fraction);
 
-            progressBar.setValue(fraction);
-            progressText.setText(pct + "%");
+        // Show 1/9, 2/9 ... (and 1/5, 2/5 in evening)
+        progressText.setText((newIndex + 1) + "/" + total);
+
+        // Hide "Tilbage" on first question WITHOUT collapsing layout spacing
+        if (newIndex == 0) {
+            prev.setEnabled(false);
+            prev.getStyle().set("visibility", "hidden"); // keeps space so "Næste" stays right
+        } else {
+            prev.setEnabled(true);
+            prev.getStyle().remove("visibility");
         }
+    }
 
     private void showQuestion(Component qComponent) {
         content.removeAll();                        // remove old question UI
