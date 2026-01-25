@@ -64,18 +64,10 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
         Duration.ofMinutes(40),
         4.0
     );
-    private Div createSurveyAnswersBox() {
-        return createSurveyAnswersBox(UUID.randomUUID()); // calls main method with dummy UUID
-    }
 
     public SleepStats(Model model) {
         this.model = model;
         model.initAsAdvisor(SecurityUtils.getUsername());
-        setSizeFull();
-        setPadding(true);
-        setSpacing(true);
-        getElement().getStyle().set("background-color", "#f7f7f7ff");
-
         setSizeFull();
         setPadding(true);
         setSpacing(true);
@@ -181,21 +173,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
                 DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     }
 
-    public class SleepSurveyAnswer {
-        private LocalDate date;
-        private LocalTime morningTime;
-        private LocalTime eveningTime;
-
-        public SleepSurveyAnswer(LocalDate date, LocalTime morningTime, LocalTime eveningTime) {
-            this.date = date;
-            this.morningTime = morningTime;
-            this.eveningTime = eveningTime;
-        }
-
-        public LocalDate getDate() { return date; }
-        public LocalTime getMorningTime() { return morningTime; }
-        public LocalTime getEveningTime() { return eveningTime; }
-    }
+ 
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
@@ -225,14 +203,11 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
                         if (answer.getMainQuestionTitle().equals("Efter jeg slukkede lyset, sov jeg ca. efter:")
                         && answer.getAnswer().getPayloadClass() == DurationPayload.class
                         ) {
-                            final Integer temp;
-                            if (maybeMinutesInBedAccumulator.isEmpty()) {
-                                temp = 0;
-                            } else {
-                                final Integer i = maybeMinutesInBedAccumulator.orElseThrow();
-                                temp = i + ((DurationPayload)(answer.getAnswer().toPayload())).minutes();
-                            }
-                            maybeMinutesInBedAccumulator = Optional.of(temp);
+                            DurationPayload payload = (DurationPayload) answer.getAnswer().toPayload();
+                            int minutes = Optional.ofNullable(payload.minutes()).orElse(0);
+
+                            int current = maybeMinutesInBedAccumulator.orElse(0);
+                            maybeMinutesInBedAccumulator = Optional.of(current + minutes);
                         }
                     }
                 }
@@ -271,7 +246,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
                 // Create the sleep chart container
                 Div chartContainer = new Div();
                 chartContainer.setId("sleepChartContainer");
-                chartContainer.setWidth("90%"); // Adjust this percentage (e.g., 80%, 85%, 90%)
+                chartContainer.setWidth("90%"); 
                 chartContainer.setHeight("400px");
                 chartContainer.getStyle()
                     .set("background-color", "white")
@@ -339,7 +314,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
                     .set("display", "flex")
                     .set("justify-content", "center")
                     .set("margin-top", "20px");
-                Div surveyBox = createSurveyAnswersBox();
+                Div surveyBox = createSurveyAnswersBox(selectedCitizen.getID());
                 // Sleep Survey Answers Box
                 surveyWrapper.add(surveyBox);
                 add(surveyWrapper);
@@ -378,29 +353,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
         this.entries.addAll(entries);
         refreshGrid();
 
-        // Load dynamic stats from DB
-        //SleepStatsData stats = db.getSleepStatsForCitizen(citizen.getId());
-
-        // Update the stats row
-        HorizontalLayout statsRow = new HorizontalLayout();
-        statsRow.setWidthFull();
-        statsRow.setSpacing(true);
-
-        statsRow.add(
-            createStatCard("TIB - Tid i seng", formatDuration(stats.getTib())),
-            createStatCard("TST - Total Søvntid", formatDuration(stats.getTst())),
-            createStatCard("Søvneffektivitet", formatPercentage(stats.getSleepEfficiency())),
-            createStatCard("SOL - Indsovningstid", formatDuration(stats.getSol())),
-            createStatCard("WASO - Opvågninger", formatDuration(stats.getWaso())),
-            createStatCard("Morgenfølelse", formatRating(stats.getMorningFeeling()))
-        );
-
-        addComponentAtIndex(1, statsRow); // Insert below breadcrumbs
-
-        // Load survey answers dynamically
-        Div surveyBox = createSurveyAnswersBox(selectedCitizen.getID());
-
-        addComponentAtIndex(3, surveyBox); // Adjust index based on your layout
+      
     }
 
     private Div createSurveyAnswersBox(UUID citizenId) {
