@@ -11,6 +11,7 @@ import com.example.application.database.ClDiDB.Questions.YesOrNoElaborateRollCom
 import com.example.application.database.ClDiDB.Questions.YesOrNoElaborateRollQuestion;
 import com.example.application.database.ClDiDB.Questions.YesOrNoElaborateRollRollQuestion;
 import com.example.application.database.ClDiDB.Questions.YesOrNoQuestion;
+import com.example.application.model.AnswerPayload;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
@@ -27,6 +28,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +50,7 @@ public class UI {
         title.getStyle()
                 .set("margin", "0")
                 .set("padding", "0")
-                .set("font-size", "28px");
+                .set("font-size", "22px");
 
         // Prevent duplicate titles: clear label on inputs that have one
         if (input instanceof HasLabel labeled) {
@@ -91,88 +93,190 @@ public class UI {
         return tp;
     }
 
+    private static boolean safeIsAnswered(GenericQuestion<?> q) {
+        try {
+            // If toPayload() works, there is something stored
+            q.getAnswer().toPayload();
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
     private static Component drawYesNo(YesOrNoElaborateComboboxQuestion question) {
-        // Title
+
         H3 h3 = new H3(question.getMainQuestionTitle());
 
-        // Yes/No selector
         RadioButtonGroup<String> yesNo = new RadioButtonGroup<>();
         yesNo.setItems("Ja", "Nej");
-
-        // Make each question be on their own row
         yesNo.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
 
-        // Container for the yes/no question + any follow-up questions
-        VerticalLayout container = new VerticalLayout(h3, yesNo);
+        ComboBox<String> combo = new ComboBox<>();
+        String[] opts = question.getComboboxQuestionOptions();
+        combo.setItems(opts);
+        combo.setWidth("300px");
+        combo.setPlaceholder("Vælg en mulighed");
+        combo.setClearButtonVisible(true);
+
+        VerticalLayout container = new VerticalLayout();
         container.setAlignItems(FlexComponent.Alignment.START);
-        container.setJustifyContentMode(JustifyContentMode.START);
-        container.setAlignSelf(Alignment.START, h3);
-        container.setAlignSelf(Alignment.START, yesNo);
 
-        // When user changes the answer...
-        yesNo.addValueChangeListener(e -> {
-            // First remove all follow-up questions (keep only the yes/no)
+        Runnable render = () -> {
             container.removeAll();
-            container.add(h3);
-            container.add(yesNo);
+            container.add(h3, yesNo);
 
-            // If they answered "Ja", add the extra questions underneath
-            if ("Ja".equals(e.getValue())) {
-                container.add(new ComboBox<String>(question.getComboboxQuestionTitle()) {{setItems(question.getComboboxQuestionOptions());}});
+            if ("Ja".equals(yesNo.getValue())) {
+                container.add(new Span(question.getComboboxQuestionTitle()), combo);
             }
+        };
+
+        Runnable saveIfComplete = () -> {
+            if (!"Ja".equals(yesNo.getValue())) return;
+            if (combo.getValue() == null) return;
+
+            short idx = -1;
+            for (short i = 0; i < opts.length; i++) {
+                if (opts[i].equals(combo.getValue())) { idx = i; break; }
+            }
+            if (idx < 0) return;
+
+            question.getAnswer().answer(
+                    new com.example.application.model.AnswerPayload.YesOrNoElaborateComboboxPayload(true, idx)
+            );
+        };
+
+        yesNo.addValueChangeListener(e -> {
+            String v = e.getValue();
+            if (v == null) return;
+
+            if ("Nej".equals(v)) {
+                question.getAnswer().answer(
+                        new com.example.application.model.AnswerPayload.YesOrNoElaborateComboboxPayload(false, (short) -1)
+                );
+            }
+
+            render.run();
+            saveIfComplete.run();
         });
 
+        combo.addValueChangeListener(e -> saveIfComplete.run());
+
+        // RESTORE
+        try {
+            var p = question.getAnswer().toPayload();
+            yesNo.setValue(p.yesNo() ? "Ja" : "Nej");
+
+            if (p.yesNo() && p.whichIsSelected() != null && p.whichIsSelected() >= 0 && p.whichIsSelected() < opts.length) {
+                combo.setValue(opts[p.whichIsSelected()]);
+            }
+        } catch (Exception ignored) {}
+
+        render.run();
         return container;
     }
 
     private static Component drawYesNo(YesOrNoElaborateComboboxRollQuestion question) {
-        // Title
+
         H3 h3 = new H3(question.getMainQuestionTitle());
 
-        // Yes/No selector
         RadioButtonGroup<String> yesNo = new RadioButtonGroup<>();
         yesNo.setItems("Ja", "Nej");
-
-        // Make each question be on their own row
         yesNo.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
 
-        // Container for the yes/no question + any follow-up questions
-        VerticalLayout container = new VerticalLayout(h3, yesNo);
+        // Follow-up components (create ONCE so values can be restored)
+        ComboBox<String> combo = new ComboBox<>();
+        String[] opts = question.getComboboxQuestionOptions();
+        combo.setItems(opts);
+        combo.setWidth("300px");
+        combo.setPlaceholder("Vælg en mulighed");
+        combo.setClearButtonVisible(true);
+
+        TimePicker tp = rollTimePicker("");
+        tp.setWidth("250px");
+        tp.setPlaceholder("Vælg tidspunkt");
+        tp.setClearButtonVisible(true);
+
+        VerticalLayout container = new VerticalLayout();
         container.setAlignItems(FlexComponent.Alignment.START);
-        container.setJustifyContentMode(JustifyContentMode.START);
-        container.setAlignSelf(Alignment.START, h3);
-        container.setAlignSelf(Alignment.START, yesNo);
 
-        // When user changes the answer...
-        yesNo.addValueChangeListener(e -> {
-            // First remove all follow-up questions (keep only the yes/no)
+        Runnable render = () -> {
             container.removeAll();
-            container.add(h3);
-            container.add(yesNo);
+            container.add(h3, yesNo);
 
-            // If they answered "Ja", add the extra questions underneath
-           if ("Ja".equals(e.getValue())) {
+            if ("Ja".equals(yesNo.getValue())) {
+                container.add(
+                    new Span(question.getComboboxQuestionTitle()),
+                    combo,
+                    new Span(question.getRollQuestionTitle()),
+                    tp
+                );
+            }
+        };
 
-            // Combobox follow-up (title + input)
-            Span comboTitle = new Span(question.getComboboxQuestionTitle());
+        // Helper: save only when we have enough info
+        Runnable saveIfComplete = () -> {
+            if (!"Ja".equals(yesNo.getValue())) return;
+            if (combo.getValue() == null) return;
+            if (tp.getValue() == null) return;
 
-            ComboBox<String> combo = new ComboBox<>();
-            combo.setItems(question.getComboboxQuestionOptions());
-            combo.setWidth("300px");
-            combo.setPlaceholder("Vælg en mulighed");
-            combo.setClearButtonVisible(true);
+            short idx = -1;
+            for (short i = 0; i < opts.length; i++) {
+                if (opts[i].equals(combo.getValue())) { idx = i; break; }
+            }
+            if (idx < 0) return;
 
-            // Time follow-up (title + input)
-            Span timeTitle = new Span(question.getRollQuestionTitle());
+            var zdt = java.time.ZonedDateTime.now()
+                    .withHour(tp.getValue().getHour())
+                    .withMinute(tp.getValue().getMinute())
+                    .withSecond(0)
+                    .withNano(0);
 
-            TimePicker tp = rollTimePicker("");   // IMPORTANT: no label
-            tp.setWidth("250px");
+            question.getAnswer().answer(
+                    new com.example.application.model.AnswerPayload.YesOrNoElaborateComboboxRollPayload(true, idx, zdt)
+            );
+        };
 
-            // Add them
-            container.add(comboTitle, combo, timeTitle, tp);
-        }
+        // LISTENERS
+        yesNo.addValueChangeListener(e -> {
+            String v = e.getValue();
+            if (v == null) return;
+
+            if ("Nej".equals(v)) {
+                // Persist "Nej" so it restores later
+                question.getAnswer().answer(
+                        new com.example.application.model.AnswerPayload.YesOrNoElaborateComboboxRollPayload(
+                                false,
+                                (short) -1,
+                                java.time.ZonedDateTime.now()
+                        )
+                );
+            }
+
+            render.run();
+            saveIfComplete.run(); // if they picked "Ja" and followups already filled
         });
 
+        combo.addValueChangeListener(e -> saveIfComplete.run());
+        tp.addValueChangeListener(e -> saveIfComplete.run());
+
+        // RESTORE (if previously answered)
+        try {
+            var p = question.getAnswer().toPayload();
+            yesNo.setValue(p.yesNo() ? "Ja" : "Nej");
+
+            if (p.yesNo()) {
+                if (p.whichIsSelected() != null && p.whichIsSelected() >= 0 && p.whichIsSelected() < opts.length) {
+                    combo.setValue(opts[p.whichIsSelected()]);
+                }
+                if (p.timestamp() != null) {
+                    tp.setValue(p.timestamp().toLocalTime());
+                }
+            }
+        } catch (Exception ignored) {
+            // unanswered → leave empty
+        }
+
+        render.run();
         return container;
     }
 
@@ -199,53 +303,94 @@ public class UI {
 
     private static Component drawYesNo(YesOrNoElaborateRollComboboxQuestion question) {
 
-        // Title
         H3 h3 = new H3(question.getMainQuestionTitle());
 
-        // Yes/No selector
         RadioButtonGroup<String> yesNo = new RadioButtonGroup<>();
         yesNo.setItems("Ja", "Nej");
-
-        // Make each question be on their own row
         yesNo.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
 
-        // Container for the yes/no question + any follow-up questions
-        VerticalLayout container = new VerticalLayout(h3, yesNo);
+        // Follow-ups (create ONCE)
+        TimePicker tp = new TimePicker();
+        tp.setStep(Duration.ofMinutes(15));
+        tp.setPlaceholder("Vælg tidspunkt");
+        tp.setAutoOpen(true);
+        tp.setClearButtonVisible(true);
+
+        ComboBox<String> cb = new ComboBox<>();
+        String[] opts = question.getComboboxQuestionOptions();
+        cb.setItems(opts);
+        cb.setPlaceholder("Vælg en mulighed");
+        cb.setClearButtonVisible(true);
+
+        VerticalLayout container = new VerticalLayout();
         container.setAlignItems(FlexComponent.Alignment.START);
-        container.setJustifyContentMode(JustifyContentMode.START);
-        container.setAlignSelf(Alignment.START, h3);
-        container.setAlignSelf(Alignment.START, yesNo);
 
-        // When user changes the answer...
-        yesNo.addValueChangeListener(e -> {
-            // First remove all follow-up questions (keep only the yes/no)
+        Runnable render = () -> {
             container.removeAll();
-            container.add(h3);
-            container.add(yesNo);
+            container.add(h3, yesNo);
 
-            // If they answered "Ja", add the extra questions underneath
-            if ("Ja".equals(e.getValue())) {
-
-                // Combobox follow-up (title + input)
-                Span comboTitle = new Span(question.getComboboxQuestionTitle());
-
-                ComboBox<String> combo = new ComboBox<>();
-                combo.setItems(question.getComboboxQuestionOptions());
-                combo.setWidth("300px");
-                combo.setPlaceholder("Vælg en mulighed");
-                combo.setClearButtonVisible(true);
-
-                // Time follow-up (title + input)
-                Span timeTitle = new Span(question.getRollQuestionTitle());
-
-                TimePicker tp = rollTimePicker("");   // IMPORTANT: no label
-                tp.setWidth("250px");
-
-                // Add them
-                container.add(comboTitle, combo, timeTitle, tp);
+            if ("Ja".equals(yesNo.getValue())) {
+                container.add(
+                    new Span(question.getComboboxQuestionTitle()),
+                    cb,
+                    new Span(question.getRollQuestionTitle()),
+                    tp
+                );
             }
+        };
+
+        Runnable saveIfComplete = () -> {
+            if (!"Ja".equals(yesNo.getValue())) return;
+            if (cb.getValue() == null) return;
+            if (tp.getValue() == null) return;
+
+            short idx = -1;
+            for (short i = 0; i < opts.length; i++) {
+                if (opts[i].equals(cb.getValue())) { idx = i; break; }
+            }
+            if (idx < 0) return;
+
+            ZonedDateTime ts = ZonedDateTime.now()
+                    .withHour(tp.getValue().getHour())
+                    .withMinute(tp.getValue().getMinute())
+                    .withSecond(0).withNano(0);
+
+            question.getAnswer().answer(new AnswerPayload.YesOrNoElaborateRollComboboxPayload(true, ts, idx));
+        };
+
+        yesNo.addValueChangeListener(e -> {
+            String v = e.getValue();
+            if (v == null) return;
+
+            if ("Nej".equals(v)) {
+                // Must fill NOT NULL fields
+                ZonedDateTime now = ZonedDateTime.now();
+                question.getAnswer().answer(new AnswerPayload.YesOrNoElaborateRollComboboxPayload(false, now, (short) -1));
+            }
+
+            render.run();
+            saveIfComplete.run();
         });
 
+        cb.addValueChangeListener(e -> saveIfComplete.run());
+        tp.addValueChangeListener(e -> saveIfComplete.run());
+
+        // RESTORE
+        try {
+            var p = question.getAnswer().toPayload();
+            yesNo.setValue(p.yesNo() ? "Ja" : "Nej");
+
+            if (p.yesNo()) {
+                if (p.whichIsSelected() != null && p.whichIsSelected() >= 0 && p.whichIsSelected() < opts.length) {
+                    cb.setValue(opts[p.whichIsSelected()]);
+                }
+                if (p.timestamp() != null) {
+                    tp.setValue(p.timestamp().toLocalTime());
+                }
+            }
+        } catch (Exception ignored) { }
+
+        render.run();
         return container;
     }
 
@@ -257,21 +402,91 @@ public class UI {
         yesNo.setItems("Ja", "Nej");
         yesNo.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
 
-        VerticalLayout container = new VerticalLayout(h3, yesNo);
+        // Follow-ups (create ONCE so they can be restored)
+        ComboBox<Integer> minutesCb = new ComboBox<>();
+        List<Integer> values = new ArrayList<>();
+        for (int i = 0; i <= 250; i += 5) values.add(i);
+        minutesCb.setItems(values);
+        minutesCb.setItemLabelGenerator(i -> i + " min");
+        minutesCb.setPlaceholder("Vælg antal minutter");
+        minutesCb.setClearButtonVisible(true);
+
+        TimePicker tp = new TimePicker();
+        tp.setStep(Duration.ofMinutes(15));
+        tp.setPlaceholder("Vælg tidspunkt");
+        tp.setAutoOpen(true);
+        tp.setClearButtonVisible(true);
+
+        VerticalLayout container = new VerticalLayout();
         container.setAlignItems(FlexComponent.Alignment.START);
 
-        yesNo.addValueChangeListener(e -> {
+        Runnable render = () -> {
             container.removeAll();
             container.add(h3, yesNo);
 
-            if ("Ja".equals(e.getValue())) {
+            if ("Ja".equals(yesNo.getValue())) {
                 container.add(
-                    rollQuestionShortUI(question.getRollQuestion0Title()), // minutes-style
-                    rollQuestionUI(question.getRollQuestion1Title())       // time-style
+                    new Span(question.getRollQuestion0Title()),
+                    minutesCb,
+                    new Span(question.getRollQuestion1Title()),
+                    tp
                 );
             }
+        };
+
+        Runnable saveIfComplete = () -> {
+            if (!"Ja".equals(yesNo.getValue())) return;
+            if (minutesCb.getValue() == null) return;
+            if (tp.getValue() == null) return;
+
+            int mins = minutesCb.getValue();
+
+            // Encode minutes as a ZonedDateTime: today's midnight + minutes
+            ZonedDateTime ts1 = ZonedDateTime.now()
+                    .withHour(0).withMinute(0).withSecond(0).withNano(0)
+                    .plusMinutes(mins);
+
+            // Encode time of day as ZonedDateTime: today at chosen time
+            ZonedDateTime ts2 = ZonedDateTime.now()
+                    .withHour(tp.getValue().getHour())
+                    .withMinute(tp.getValue().getMinute())
+                    .withSecond(0).withNano(0);
+
+            question.getAnswer().answer(new AnswerPayload.YesOrNoElaborateRollRollPayload(true, ts1, ts2));
+        };
+
+        yesNo.addValueChangeListener(e -> {
+            String v = e.getValue();
+            if (v == null) return;
+
+            if ("Nej".equals(v)) {
+                // Must fill NOT NULL fields
+                ZonedDateTime now = ZonedDateTime.now();
+                question.getAnswer().answer(new AnswerPayload.YesOrNoElaborateRollRollPayload(false, now, now));
+            }
+
+            render.run();
+            saveIfComplete.run();
         });
 
+        minutesCb.addValueChangeListener(e -> saveIfComplete.run());
+        tp.addValueChangeListener(e -> saveIfComplete.run());
+
+        // RESTORE
+        try {
+            var p = question.getAnswer().toPayload();
+            yesNo.setValue(p.yesNo() ? "Ja" : "Nej");
+
+            if (p.yesNo()) {
+                // Decode minutes from timestamp1 (minutes since midnight)
+                int mins = p.timestamp1().toLocalTime().toSecondOfDay() / 60;
+                if (values.contains(mins)) minutesCb.setValue(mins);
+
+                tp.setValue(p.timestamp2().toLocalTime());
+            }
+        } catch (Exception ignored) { }
+
+        render.run();
         return container;
     }
 
@@ -283,18 +498,64 @@ public class UI {
         yesNo.setItems("Ja", "Nej");
         yesNo.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
 
-        VerticalLayout container = new VerticalLayout(h3, yesNo);
+        TimePicker tp = rollTimePicker("");
+        tp.setWidth("250px");
+        tp.setPlaceholder("Vælg tidspunkt");
+        tp.setClearButtonVisible(true);
+
+        VerticalLayout container = new VerticalLayout();
         container.setAlignItems(FlexComponent.Alignment.START);
 
-        yesNo.addValueChangeListener(e -> {
+        Runnable render = () -> {
             container.removeAll();
             container.add(h3, yesNo);
 
-            if ("Ja".equals(e.getValue())) {
-                container.add(rollQuestionUI(question.getRollQuestionTitle()));
+            if ("Ja".equals(yesNo.getValue())) {
+                container.add(new Span(question.getRollQuestionTitle()), tp);
             }
+        };
+
+        Runnable saveIfComplete = () -> {
+            if (!"Ja".equals(yesNo.getValue())) return;
+            if (tp.getValue() == null) return;
+
+            var zdt = java.time.ZonedDateTime.now()
+                    .withHour(tp.getValue().getHour())
+                    .withMinute(tp.getValue().getMinute())
+                    .withSecond(0)
+                    .withNano(0);
+
+            question.getAnswer().answer(
+                    new com.example.application.model.AnswerPayload.YesOrNoElaborateRollPayload(true, zdt)
+            );
+        };
+
+        yesNo.addValueChangeListener(e -> {
+            String v = e.getValue();
+            if (v == null) return;
+
+            if ("Nej".equals(v)) {
+                question.getAnswer().answer(
+                        new com.example.application.model.AnswerPayload.YesOrNoElaborateRollPayload(false, java.time.ZonedDateTime.now())
+                );
+            }
+
+            render.run();
+            saveIfComplete.run();
         });
 
+        tp.addValueChangeListener(e -> saveIfComplete.run());
+
+        // RESTORE
+        try {
+            var p = question.getAnswer().toPayload();
+            yesNo.setValue(p.yesNo() ? "Ja" : "Nej");
+            if (p.yesNo() && p.timestamp() != null) {
+                tp.setValue(p.timestamp().toLocalTime());
+            }
+        } catch (Exception ignored) {}
+
+        render.run();
         return container;
     }
 
@@ -323,74 +584,150 @@ public class UI {
         return tp;
     }
 
-    public static Component drawUI(GenericQuestion<?> question) {
+    public static Component drawUI(GenericQuestion<?> question, boolean hasAnswered) {
         return switch (question) {
             case ComboBoxQuestion x -> {
                 ComboBox<String> cb = new ComboBox<>();
-                cb.setItems(x.getComboboxQuestionOptions());
+                String[] opts = x.getComboboxQuestionOptions();
+                cb.setItems(opts);
                 cb.setPlaceholder("Vælg en mulighed");
                 cb.setClearButtonVisible(true);
+
+                // RESTORE
+                if (hasAnswered) {
+                    try {
+                        short idx = x.getAnswer().toPayload().whichIsSelected();
+                        if (idx >= 0 && idx < opts.length) cb.setValue(opts[idx]);
+                    } catch (Exception ignored) {}
+                }
+
+                // SAVE
+                cb.addValueChangeListener(e -> {
+                    String v = e.getValue();
+                    if (v == null) return;
+                    for (short i = 0; i < opts.length; i++) {
+                        if (opts[i].equals(v)) {
+                            x.getAnswer().answer(new AnswerPayload.ComboBoxPayload(i));
+                            break;
+                        }
+                    }
+                });
 
                 yield questionBlock(x.getMainQuestionTitle(), cb);
             }
 
-            case YesOrNoElaborateRollRollQuestion x -> drawYesNoRollRoll(x);
-            case YesOrNoElaborateRollQuestion x -> drawYesNoRoll(x);
-            case YesOrNoElaborateComboboxRollQuestion x -> drawYesNo(x);
-            case YesOrNoElaborateRollComboboxQuestion x -> drawYesNo(x);
-            case YesOrNoElaborateComboboxQuestion x -> drawYesNo(x);
-
-            // Wakeup etc. = coarse (1 hour)
-
-            // Bedtime + lights off = fine (5 minutes)
             case RollQuestion x -> {
                 TimePicker tp = new TimePicker(x.getMainQuestionTitle());
                 tp.setStep(Duration.ofMinutes(15));
                 tp.setPlaceholder("Vælg tidspunkt");
-                tp.setAutoOpen(true);            // clicking the field opens the list
+                tp.setAutoOpen(true);
                 tp.setClearButtonVisible(true);
-                yield tp;
+
+                // RESTORE
+                if (hasAnswered) {
+                    try {
+                        var ts = x.getAnswer().toPayload().timestamp();
+                        tp.setValue(ts.toLocalTime());
+                    } catch (Exception ignored) {}
+                }
+
+                // SAVE
+                tp.addValueChangeListener(e -> {
+                    var t = e.getValue();
+                    if (t == null) return;
+                    var zdt = java.time.ZonedDateTime.now()
+                            .withHour(t.getHour())
+                            .withMinute(t.getMinute())
+                            .withSecond(0)
+                            .withNano(0);
+                    x.getAnswer().answer(new AnswerPayload.RollPayload(zdt));
+                });
+
+                // keep your consistent title styling:
+                yield questionBlock(x.getMainQuestionTitle(), tp);
             }
 
-            // Duration questions = fine (5 minutes) AND no more null => no blank page
             case RollQuestionShort x -> {
                 ComboBox<Integer> cb = new ComboBox<>(x.getMainQuestionTitle());
 
                 List<Integer> values = new ArrayList<>();
-                for (int i = 0; i <= 250; i += 5) {
-                    values.add(i);
-                }
+                for (int i = 0; i <= 250; i += 5) values.add(i);
 
                 cb.setItems(values);
                 cb.setItemLabelGenerator(i -> i + " min");
                 cb.setPlaceholder("Vælg antal minutter");
                 cb.setClearButtonVisible(true);
 
-                yield cb;
+                // RESTORE
+                if (hasAnswered) {
+                    try {
+                        cb.setValue(x.getAnswer().toPayload().minutes());
+                    } catch (Exception ignored) {}
+                }
+
+                // SAVE
+                cb.addValueChangeListener(e -> {
+                    Integer v = e.getValue();
+                    if (v == null) return;
+                    x.getAnswer().answer(new AnswerPayload.DurationPayload(v));
+                });
+
+                yield questionBlock(x.getMainQuestionTitle(), cb);
             }
 
-        case TextFieldQuestion x -> {
-            TextArea ta = new TextArea(x.getMainQuestionTitle());
-            ta.setWidth("600px");          // pick a size you like
-            ta.setMinHeight("150px");      // "big field"
-            ta.setMaxHeight("600px");      // optional
-            ta.setClearButtonVisible(true);
+            case TextFieldQuestion x -> {
+                TextArea ta = new TextArea(x.getMainQuestionTitle());
+                ta.setWidth("600px");
+                ta.setMinHeight("150px");
+                ta.setClearButtonVisible(true);
 
-            // This makes it expand downwards while typing:
-            ta.setHeight("auto");
-            ta.getStyle().set("overflow", "hidden");
-            ta.getElement().executeJs("""
-                const ta = this.inputElement;
-                const resize = () => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; };
-                ta.addEventListener('input', resize);
-                resize();
-            """);
+                // RESTORE
+                if (hasAnswered) {
+                    try {
+                        ta.setValue(x.getAnswer().toPayload().text());
+                    } catch (Exception ignored) {}
+                }
 
-            yield questionBlock(x.getMainQuestionTitle(), ta);
-        }
+                // SAVE (on every change)
+                ta.addValueChangeListener(e -> {
+                    String v = e.getValue();
+                    if (v == null) v = "";
+                    x.getAnswer().answer(new AnswerPayload.TextFieldPayload(v));
+                });
 
-        case YesOrNoQuestion x -> drawYesNo(x);
-    };
-}
+                yield questionBlock(x.getMainQuestionTitle(), ta);
+            }
+
+            case YesOrNoQuestion x -> {
+                RadioButtonGroup<String> yesNo = new RadioButtonGroup<>();
+                yesNo.setItems("Ja", "Nej");
+                yesNo.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+
+                // RESTORE
+                if (hasAnswered) {
+                    try {
+                        boolean yn = x.getAnswer().toPayload().yesNo();
+                        yesNo.setValue(yn ? "Ja" : "Nej");
+                    } catch (Exception ignored) {}
+                }
+
+                // SAVE
+                yesNo.addValueChangeListener(e -> {
+                    String v = e.getValue();
+                    if (v == null) return;
+                    x.getAnswer().answer(new AnswerPayload.YesOrNoPayload("Ja".equals(v)));
+                });
+
+                yield questionBlock(x.getMainQuestionTitle(), yesNo);
+            }
+
+            // keep your existing elaborate cases for now (or we can bind them next)
+            case YesOrNoElaborateRollRollQuestion x -> drawYesNoRollRoll(x);
+            case YesOrNoElaborateRollQuestion x -> drawYesNoRoll(x);
+            case YesOrNoElaborateComboboxRollQuestion x -> drawYesNo(x);
+            case YesOrNoElaborateRollComboboxQuestion x -> drawYesNo(x);
+            case YesOrNoElaborateComboboxQuestion x -> drawYesNo(x);
+        };
+    }
 
 }

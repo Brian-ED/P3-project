@@ -31,4 +31,9 @@ public final class YesOrNoElaborateComboboxRollQuestion
         return "";
         /* TODO */
     }
+
+    public GenericQuestion<?>[] getMoreQuestions() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getMoreQuestions'");
+    }
 }

@@ -35,7 +35,7 @@ public class Survey extends VerticalLayout implements BeforeEnterObserver {
     class ThisListener implements SurveyListener {
         @Override
         public void currentQuestionChanged(int newIndex) {
-            showQuestion(UI.drawUI(survey.currentQuestion()));
+            showQuestion(UI.drawUI(survey.currentQuestion(), survey.hasCurrentQuestionBeenAnswered()));
             Survey.this.updateProgress(newIndex);
         }
 
@@ -158,6 +158,6 @@ public class Survey extends VerticalLayout implements BeforeEnterObserver {
 
         updateProgress(survey.currentQuestionIndex);
 
-        showQuestion(UI.drawUI(survey.currentQuestion()));
+        showQuestion(UI.drawUI(survey.currentQuestion(), survey.hasCurrentQuestionBeenAnswered()));
     }
 }
