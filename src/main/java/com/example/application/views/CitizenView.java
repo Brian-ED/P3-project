@@ -39,7 +39,7 @@ import jakarta.annotation.security.RolesAllowed;
 public class CitizenView extends VerticalLayout {
 
     public CitizenView(Model model) {
-        getElement().getStyle().set("background-color", "#f7f7f7ff");
+        getElement().getStyle().set("background-color", "var(--lumo-base-color)");
 
         // Setup user
         Citizen citizen = model.getThisCitizen(SecurityUtils.getUsername());
@@ -81,7 +81,7 @@ public class CitizenView extends VerticalLayout {
         // Creates the "morninganswer box"
         Card morningCard = new Card();
         morningCard.getStyle()
-            .set("background-color", "white")
+            .set("background-color", "var(--lumo-base2-color)")
             .set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)")
             .set("padding", "20px");
         H2 morningH2 = new H2("Morgensvar");
@@ -109,7 +109,7 @@ public class CitizenView extends VerticalLayout {
         // Creates the "eveninganswer box"
         Card eveningCard = new Card();
         eveningCard.getStyle()
-            .set("background-color", "white")
+            .set("background-color", "var(--lumo-base2-color)")
             .set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)")
             .set("padding", "20px");
         H2 eveningH2 = new H2("Aftensvar");
@@ -145,7 +145,7 @@ public class CitizenView extends VerticalLayout {
         latestHistoryAnswersDiv.getStyle()
             .set("padding", "20px")
             .set("cursor", "pointer")
-            .set("background-color", "lightgray")
+            .set("background-color", "var(--lumo-base-color)")
             .set("margin-top", "1px")
             .set("border-radius", "8px")
             .set("text-align", "center");
@@ -236,7 +236,7 @@ public class CitizenView extends VerticalLayout {
                 Button viewDataButton = new Button("Se data", new Icon(VaadinIcon.CHART));
                 viewDataButton.getElement().getStyle()
                     .set("border-radius", "8px")
-                    .set("background", "white")
+                    .set("background", "var(--lumo-base2-color)")
                     .set("border", "1px solid rgba(15,23,42,0.06)")
                     .set("padding", "6px 10px")
                     .set("font-size", "13px")
@@ -461,7 +461,7 @@ public class CitizenView extends VerticalLayout {
             .set("display", "block")
             .set("margin", "0 auto")
             .set("box-shadow", "0 2px 12px rgba(15,23,42,0.06)")
-            .set("background-color", "white")
+            .set("background-color", "var(--lumo-base2-color)")
             .set("padding", "16px");
         H3 lastestAnswerH3 = new H3("📆︎ Seneste indtastninger");
         lastestAnswerH3.getStyle()

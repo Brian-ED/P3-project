@@ -71,7 +71,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
         setSizeFull();
         setPadding(true);
         setSpacing(true);
-        getElement().getStyle().set("background-color", "#f7f7f7ff");
+        getElement().getStyle().set("background-color", "var(--lumo-base-color)");
 
         HorizontalLayout top = new HorizontalLayout();
         top.setWidthFull();
@@ -249,7 +249,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
                 chartContainer.setWidth("90%"); 
                 chartContainer.setHeight("400px");
                 chartContainer.getStyle()
-                    .set("background-color", "white")
+                    .set("background-color", "var(--lumo-base2-color)")
                     .set("border-radius", "12px")
                     .set("border", "1px solid #e0e0e0")
                     .set("padding", "20px")
@@ -290,7 +290,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
                 effectivenessChartContainer.setWidth("90%");
                 effectivenessChartContainer.setHeight("400px");
                 effectivenessChartContainer.getStyle()
-                    .set("background-color", "white")
+                    .set("background-color", "var(--lumo-base2-color)")
                     .set("border-radius", "12px")
                     .set("border", "1px solid #e0e0e0")
                     .set("padding", "20px")
@@ -361,7 +361,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
         box.setWidth("90%");
         box.setHeight("400px");
         box.getStyle()
-            .set("background", "white")
+            .set("background", "var(--lumo-base2-color)")
             .set("border-radius", "12px")
             .set("border", "1px solid #e0e0e0")
             .set("padding", "20px")
@@ -552,7 +552,7 @@ public class SleepStats extends VerticalLayout implements BeforeEnterObserver {
     private Div createStatCard(String title, String value) {
         Div card = new Div();
         card.getStyle()
-            .set("background", "white")
+            .set("background", "var(--lumo-base2-color)")
             .set("border-radius", "12px")
             .set("padding", "16px")
             .set("width", "240px")
