@@ -345,7 +345,6 @@ public class DashboardView extends VerticalLayout {
         CheckForEnd endCheckerListener = new CheckForEnd();
         survey.addListener(endCheckerListener);
         while (endCheckerListener.hasChanged()) {
-            System.out.println(survey.currentQuestion());
             Answer<?> a = survey.currentQuestion().getAnswer();
             ZonedDateTime t = ZonedDateTime.now();
             switch (a) {

@@ -119,8 +119,6 @@ public class ModelImpl implements Model {
             () -> {
                 ZonedDateTime now = ZonedDateTime.now();
                 surveyRow.setWhenAnswered(now);
-                System.out.println(surveyRow);
-                System.out.println(surveyRow.getAnswers()[0].getAnswer().toPayload());
                 database.saveSurvey(surveyRow);
                 AnsweredSurvey finishedSurvey = switch (type) {
                     case SurveyType.morning -> new AnsweredMorningSurvey(surveyRow.getID(), surveyRow.getAnswers(), now);
