@@ -149,7 +149,7 @@ public class DashboardView extends VerticalLayout {
         titleBlock.setPadding(false);
         titleBlock.setSpacing(false);
 
-        Span sectionTitle = new Span("Borgersoversigt");
+        Span sectionTitle = new Span("Borgeroversigt");
         sectionTitle.getStyle().set("font-weight", "600");
         sectionTitle.getStyle().set("font-size", "15px");
         sectionTitle.getStyle().set("margin", "0");
@@ -556,7 +556,7 @@ public class DashboardView extends VerticalLayout {
         top.setAlignItems(Alignment.CENTER);
         // Setup user
         // Left: small app title
-        Span appTitle = new Span("Velkommen," + meAdvisor.getFullName());
+        Span appTitle = new Span("Velkommen, " + meAdvisor.getFullName());
         appTitle.getStyle().set("font-weight", "700");
         appTitle.getStyle().set("font-size", "26px");
         appTitle.getStyle().set("color", "#072d85ff");

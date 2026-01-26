@@ -103,7 +103,31 @@ public class Survey extends VerticalLayout implements BeforeEnterObserver {
 
 
         // Next/Prev logic (works once survey is initialized in beforeEnter)
-        next.addClickListener(e -> { if (survey != null) survey.nextQuestion(); });
+        next.addClickListener(e -> {
+            if (survey == null) return;
+
+            boolean isLast = survey.currentQuestionIndex == survey.totalQuestions() - 1;
+
+            if (!isLast) {
+                survey.nextQuestion();
+                return;
+            }
+
+            // LAST QUESTION: try submit
+            var submitted = survey.submitAnswers();
+
+            if (submitted.isEmpty()) {
+                com.vaadin.flow.component.notification.Notification.show(
+                        "Du mangler at besvare et eller flere spørgsmål før du kan afslutte.",
+                        3000,
+                        com.vaadin.flow.component.notification.Notification.Position.MIDDLE
+                );
+                return;
+            }
+
+            // Success: SurveyRow is already saved in DB inside ModelImpl's submit supplier
+            getUI().ifPresent(ui -> ui.navigate("citizen"));
+        });
         prev.addClickListener(e -> { if (survey != null) survey.previousQuestion(); });
 
     }
