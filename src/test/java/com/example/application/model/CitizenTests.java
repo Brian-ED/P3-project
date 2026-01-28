@@ -12,7 +12,7 @@ public class CitizenTests {
     private static int check2 = 0;
 
     @Test
-    public void test1() {
+    public void citizenUpdateListener() {
         Citizen x = new Citizen(null, null, null, null);
         check1 = 0;
         check2 = 0;
@@ -30,5 +30,6 @@ public class CitizenTests {
         assertEquals(1, check1);
         assertEquals(0, check2);
         x.removeUpdateListener(t1);
+        System.out.println("citizenUpdateListener test was successful");
     }
 }
